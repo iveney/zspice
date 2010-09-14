@@ -3,4 +3,5 @@ cscope.*
 tags
 debug
 zspice
-project
+vim.prj
+*.swp

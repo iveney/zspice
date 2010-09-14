@@ -1,5 +1,5 @@
 CC=g++
-SRC=util.cpp
+SRC=util.cpp net.cpp io.cpp
 HDR=$(SRC:.cpp=.h)
 OBJ=$(SRC:.cpp=.o)
 BIN=zspice

@@ -4,6 +4,6 @@
 #include <stdio.h>
 #include <string.h>
 
-void read_netlist(char * filename);
+void read_netlist(char * filename, Netlist & netlist);
 
 #endif
