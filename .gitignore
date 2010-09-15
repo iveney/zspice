@@ -5,3 +5,5 @@ debug
 zspice
 vim.prj
 *.swp
+SuiteSparse
+test
