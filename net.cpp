@@ -1,7 +1,6 @@
 #include <string>
 #include <iostream>
 #include "net.h"
-#include "global.h"
 using std::string;
 using std::cout;
 
@@ -52,9 +51,21 @@ Net & Netlist::operator [](string name){
 	return netlist[name];
 }
 
+// output all the elements in a netlist instance
 void Netlist::output(){
 	hash_map<string, Net>::iterator iter;
 	for(iter=netlist.begin();iter!=netlist.end();iter++){
 		cout<<(*iter).first<<endl;
+	}
+}
+
+// categorized output
+void Netlist::output_sets(){
+	set<string>::iterator it;
+	for(int i=0;i<NUM_NETTYPE;i++){
+		cout<<nettype_str[i]<<": [";
+		for(it=netset[i].begin();it!=netset[i].end();it++)
+			cout<<" "<<*it;
+		cout<<" ]"<<endl;
 	}
 }

@@ -18,12 +18,13 @@ LIBS=$(SPARSE)/UMFPACK/Lib/libumfpack.a \
 INC=-I$(SPARSE)/AMD/Include \
     -I$(SPARSE)/UMFPACK/Include\
     -I$(SPARSE)/UFconfig
+CSCOPEFILES=cscope.files cscope.out cscope.po.out
 
 main: $(OBJ) main.o tags
 	@echo "Making zspice..."
 	$(CC) $(OPT) $(CFLAGS) $(INC) -o $(BIN) $(OBJ) $(LIBS) main.o 
 
-all: main debug
+all: main debug test
 	@echo "Making all..."
 
 debug: $(OBJ) main.cpp main.h
@@ -39,12 +40,13 @@ test: test.cpp
 	$(CC) -c $< $(OPT) -o $@
 
 tags: $(SRC) $(HDR) main.cpp main.h
-	@echo "Making tags..."
-	find . -maxdepth 1 -name "*.h" -o -name "*.c" -o -name "*.cpp" > cscope.files
-	cscope -bkq -i cscope.files
-	ctags -L cscope.files
+	@echo "Generating tags..."
+	@find . -maxdepth 1 -name "*.h" -o -name "*.c" \
+		-o -name "*.cpp" > cscope.files
+	@cscope -bkq -i cscope.files
+	@ctags -L cscope.files
 
 .PHONY : clean
 clean:
 	@echo "Cleaning all..."
-	rm -rf *.o $(OBJ) $(DBG) $(BIN)
+	rm -rf *.o $(OBJ) $(DBG) $(BIN) tags $(CSCOPEFILES)

@@ -21,5 +21,6 @@ int main(int argc, char *argv[]){
 	char * filename = argv[1];
 	Netlist netlist;
 	read_netlist(filename, netlist);
+	netlist.output_sets();
 	return 0;
 }

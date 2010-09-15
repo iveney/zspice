@@ -10,9 +10,19 @@
 #ifndef __GLOBAL_H__
 #define __GLOBAL_H__
 
-const int BUFSIZE=256;
-enum NODETYPE{UNDEF, RSTR, VSRC, CSRC, VCCS, VCVS, CCVS, CCCS, DIODE, 
-	BJT, CAPCT, INDCT};
+static const int BUFSIZE=256;
+static const int NUM_NETTYPE=11;
+enum NODETYPE{RSTR, VSRC, CSRC, VCCS, VCVS, CCVS, CCCS, DIODE, 
+	BJT, CAPCT, INDCT, UNDEF}; // the last type is undef
+static const char *nettype_str[]={"resistor", 
+	"voltage source", 
+	"current source",
+	"vccs", "vcvs",
+	"ccvs", "cccs",
+	"diode", "bjt",
+	"capacitor",
+	"inductor"
+};
 enum POLARITY{NPN, PNP};
 
 #endif

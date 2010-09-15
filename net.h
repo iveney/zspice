@@ -12,6 +12,7 @@
 
 #include <string>
 #include <ext/hash_map>
+#include <set>
 #include "global.h"
 using namespace std;
 using namespace __gnu_cxx;
@@ -51,6 +52,10 @@ class Netlist{
 public:
 	Net & operator [] (string name);
 	void output();
+	void output_sets();
+
+	// component sets, there 11 different types
+	set<string> netset[NUM_NETTYPE];
 private:
 	hash_map<string, Net> netlist;
 };
