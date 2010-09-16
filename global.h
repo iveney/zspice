@@ -1,6 +1,6 @@
 // ----------------------------------------------------------------//
 // Filename : global.h
-// Author : Xiao Zigang <zxiao2@illinois.edu>
+// Author : Zigang Xiao <zxiao2@illinois.edu>
 //
 // Global macros and constants
 // ----------------------------------------------------------------//
@@ -11,7 +11,6 @@
 #define __GLOBAL_H__
 
 static const int BUFSIZE=256;
-static const int NUM_NETTYPE=11;
 enum NODETYPE{RSTR, VSRC, CSRC, VCCS, VCVS, CCVS, CCCS, DIODE, 
 	BJT, CAPCT, INDCT, UNDEF}; // the last type is undef
 const char * const nettype_str[]={
@@ -24,6 +23,8 @@ const char * const nettype_str[]={
 	"capacitor",
 	"inductor"
 };
+// types of nets
+static const int NUM_NETTYPE=sizeof(nettype_str)/sizeof(char*);
 enum POLARITY{NPN, PNP};
 static const double EPSILON = 1E-9;
 

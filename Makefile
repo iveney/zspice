@@ -1,7 +1,7 @@
 CC=g++
-SRC=util.cpp net.cpp io.cpp node.cpp dc_linear.cpp
+SRC=util.cpp net.cpp io.cpp node.cpp
 HDR=$(SRC:.cpp=.h)
-OBJ=$(SRC:.cpp=.o)
+OBJ=$(SRC:.cpp=.o) dc_linear.o
 BIN=zspice
 DBG=debug
 CFLAGS=
@@ -38,6 +38,9 @@ test: test.cpp
 
 %.o: %.cpp  %.h
 	$(CC) -c $< $(OPT) -o $@
+
+dc_linear.o: dc_linear.cpp dc_linear.h
+	$(CC) -c $(OPT) $(CFLAGS) $(INC) dc_linear.cpp
 
 tags: $(SRC) $(HDR) main.cpp main.h
 	@echo "Generating tags..."

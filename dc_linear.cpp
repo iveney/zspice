@@ -1,6 +1,6 @@
 // ----------------------------------------------------------------//
 // Filename : dc_linear.cpp
-// Author : Xiao Zigang <zxiao2@illinois.edu>
+// Author : Zigang Xiao <zxiao2@illinois.edu>
 //
 // define function for linear dc analysis
 // ----------------------------------------------------------------//
@@ -12,6 +12,7 @@
 #include "global.h"
 #include "util.h"
 #include "dc_linear.h"
+#include "umfpack.h"
 using namespace std;
 using namespace __gnu_cxx;
 
@@ -48,9 +49,94 @@ void linear_dc_analysis(Netlist & netlist, Nodelist & nodelist){
 	delete [] J;
 }
 
+// count how many non-zero entries in Y
+int count_entry(double **Y, int n){
+	int m=0;
+	for(int i=0;i<n;i++){
+		for(int j=0;j<n;j++){
+			if( !zero(Y[i][j]) ) ++m;
+		}
+	}
+	return m;
+}
+
+// Convert the matrix to triplet form
+void matrix_to_triplet(int *Ti, int * Tj, double * Tx, int nz, double **Y, int n){
+	int k=0;
+	for(int i=0;i<n;i++){
+		for(int j=0;j<n;j++){
+			if( !zero(Y[i][j]) ){
+				Ti[k] = i; 
+				Tj[k] = j;
+				Tx[k] = Y[i][j];
+				k++;
+			}
+		}
+	}
+}
+
+// Given the matrix, solve them, the result is stored in `v'
 void solve_dc(double **Y, double * J, double * v, int n){
+	// first need to convert them to triplet format
+	int nz=count_entry(Y,n);
+	int Ti[nz];
+	int Tj[nz];
+	double Tx[nz];
+	matrix_to_triplet(Ti,Tj,Tx,nz,Y,n);
+	
+	// then convert to column compressed form
+	int n_row = n;
+	int n_col = n;
+	int * Ap = new int [n_col+1];
+	int * Ai = new int [nz];
+	double * Ax = new double [nz];
+
+	int status;
+	double Control [UMFPACK_CONTROL];
+	umfpack_di_defaults (Control) ;
+	status = umfpack_di_triplet_to_col(n_row, n_col, nz, Ti, Tj, Tx, 
+			Ap, Ai, Ax, (int *) NULL);
+	
+	if( status < 0 ) {
+		umfpack_di_report_status (Control, status) ;
+		report_exit("umfpack_zi_triplet_to_col failed\n") ;
+	}
+
+	/*
+	for(int i=0;i<n_col+1;i++)
+		cout<<"Ap["<<i<<"]="<<Ap[i]<<endl;
+			
+	for(int i=0;i<nz;i++)
+		cout<<"Ai["<<i<<"]="<<Ai[i]<<" Ax["<<i<<"]="<<Ax[i]<<endl;
+		*/
+
+	
 	double *null = (double *) NULL;
 	void *Symbolic, *Numeric;
+	status = umfpack_di_symbolic (n, n, Ap, Ai, Ax, &Symbolic, Control, null) ; 
+	if( status < 0 ){
+		umfpack_di_report_status (Control, status) ;
+		report_exit("umfpack_di_symbolic failed\n") ;
+	}
+	status= umfpack_di_numeric (Ap, Ai, Ax, Symbolic, &Numeric, Control, null) ;
+	if( status < 0 ){
+		umfpack_di_report_status (Control, status) ;
+		report_exit("umfpack_di_numeric failed\n") ;
+	}
+	umfpack_di_free_symbolic (&Symbolic) ;
+	(void) umfpack_di_solve (UMFPACK_A, Ap, Ai, Ax, v, J, Numeric, Control, null) ;
+	if( status < 0 ){
+		umfpack_di_report_status (Control, status) ;
+		report_exit("umfpack_di_solve failed\n") ;
+	}
+	umfpack_di_free_numeric (&Numeric) ;
+
+	for(int i=0;i<n;i++)
+		cout<<"J["<<i<<"] = "<<J[i]<<endl;
+
+	delete [] Ax;
+	delete [] Ai;
+	delete [] Ap;
 }
 
 // stamp the matrix according to the elements (nets)
@@ -160,8 +246,6 @@ void stamp_matrix(Netlist & netlist, Nodelist & nodelist, double ** Y, double * 
 		string ctrl = net.vyyy;
 		string ctrl1 = netlist[ctrl].nbr[0];
 		string ctrl2 = netlist[ctrl].nbr[1];
-		int k = nodelist.name2idx[ctrl1];
-		int l = nodelist.name2idx[ctrl2];
 
 		// need to find out where the controlling node is stamped
 		int ctrl_index = net2int[ctrl];
