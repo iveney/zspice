@@ -1,8 +1,18 @@
+// ----------------------------------------------------------------//
+// Filename : net.cpp
+// Author : Xiao Zigang <zxiao2@illinois.edu>
+//
+// implementation file of net.h
+// ----------------------------------------------------------------//
+// - Zigang Xiao - Wed Sep 15 15:48:58 CDT 2010
+//   * change output to standard c++ stream output
+
 #include <string>
 #include <iostream>
+#include <set>
+#include <iomanip>
 #include "net.h"
-using std::string;
-using std::cout;
+using namespace std;
 
 Net::Net():type(UNDEF){
 }
@@ -51,21 +61,14 @@ Net & Netlist::operator [](string name){
 	return netlist[name];
 }
 
-// output all the elements in a netlist instance
-void Netlist::output(){
-	hash_map<string, Net>::iterator iter;
-	for(iter=netlist.begin();iter!=netlist.end();iter++){
-		cout<<(*iter).first<<endl;
-	}
-}
-
 // categorized output
-void Netlist::output_sets(){
+ostream & operator <<(ostream & s, Netlist & l){
 	set<string>::iterator it;
 	for(int i=0;i<NUM_NETTYPE;i++){
-		cout<<nettype_str[i]<<": [";
-		for(it=netset[i].begin();it!=netset[i].end();it++)
-			cout<<" "<<*it;
-		cout<<" ]"<<endl;
+		s<<setw(15)<<std::left<<nettype_str[i]<<": ["<<std::right;
+		for(it=l.netset[i].begin();it!=l.netset[i].end();it++)
+			s<<" "<<*it;
+		s<<" ]"<<endl;
 	}
+	return s;
 }

@@ -13,6 +13,7 @@
 #include <string>
 #include <ext/hash_map>
 #include <set>
+#include <iostream>
 #include "global.h"
 using namespace std;
 using namespace __gnu_cxx;
@@ -28,7 +29,7 @@ public:
 			string emit, POLARITY pol);
 
 	void set(NODETYPE type, string name, string node1, string node2, double value);
-private:
+
 	NODETYPE type;
 	string name;
 	string nbr[2];
@@ -51,8 +52,7 @@ namespace __gnu_cxx{
 class Netlist{
 public:
 	Net & operator [] (string name);
-	void output();
-	void output_sets();
+	friend ostream & operator <<(ostream &s, Netlist& );
 
 	// component sets, there 11 different types
 	set<string> netset[NUM_NETTYPE];

@@ -1,14 +1,23 @@
+// ----------------------------------------------------------------//
+// Filename : io.cpp
+// Author : Xiao Zigang <zxiao2@illinois.edu>
+//
+// implementation file of io.h
+// ----------------------------------------------------------------//
+// - Zigang Xiao - Wed Sep 15 15:48:58 CDT 2010
+//   * Update the read_netlist function
+
 #include <iostream>
 #include <fstream>
-#include <cstdio>
 #include "net.h"
 #include "util.h"
 #include "io.h"
+#include "node.h"
 using namespace std;
 
 // given a filename, parse it and store the nets in netlist
 // return the size of the square matrix
-void read_netlist(char * filename, Netlist & netlist){
+void read_netlist(char * filename, Netlist & netlist, Nodelist & nodelist){
 	ifstream ifs(filename);
 	string name;
 	// read the node name
@@ -20,8 +29,10 @@ void read_netlist(char * filename, Netlist & netlist){
 		double v;
 		char c = name[0];
 
-		// read two more node names
+		// read two more node names and insert to node list
 		ifs>>node1>>node2;
+		nodelist.insert_node(Node(node1));
+		nodelist.insert_node(Node(node2));
 		switch(c){
 		case 'r': // resistor
 			ifs>>v;
@@ -43,12 +54,16 @@ void read_netlist(char * filename, Netlist & netlist){
 			netlist[name]=Net(VCCS, name, node1, node2, 
 					ctrl1, ctrl2, v);
 			netlist.netset[VCCS].insert(name);
+			nodelist.insert_node(Node(ctrl1));
+			nodelist.insert_node(Node(ctrl2));
 			break;
 		case 'e': // vcvs
 			ifs>>ctrl1>>ctrl2>>v;
 			netlist[name]=Net(VCVS, name, node1, node2, 
 					ctrl1, ctrl2, v);
 			netlist.netset[VCVS].insert(name);
+			nodelist.insert_node(Node(ctrl1));
+			nodelist.insert_node(Node(ctrl2));
 			break;
 		case 'h': // ccvs
 			ifs>>vyyy>>v;
@@ -68,6 +83,7 @@ void read_netlist(char * filename, Netlist & netlist){
 			ifs>>emit>>v;
 			netlist[name]=Net(BJT, name, node1, node2, emit, v); 
 			netlist.netset[BJT].insert(name);
+			nodelist.insert_node(Node(emit));
 			break;
 		case 'c': // capacitor
 			ifs>>v;
@@ -84,6 +100,8 @@ void read_netlist(char * filename, Netlist & netlist){
 			report_exit(error_msg.c_str());
 			break;
 		}
+		nodelist[node1].insert_net(name);
+		nodelist[node2].insert_net(name);
 	};
 	ifs.close();
 }

@@ -14,7 +14,8 @@ static const int BUFSIZE=256;
 static const int NUM_NETTYPE=11;
 enum NODETYPE{RSTR, VSRC, CSRC, VCCS, VCVS, CCVS, CCCS, DIODE, 
 	BJT, CAPCT, INDCT, UNDEF}; // the last type is undef
-static const char *nettype_str[]={"resistor", 
+const char * const nettype_str[]={
+	"resistor", 
 	"voltage source", 
 	"current source",
 	"vccs", "vcvs",
@@ -24,5 +25,9 @@ static const char *nettype_str[]={"resistor",
 	"inductor"
 };
 enum POLARITY{NPN, PNP};
+static const double EPSILON = 1E-9;
+
+#define abs(a) ((a)>0?(a):-(a))
+#define zero(a) (abs(a)<EPSILON)
 
 #endif

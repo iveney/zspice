@@ -10,7 +10,9 @@
 #include <iostream>
 #include "util.h"
 #include "net.h"
+#include "node.h"
 #include "io.h"
+#include "dc_linear.h"
 #include "main.h"
 using namespace std;
 
@@ -20,7 +22,14 @@ int main(int argc, char *argv[]){
 	}
 	char * filename = argv[1];
 	Netlist netlist;
-	read_netlist(filename, netlist);
-	netlist.output_sets();
+	Nodelist nodelist;
+	read_netlist(filename, netlist, nodelist);
+	cout<<"** Net information **"<<endl;
+	cout<<netlist<<endl;
+	cout<<"** Node information **"<<endl;
+	cout<<nodelist<<endl;
+	cout<<"======================"<<endl;
+
+	linear_dc_analysis(netlist,nodelist);
 	return 0;
 }

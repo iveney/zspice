@@ -1,5 +1,5 @@
 CC=g++
-SRC=util.cpp net.cpp io.cpp
+SRC=util.cpp net.cpp io.cpp node.cpp dc_linear.cpp
 HDR=$(SRC:.cpp=.h)
 OBJ=$(SRC:.cpp=.o)
 BIN=zspice
@@ -44,7 +44,7 @@ tags: $(SRC) $(HDR) main.cpp main.h
 	@find . -maxdepth 1 -name "*.h" -o -name "*.c" \
 		-o -name "*.cpp" > cscope.files
 	@cscope -bkq -i cscope.files
-	@ctags -L cscope.files
+	@ctags -L cscope.files --sort=yes --c++-kinds=+p --fields=+iaS --extra=+q
 
 .PHONY : clean
 clean:
