@@ -23,7 +23,7 @@ void read_netlist(char * filename, Netlist & netlist, Nodelist & nodelist){
 	// read the node name
 	while( ifs>>name ){
 		// check errors
-		if( name == ".eof" || name == ".op" ) break;
+		if( name == ".end" || name == ".op" ) break;
 
 		string node1, node2, ctrl1, ctrl2, vyyy, emit;
 		double v;

@@ -34,7 +34,8 @@ debug: $(OBJ) main.cpp main.h
 
 test: test.cpp
 	@echo "Making test"
-	$(CC) $(OPT) $(CFLAGS) $(INC) -o test $(LIBS) test.cpp
+	$(CC) -c $(OPT) $(CFLAGS) $(INC) test.cpp
+	$(CC) $(OPT) $(CFLAGS) $(INC) -o test $(LIBS) $(OBJ) test.o
 
 %.o: %.cpp  %.h
 	$(CC) -c $< $(OPT) -o $@
@@ -52,4 +53,4 @@ tags: $(SRC) $(HDR) main.cpp main.h
 .PHONY : clean
 clean:
 	@echo "Cleaning all..."
-	rm -rf *.o $(OBJ) $(DBG) $(BIN) tags $(CSCOPEFILES)
+	rm -rf *.o $(OBJ) $(DBG) $(BIN) test tags $(CSCOPEFILES)
