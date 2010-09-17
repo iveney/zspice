@@ -9,6 +9,7 @@
 
 #include <ext/hash_map>
 #include <cstdlib>
+#include <algorithm>
 #include "global.h"
 #include "util.h"
 #include "dc_linear.h"
@@ -16,7 +17,17 @@
 using namespace std;
 using namespace __gnu_cxx;
 
+// for vsrc, vcvs, ccvs, map the net name to integer index in the matrix
 hash_map<string, int> net2int;
+
+// Y[0][0] is always 1, hence add this when initializing
+Triplet::Triplet(){
+	Ti.push_back(0);
+	Tj.push_back(0);
+	Tx.push_back(1.0);
+}
+
+int Triplet::size(){return Ti.size();}
 
 // Given netlist and nodelist, perform dc analysis
 void linear_dc_analysis(Netlist & netlist, Nodelist & nodelist){
@@ -30,30 +41,22 @@ void linear_dc_analysis(Netlist & netlist, Nodelist & nodelist){
 #ifdef 	DEBUG
 	cout<<"matrix size = "<<size<<endl;
 #endif
-	double ** Y = new_square_matrix(size);
-	double * J = new double[size];
+	// use triplet form here
+	Triplet tri;
 	double * v = new double[size];
-	memset(J, 0, sizeof(double)*size);
+	double * J = new double[size];
 
 	// stamp the matrix
-	stamp_matrix(netlist, nodelist, Y, J);
+	stamp_matrix(netlist, nodelist, tri, J);
 
-	// IMPORTANT: remove ground equation to make matrix definite!
-	Y[0][0]=1.0;
-	for(int i=1;i<size;i++) Y[i][0]=Y[0][i]=0.0;
+	// set J[0]=0
 	J[0]=0.0;
 
-	cout<<"** Information of Y (ground included) **"<<endl;
-	output_matrix(Y, size);
-	cout<<"** Content of J **"<<endl;
-	for(int i=0;i<size;i++) cout<<"J["<<i<<"]="<<J[i]<<endl;
-
 	// solve matrix and output
-	solve_dc(Y,J,v,size);
+	solve_dc(tri, J, v, size);
 	output_result(netlist, nodelist, v, size);
 	
 	// release resourse
-	delete_matrix(Y, size);
 	delete [] v;
 	delete [] J;
 }
@@ -71,10 +74,9 @@ void output_result(Netlist & netlist, Nodelist & nodelist, double *v, int n){
 	}
 
 	Net net;
-	//const int set_types[] = {VSRC, CCCS, VCVS, CCVS};
 	const int set_types[] = {VSRC, VCVS, CCVS};
 	int nn= sizeof(set_types)/sizeof(int);
-	for(int i=0;i<nn;i++){
+	for(i=0;i<nn;i++){
 		cout<<endl<<"** branch current of "
 			  <<nettype_str[set_types[i]]<<" **"<<endl;
 		foreach_net_in(netlist, set_types[i], net){
@@ -92,45 +94,28 @@ void output_result(Netlist & netlist, Nodelist & nodelist, double *v, int n){
 	cout<<endl;
 }
 
-// count how many non-zero entries in Y, note that we ignore row 1 and column 1
-int count_entry(double **Y, int n){
-	int m=0;
-	for(int i=0;i<n;i++)
-		for(int j=0;j<n;j++)
-			if( !zero(Y[i][j]) ) ++m;
-	return m;
-}
-
-// Convert the matrix to triplet form, note that we ignore row 1 and column 1
-void matrix_to_triplet(int *Ti, int * Tj, double * Tx, int nz, double **Y, int n){
-	int k=0;
-	for(int i=0;i<n;i++){
-		for(int j=0;j<n;j++){
-			if( !zero(Y[i][j]) ){
-				Ti[k] = i;  
-				Tj[k] = j;
-				Tx[k] = Y[i][j];
-				k++;
-			}
-		}
-	}
+template<class T>
+void vector_to_array(vector<T> v, T * arr){
+	copy(v.begin(), v.end(), arr);
 }
 
 // Given the matrix, solve them, the result is stored in `v'
-void solve_dc(double **Y, double * J, double * v, int n){
-	// convert them to triplet format
-	int nz=count_entry(Y,n);
-	int Ti[nz];
-	int Tj[nz];
-	double Tx[nz];
-	matrix_to_triplet(Ti,Tj,Tx,nz,Y,n);
-	
-	// then convert to column compressed form 
+void solve_dc(Triplet & t, double * J, double * v, int n){
+	// convert to column compressed form 
 	int n_row = n; // do not count ground row
 	int n_col = n; // do not count ground column
+	int nz = t.size();
 	int * Ap = new int [n_col+1];
 	int * Ai = new int [nz];
 	double * Ax = new double [nz];
+
+	int * Ti = new int[nz];
+	int * Tj = new int[nz];
+	double * Tx = new double[nz];
+	vector_to_array<int>(t.Ti, Ti);
+	vector_to_array<int>(t.Tj, Tj);
+	vector_to_array<double>(t.Tx, Tx);
+
 	int status;
 	double Control [UMFPACK_CONTROL];
 	umfpack_di_defaults (Control) ;
@@ -173,11 +158,15 @@ void solve_dc(double **Y, double * J, double * v, int n){
 	delete [] Ax;
 	delete [] Ai;
 	delete [] Ap;
+	delete [] Ti;
+	delete [] Tj;
+	delete [] Tx;
 }
+
 
 // stamp the matrix according to the elements (nets)
 // the index of nodes in the matrix are the same as their stored order in nodelist
-void stamp_matrix(Netlist & netlist, Nodelist & nodelist, double ** Y, double * J){
+void stamp_matrix(Netlist & netlist, Nodelist & nodelist, Triplet & t, double * J){
 	set<string>::iterator it;
 
 	// stamp resistor
@@ -187,10 +176,10 @@ void stamp_matrix(Netlist & netlist, Nodelist & nodelist, double ** Y, double * 
 		int i = nodelist.name2idx[net.nbr[0]];
 		int j = nodelist.name2idx[net.nbr[1]];
 		double G = 1./net.value;
-		Y[i][i] +=  G;
-		Y[j][j] +=  G;
-		Y[i][j] += -G;
-		Y[j][i] += -G;
+		t.push(i,i,G);
+		t.push(j,j,G);
+		t.push(i,j,-G);
+		t.push(j,i,-G);
 	}
 
 	// stamp current source
@@ -212,10 +201,10 @@ void stamp_matrix(Netlist & netlist, Nodelist & nodelist, double ** Y, double * 
 		int k = nodelist.name2idx[net.ctrl[0]];
 		int l = nodelist.name2idx[net.ctrl[1]];
 
-		Y[p][k] +=  net.value;
-		Y[q][l] +=  net.value;
-		Y[p][l] += -net.value;
-		Y[q][k] += -net.value;
+		t.push(p,k,net.value);
+		t.push(q,l,net.value);
+		t.push(p,l,-net.value);
+		t.push(q,k,-net.value);
 	}
 
 	// the following nets will use extra space in augmented Y
@@ -229,10 +218,10 @@ void stamp_matrix(Netlist & netlist, Nodelist & nodelist, double ** Y, double * 
 		int k = nodelist.name2idx[net.nbr[0]];
 		int l = nodelist.name2idx[net.nbr[1]];
 
-		Y[k][ct] += 1.;
-		Y[ct][k] += 1.;
-		Y[l][ct] += -1.;
-		Y[ct][l] += -1.;
+		t.push(k,ct,1.);
+		t.push(ct,k,1.);
+		t.push(l,ct,1.);
+		t.push(ct,l,1.);
 		J[ct] += net.value;
 	}
 
@@ -250,8 +239,8 @@ void stamp_matrix(Netlist & netlist, Nodelist & nodelist, double ** Y, double * 
 		// need to find out where the controlling node is stamped
 		int ctrl_index = net2int[ctrl];
 		
-		Y[p][ctrl_index] +=  net.value; // alpha
-		Y[q][ctrl_index] += -net.value; // alpha
+		t.push(p,ctrl_index, net.value); // alpha
+		t.push(q,ctrl_index,-net.value); // alpha
 	}
 
 	// stamp vcvs
@@ -264,13 +253,12 @@ void stamp_matrix(Netlist & netlist, Nodelist & nodelist, double ** Y, double * 
 		int k = nodelist.name2idx[net.ctrl[0]];
 		int l = nodelist.name2idx[net.ctrl[1]];
 
-		Y[p][ct] += 1. ;
-		Y[ct][p] += 1.;
-		Y[q][ct] += -1.;
-		Y[ct][q] += -1.;
-		Y[ct][k] += -net.value; // mu
-		Y[ct][l] +=  net.value; // mu
-		//J[ct] = 0;
+		t.push(p,ct, 1.);
+		t.push(ct,p, 1.);
+		t.push(q,ct,-1.);
+		t.push(ct,q,-1.);
+		t.push(ct,k,-net.value); // mu
+		t.push(ct,l, net.value); // mu
 	}
 
 	// stamp ccvs, add only one row and column!
@@ -287,11 +275,11 @@ void stamp_matrix(Netlist & netlist, Nodelist & nodelist, double ** Y, double * 
 		// need to find out where the controlling node is stamped
 		int ctrl_index = net2int[ctrl];
 
-		Y[p][ct] += 1.;
-		Y[ct][p] += 1.;
-		Y[q][ct] += -1.;
-		Y[ct][q] += -1.; 
-		Y[ct][ctrl_index] += -net.value;
+		t.push(p,ct, 1.);
+		t.push(ct,p, 1.);
+		t.push(q,ct,-1.);
+		t.push(ct,q,-1.);
+		t.push(ct,ctrl_index,-net.value);
 	}
 	// stamp is over!
 }
