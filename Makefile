@@ -49,6 +49,8 @@ dc_linear.o: dc_linear.cpp dc_linear.h
 	$(CC) -c $(OPT) $(CFLAGS) $(INC) dc_linear.cpp
 
 copy_libs: $(LIBS) $(AMD_HDR) $(UMFPACK_HDR) $(SPARSE_HDR)
+	mkdir -p ./headers
+	mkdir -p ./libs
 	cp -r $(AMD_HDR)/*.h ./headers/
 	cp -r $(UMFPACK_HDR)/*.h ./headers/
 	cp -r $(SPARSE_HDR)/*.h ./headers/
