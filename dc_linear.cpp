@@ -10,6 +10,7 @@
 #include <ext/hash_map>
 #include <cstdlib>
 #include <algorithm>
+#include <iomanip>
 #include "global.h"
 #include "util.h"
 #include "dc_linear.h"
@@ -38,9 +39,7 @@ void linear_dc_analysis(Netlist & netlist, Nodelist & nodelist){
 	size += netlist.netset[VSRC].size();
 	size += netlist.netset[VCVS].size();
 	size += netlist.netset[CCVS].size();
-#ifdef 	DEBUG
-	cout<<"matrix size = "<<size<<endl;
-#endif
+
 	// use triplet form here
 	Triplet tri;
 	double * v = new double[size];
@@ -49,7 +48,7 @@ void linear_dc_analysis(Netlist & netlist, Nodelist & nodelist){
 	// stamp the matrix
 	stamp_matrix(netlist, nodelist, tri, J);
 
-	// set J[0]=0
+	// this is important: cross out the ground (reference) node 
 	J[0]=0.0;
 
 	// solve matrix and output
@@ -94,6 +93,7 @@ void output_result(Netlist & netlist, Nodelist & nodelist, double *v, int n){
 	cout<<endl;
 }
 
+// given a vector, copy its element to a basic array
 template<class T>
 void vector_to_array(vector<T> v, T * arr){
 	copy(v.begin(), v.end(), arr);
@@ -127,13 +127,14 @@ void solve_dc(Triplet & t, double * J, double * v, int n){
 		report_exit("umfpack_zi_triplet_to_col failed\n") ;
 	}
 
-	/*
+	cout<<"nz, n ="<<nz<<" "<<n<<endl;
 	for(int i=0;i<n_col+1;i++)
 		cout<<"Ap["<<i<<"]="<<Ap[i]<<endl;
 			
 	for(int i=0;i<nz;i++)
-		cout<<"Ai["<<i<<"]="<<Ai[i]<<" Ax["<<i<<"]="<<Ax[i]<<endl;
-		*/
+		cout<<"Ai["<<setw(2)<<i<<"]="<<setw(2)<<Ai[i]
+		    <<" Ax["<<setw(2)<<i<<"]="<<setw(2)<<Ax[i]<<endl;
+	return;
 	
 	double *null = (double *) NULL;
 	void *Symbolic, *Numeric;
