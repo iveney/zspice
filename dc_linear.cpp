@@ -23,9 +23,10 @@ void linear_dc_analysis(Netlist & netlist, Nodelist & nodelist){
 	// create matrix, note that 0 row and column is for ground
 	int size = nodelist.size();
 
-	// for vsrc, cccs, vcvs, ccvs, allocate new rows and column
+	// // for vsrc, cccs, vcvs, ccvs, allocate new rows and column
+	// for vsrc, vcvs, ccvs, allocate new rows and column
 	size += netlist.netset[VSRC].size();
-	size += netlist.netset[CCCS].size();
+	//size += netlist.netset[CCCS].size();
 	size += netlist.netset[VCVS].size();
 	size += netlist.netset[CCVS].size();
 #ifdef 	DEBUG
@@ -39,8 +40,11 @@ void linear_dc_analysis(Netlist & netlist, Nodelist & nodelist){
 	// stamp the matrix
 	stamp_matrix(netlist, nodelist, Y, J);
 
+	// IMPORTANT: remove ground equation to make matrix definite!
 	Y[0][0]=1.0;
 	for(int i=1;i<size;i++) Y[i][0]=Y[0][i]=0.0;
+	J[0]=0.0;
+
 	cout<<"** Information of Y (ground included) **"<<endl;
 	output_matrix(Y, size);
 	cout<<"** Content of J **"<<endl;
@@ -69,7 +73,8 @@ void output_result(Netlist & netlist, Nodelist & nodelist, double *v, int n){
 	}
 
 	Net net;
-	const int set_types[] = {VSRC, CCCS, VCVS, CCVS};
+	//const int set_types[] = {VSRC, CCCS, VCVS, CCVS};
+	const int set_types[] = {VSRC, VCVS, CCVS};
 	int nn= sizeof(set_types)/sizeof(int);
 	for(int i=0;i<nn;i++){
 		cout<<endl<<"** branch current of "
@@ -80,16 +85,12 @@ void output_result(Netlist & netlist, Nodelist & nodelist, double *v, int n){
 		}
 	}
 
-	/*
-	cout<<endl<<"** branch current of CCCS **"<<endl;
-	Net net;
-	foreach_net_in(netlist, VSRC, net){
-		int id = net2int[net.name];
-		cout<<net.name<<": "<<scientific<<right<<v[id]<<endl;
+	// for cccs, it is controlled by the current, just compute it
+	cout<<endl<<"** branch current of cccs **"<<endl;
+	foreach_net_in(netlist, CCCS, net){
+		int id = net2int[net.vyyy];
+		cout<<net.name<<": "<<scientific<<right<<net.value*v[id]<<endl;
 	}
-	cout<<endl<<"** branch current of VCVS **"<<endl;
-	cout<<endl<<"** branch current of CCVS **"<<endl;
-	*/
 }
 
 // count how many non-zero entries in Y, note that we ignore row 1 and column 1
@@ -149,28 +150,26 @@ void solve_dc(double **Y, double * J, double * v, int n){
 	for(int i=0;i<nz;i++)
 		cout<<"Ai["<<i<<"]="<<Ai[i]<<" Ax["<<i<<"]="<<Ax[i]<<endl;
 		*/
-
 	
 	double *null = (double *) NULL;
 	void *Symbolic, *Numeric;
-	status = umfpack_di_symbolic (n, n, Ap, Ai, Ax, &Symbolic, Control, null) ; 
+	status = umfpack_di_symbolic(n, n, Ap, Ai, Ax, &Symbolic, Control, null) ; 
 	if( status < 0 ){
 		umfpack_di_report_status (Control, status) ;
 		report_exit("umfpack_di_symbolic failed\n") ;
 	}
-	status= umfpack_di_numeric (Ap, Ai, Ax, Symbolic, &Numeric, Control, null) ;
+	status = umfpack_di_numeric(Ap, Ai, Ax, Symbolic, &Numeric, Control, null) ;
 	if( status < 0 ){
 		umfpack_di_report_status (Control, status) ;
 		report_exit("umfpack_di_numeric failed\n") ;
 	}
 	umfpack_di_free_symbolic (&Symbolic) ;
-	(void) umfpack_di_solve (UMFPACK_A, Ap, Ai, Ax, v, J, Numeric, Control, null) ;
+	status = umfpack_di_solve(UMFPACK_A, Ap, Ai, Ax, v, J, Numeric, Control, null) ;
 	if( status < 0 ){
 		umfpack_di_report_status (Control, status) ;
 		report_exit("umfpack_di_solve failed\n") ;
 	}
 	umfpack_di_free_numeric (&Numeric) ;
-
 
 	delete [] Ax;
 	delete [] Ai;
@@ -213,6 +212,7 @@ void stamp_matrix(Netlist & netlist, Nodelist & nodelist, double ** Y, double * 
 		int q = nodelist.name2idx[net.nbr[1]];
 		int k = nodelist.name2idx[net.ctrl[0]];
 		int l = nodelist.name2idx[net.ctrl[1]];
+
 		Y[p][k] +=  net.value;
 		Y[q][l] +=  net.value;
 		Y[p][l] += -net.value;
@@ -229,30 +229,34 @@ void stamp_matrix(Netlist & netlist, Nodelist & nodelist, double ** Y, double * 
 		net2int[net.name] = ct;
 		int k = nodelist.name2idx[net.nbr[0]];
 		int l = nodelist.name2idx[net.nbr[1]];
-		Y[k][ct] = Y[ct][k] =  1.;
-		Y[l][ct] = Y[ct][l] = -1.;
-		J[ct] = net.value;
+
+		Y[k][ct] += 1.;
+		Y[ct][k] += 1.;
+		Y[l][ct] += -1.;
+		Y[ct][l] += -1.;
+		J[ct] += net.value;
 	}
 
 	// stamp cccs
 	set<string> & cccs = netlist.netset[CCCS];
-	for(it = cccs.begin(); it != cccs.end(); ++it, ++ct){
+	for(it = cccs.begin(); it != cccs.end(); ++it){
 		Net & net = netlist[*it];
-		net2int[net.name] = ct;
+		//net2int[net.name] = ct;
 		int p = nodelist.name2idx[net.nbr[0]];
 		int q = nodelist.name2idx[net.nbr[1]];
+
 		// need to find the controlling node
 		string ctrl = net.vyyy;
-		string ctrl1 = netlist[ctrl].nbr[0];
-		string ctrl2 = netlist[ctrl].nbr[1];
-		int k = nodelist.name2idx[ctrl1];
-		int l = nodelist.name2idx[ctrl2];
 
-		Y[k][ct] = Y[ct][k] =  1.;
-		Y[l][ct] = Y[ct][l] = -1.;
-		Y[p][ct] =   net.value; // alpha
-		Y[q][ct] = - net.value; // alpha
-		//J[ct] = 0;
+		// need to find out where the controlling node is stamped
+		int ctrl_index = net2int[ctrl];
+		
+		//Y[k][ct] += 1.;
+		//Y[ct][k] += 1.;
+		//Y[l][ct] += -1.;
+		//Y[ct][l] += -1.;
+		Y[p][ctrl_index] +=  net.value; // alpha
+		Y[q][ctrl_index] += -net.value; // alpha
 	}
 
 	// stamp vcvs
@@ -265,10 +269,12 @@ void stamp_matrix(Netlist & netlist, Nodelist & nodelist, double ** Y, double * 
 		int k = nodelist.name2idx[net.ctrl[0]];
 		int l = nodelist.name2idx[net.ctrl[1]];
 
-		Y[p][ct] = Y[ct][p] =  1.;
-		Y[q][ct] = Y[ct][q] = -1.;
-		Y[ct][k] = -net.value; // mu
-		Y[ct][l] =  net.value; // mu
+		Y[p][ct] += 1. ;
+		Y[ct][p] += 1.;
+		Y[q][ct] += -1.;
+		Y[ct][q] += -1.;
+		Y[ct][k] += -net.value; // mu
+		Y[ct][l] +=  net.value; // mu
 		//J[ct] = 0;
 	}
 
@@ -282,16 +288,15 @@ void stamp_matrix(Netlist & netlist, Nodelist & nodelist, double ** Y, double * 
 		
 		// need to find the controlling node
 		string ctrl = net.vyyy;
-		string ctrl1 = netlist[ctrl].nbr[0];
-		string ctrl2 = netlist[ctrl].nbr[1];
 
 		// need to find out where the controlling node is stamped
 		int ctrl_index = net2int[ctrl];
 
-		//Y[k][ct] = Y[ct][k] = Y[l][ct] = Y[ct][l] = 0; 
-		Y[p][ct] = Y[ct][p] =  1.;
-		Y[q][ct] = Y[ct][q] = -1.; 
-		Y[ct][ctrl_index] = -net.value;
+		Y[p][ct] += 1.;
+		Y[ct][p] += 1.;
+		Y[q][ct] += -1.;
+		Y[ct][q] += -1.; 
+		Y[ct][ctrl_index] += -net.value;
 	}
 	// stamp is over!
 }
