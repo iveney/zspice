@@ -44,6 +44,7 @@ void linear_dc_analysis(Netlist & netlist, Nodelist & nodelist){
 	Triplet tri;
 	double * v = new double[size];
 	double * J = new double[size];
+	memset((void*)J, 0, sizeof(double)*size);
 
 	// stamp the matrix
 	stamp_matrix(netlist, nodelist, tri, J);
@@ -128,13 +129,15 @@ void solve_dc(Triplet & t, double * J, double * v, int n){
 	}
 
 	cout<<"nz, n ="<<nz<<" "<<n<<endl;
+	for(int i=0;i<n;i++)
+		cout<<"J["<<i<<"]="<<J[i]<<endl;
+
 	for(int i=0;i<n_col+1;i++)
 		cout<<"Ap["<<i<<"]="<<Ap[i]<<endl;
 			
 	for(int i=0;i<nz;i++)
 		cout<<"Ai["<<setw(2)<<i<<"]="<<setw(2)<<Ai[i]
 		    <<" Ax["<<setw(2)<<i<<"]="<<setw(2)<<Ax[i]<<endl;
-	return;
 	
 	double *null = (double *) NULL;
 	void *Symbolic, *Numeric;
