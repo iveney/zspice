@@ -38,7 +38,6 @@ public:
 	friend ostream & operator <<(ostream & s, Nodelist & nlist);
 	Node & operator [] (string name);
 	const int size();
-private:
 	vector<Node> nodelist;
 };
 

@@ -60,5 +60,18 @@ private:
 	hash_map<string, Net> netlist;
 };
 
+// some macros to iterate the sets
+#define FORALL_CONCAT(x,y) x##y
+#define FORALL_VAR(y) FORALL_CONCAT(FORALL_VAR,y)
+
+// note that the set may be empty, hence need to check at the very beginning
+#define foreach_net_in( nlist, type, net ) \
+	set<string>::iterator FORALL_VAR(__LINE__); \
+	for(FORALL_VAR(__LINE__) = (nlist).netset[(type)].begin(), \
+	    (net) = (FORALL_VAR(__LINE__) == (nlist).netset[(type)].end())? Net(): (nlist)[*FORALL_VAR(__LINE__)] ; \
+	    FORALL_VAR(__LINE__) != (nlist).netset[(type)].end() ; \
+	    FORALL_VAR(__LINE__)++,  \
+	    (net) = (FORALL_VAR(__LINE__) == (nlist).netset[(type)].end())? Net(): (nlist)[*FORALL_VAR(__LINE__)])
+
 #endif
 

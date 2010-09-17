@@ -38,12 +38,17 @@ void linear_dc_analysis(Netlist & netlist, Nodelist & nodelist){
 
 	// stamp the matrix
 	stamp_matrix(netlist, nodelist, Y, J);
-	cout<<"Information of Y and J (ground included)"<<endl;
+
+	Y[0][0]=1.0;
+	for(int i=1;i<size;i++) Y[i][0]=Y[0][i]=0.0;
+	cout<<"** Information of Y (ground included) **"<<endl;
 	output_matrix(Y, size);
+	cout<<"** Content of J **"<<endl;
 	for(int i=0;i<size;i++) cout<<"J["<<i<<"]="<<J[i]<<endl;
 
-	// solve matrix
+	// solve matrix and output
 	solve_dc(Y,J,v,size);
+	output_result(netlist, nodelist, v, size);
 	
 	// release resourse
 	delete_matrix(Y, size);
@@ -51,25 +56,59 @@ void linear_dc_analysis(Netlist & netlist, Nodelist & nodelist){
 	delete [] J;
 }
 
+// output the final result, which includes 
+// 1) node voltages 
+// 2) currents of independent voltage sources, cccs, vcvs, ccvs
+void output_result(Netlist & netlist, Nodelist & nodelist, double *v, int n){
+	cout<<endl<<"** Node voltages **"<<endl;
+	int i;
+	for(i=1; i<nodelist.size(); i++){ // do not output ground=0
+		Node & nd = nodelist.nodelist[i];
+		int id = nodelist.name2idx[nd.name];
+		cout<<nd.name<<": "<<scientific<<right<<v[id]<<endl;
+	}
+
+	Net net;
+	const int set_types[] = {VSRC, CCCS, VCVS, CCVS};
+	int nn= sizeof(set_types)/sizeof(int);
+	for(int i=0;i<nn;i++){
+		cout<<endl<<"** branch current of "
+			  <<nettype_str[set_types[i]]<<" **"<<endl;
+		foreach_net_in(netlist, set_types[i], net){
+			int id = net2int[net.name];
+			cout<<net.name<<": "<<scientific<<right<<v[id]<<endl;
+		}
+	}
+
+	/*
+	cout<<endl<<"** branch current of CCCS **"<<endl;
+	Net net;
+	foreach_net_in(netlist, VSRC, net){
+		int id = net2int[net.name];
+		cout<<net.name<<": "<<scientific<<right<<v[id]<<endl;
+	}
+	cout<<endl<<"** branch current of VCVS **"<<endl;
+	cout<<endl<<"** branch current of CCVS **"<<endl;
+	*/
+}
+
 // count how many non-zero entries in Y, note that we ignore row 1 and column 1
 int count_entry(double **Y, int n){
 	int m=0;
-	for(int i=1;i<n;i++){
-		for(int j=1;j<n;j++){
+	for(int i=0;i<n;i++)
+		for(int j=0;j<n;j++)
 			if( !zero(Y[i][j]) ) ++m;
-		}
-	}
 	return m;
 }
 
 // Convert the matrix to triplet form, note that we ignore row 1 and column 1
 void matrix_to_triplet(int *Ti, int * Tj, double * Tx, int nz, double **Y, int n){
 	int k=0;
-	for(int i=1;i<n;i++){
-		for(int j=1;j<n;j++){
+	for(int i=0;i<n;i++){
+		for(int j=0;j<n;j++){
 			if( !zero(Y[i][j]) ){
-				Ti[k] = i-1;  // move the index one step forward
-				Tj[k] = j-1;
+				Ti[k] = i;  
+				Tj[k] = j;
 				Tx[k] = Y[i][j];
 				k++;
 			}
@@ -79,7 +118,7 @@ void matrix_to_triplet(int *Ti, int * Tj, double * Tx, int nz, double **Y, int n
 
 // Given the matrix, solve them, the result is stored in `v'
 void solve_dc(double **Y, double * J, double * v, int n){
-	// first need to convert them to triplet format
+	// convert them to triplet format
 	int nz=count_entry(Y,n);
 	int Ti[nz];
 	int Tj[nz];
@@ -87,9 +126,8 @@ void solve_dc(double **Y, double * J, double * v, int n){
 	matrix_to_triplet(Ti,Tj,Tx,nz,Y,n);
 	
 	// then convert to column compressed form 
-	int nn = n-1;    // new size
-	int n_row = nn; // do not count ground row
-	int n_col = nn; // do not count ground column
+	int n_row = n; // do not count ground row
+	int n_col = n; // do not count ground column
 	int * Ap = new int [n_col+1];
 	int * Ai = new int [nz];
 	double * Ax = new double [nz];
@@ -104,11 +142,6 @@ void solve_dc(double **Y, double * J, double * v, int n){
 		report_exit("umfpack_zi_triplet_to_col failed\n") ;
 	}
 
-	// for J, we also need to remove the 1st element
-	double * JJ = new double[nn];
-	// start from J[1]
-	memcpy((void*)JJ,(void*)(J+1),sizeof(double)*(nn));
-
 	/*
 	for(int i=0;i<n_col+1;i++)
 		cout<<"Ap["<<i<<"]="<<Ap[i]<<endl;
@@ -120,7 +153,7 @@ void solve_dc(double **Y, double * J, double * v, int n){
 	
 	double *null = (double *) NULL;
 	void *Symbolic, *Numeric;
-	status = umfpack_di_symbolic (nn, nn, Ap, Ai, Ax, &Symbolic, Control, null) ; 
+	status = umfpack_di_symbolic (n, n, Ap, Ai, Ax, &Symbolic, Control, null) ; 
 	if( status < 0 ){
 		umfpack_di_report_status (Control, status) ;
 		report_exit("umfpack_di_symbolic failed\n") ;
@@ -131,20 +164,17 @@ void solve_dc(double **Y, double * J, double * v, int n){
 		report_exit("umfpack_di_numeric failed\n") ;
 	}
 	umfpack_di_free_symbolic (&Symbolic) ;
-	(void) umfpack_di_solve (UMFPACK_A, Ap, Ai, Ax, v, JJ, Numeric, Control, null) ;
+	(void) umfpack_di_solve (UMFPACK_A, Ap, Ai, Ax, v, J, Numeric, Control, null) ;
 	if( status < 0 ){
 		umfpack_di_report_status (Control, status) ;
 		report_exit("umfpack_di_solve failed\n") ;
 	}
 	umfpack_di_free_numeric (&Numeric) ;
 
-	for(int i=0;i<nn;i++)
-		cout<<"v["<<i<<"] = "<<v[i]<<endl;
 
 	delete [] Ax;
 	delete [] Ai;
 	delete [] Ap;
-	delete [] JJ;
 }
 
 // stamp the matrix according to the elements (nets)

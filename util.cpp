@@ -51,4 +51,5 @@ void output_matrix(double ** m,int n){
 		}
 		cout<<endl;
 	}
+	cout<<endl;
 }

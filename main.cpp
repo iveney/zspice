@@ -28,7 +28,6 @@ int main(int argc, char *argv[]){
 	cout<<netlist<<endl;
 	cout<<"** Node information **"<<endl;
 	cout<<nodelist<<endl;
-	cout<<"======================"<<endl;
 
 	linear_dc_analysis(netlist,nodelist);
 	return 0;

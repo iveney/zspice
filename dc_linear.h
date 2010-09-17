@@ -17,5 +17,6 @@ void stamp_matrix(Netlist & netlist, Nodelist & nodelist, double **, double *);
 void solve_dc(double **Y, double * J, double * v, int n);
 int count_entry(double **Y, int n);
 void matrix_to_triplet(int *Ti, int * Tj, double * Tx, int nz, double **Y, int n);
+void output_result(Netlist &, Nodelist & , double *v, int n);
 
 #endif
