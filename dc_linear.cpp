@@ -23,10 +23,8 @@ void linear_dc_analysis(Netlist & netlist, Nodelist & nodelist){
 	// create matrix, note that 0 row and column is for ground
 	int size = nodelist.size();
 
-	// // for vsrc, cccs, vcvs, ccvs, allocate new rows and column
 	// for vsrc, vcvs, ccvs, allocate new rows and column
 	size += netlist.netset[VSRC].size();
-	//size += netlist.netset[CCCS].size();
 	size += netlist.netset[VCVS].size();
 	size += netlist.netset[CCVS].size();
 #ifdef 	DEBUG
@@ -91,6 +89,7 @@ void output_result(Netlist & netlist, Nodelist & nodelist, double *v, int n){
 		int id = net2int[net.vyyy];
 		cout<<net.name<<": "<<scientific<<right<<net.value*v[id]<<endl;
 	}
+	cout<<endl;
 }
 
 // count how many non-zero entries in Y, note that we ignore row 1 and column 1
@@ -251,10 +250,6 @@ void stamp_matrix(Netlist & netlist, Nodelist & nodelist, double ** Y, double * 
 		// need to find out where the controlling node is stamped
 		int ctrl_index = net2int[ctrl];
 		
-		//Y[k][ct] += 1.;
-		//Y[ct][k] += 1.;
-		//Y[l][ct] += -1.;
-		//Y[ct][l] += -1.;
 		Y[p][ctrl_index] +=  net.value; // alpha
 		Y[q][ctrl_index] += -net.value; // alpha
 	}
