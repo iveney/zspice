@@ -7,3 +7,5 @@ vim.prj
 *.swp
 SuiteSparse
 test
+libs
+headers
