@@ -47,7 +47,10 @@ void linear_dc_analysis(Netlist & netlist, Nodelist & nodelist){
 	memset((void*)J, 0, sizeof(double)*size);
 
 	// stamp the matrix
-	stamp_matrix(netlist, nodelist, tri, J);
+	bool ret = stamp_matrix(netlist, nodelist, tri, J);
+	if( ret == false ){
+		report_exit("**** job aborted ****\n");
+	}
 
 	// this is important: cross out the ground (reference) node 
 	J[0]=0.0;
@@ -172,8 +175,10 @@ void solve_dc(Triplet & t, double * J, double * v, int n){
 
 // stamp the matrix according to the elements (nets)
 // the index of nodes in the matrix are the same as their stored order in nodelist
-void stamp_matrix(Netlist & netlist, Nodelist & nodelist, Triplet & t, double * J){
+// NOTE: error will be checked here
+bool stamp_matrix(Netlist & netlist, Nodelist & nodelist, Triplet & t, double * J){
 	set<string>::iterator it;
+	bool success = true;
 
 	// stamp resistor
 	set<string> & rset = netlist.netset[RSTR];
@@ -241,6 +246,13 @@ void stamp_matrix(Netlist & netlist, Nodelist & nodelist, Triplet & t, double * 
 
 		// need to find the controlling node
 		string ctrl = net.vyyy;
+		// check if it exists
+		if( netlist.netlist.find(ctrl) == netlist.netlist.end() ){
+			cerr<<"Error: dependent voltage source ["<<ctrl
+			    <<"] of cccs ["<<net.name<<"] not present!"<<endl;
+			success = false;
+			continue;
+		}
 
 		// need to find out where the controlling node is stamped
 		int ctrl_index = net2int[ctrl];
@@ -277,6 +289,13 @@ void stamp_matrix(Netlist & netlist, Nodelist & nodelist, Triplet & t, double * 
 		
 		// need to find the controlling node
 		string ctrl = net.vyyy;
+		// check if it exists
+		if( netlist.netlist.find(ctrl) == netlist.netlist.end() ){
+			cerr<<"Error: dependent voltage source ["<<ctrl
+			    <<"] of ccvs ["<<net.name<<"] not present!"<<endl;
+			success = false;
+			continue;
+		}
 
 		// need to find out where the controlling node is stamped
 		int ctrl_index = net2int[ctrl];
@@ -288,4 +307,5 @@ void stamp_matrix(Netlist & netlist, Nodelist & nodelist, Triplet & t, double * 
 		t.push(ct,ctrl_index,-net.value);
 	}
 	// stamp is over!
+	return success;
 }

@@ -19,11 +19,26 @@ using namespace std;
 // return the size of the square matrix
 void read_netlist(char * filename, Netlist & netlist, Nodelist & nodelist){
 	ifstream ifs(filename);
+	if( ifs.fail() )
+		report_exit("File not exist!\n");
 	string name;
+	int line_counter = 0;
 	// read the node name
 	while( ifs>>name ){
-		// check errors
+		// check format
 		if( name == ".end" || name == ".op" ) break;
+
+		line_counter++;
+		// check device multiple definition
+		if( netlist.netlist.find(name) != netlist.netlist.end() ){
+			cerr<<"Warning: Ignoring duplicate definition of device ["
+			    <<name<<"] at line "<<line_counter<<": ";
+			// skip the whole line;
+			string dummy;
+			getline(ifs, dummy);
+			cerr<<name<<dummy<<endl;
+			continue;
+		}
 
 		string node1, node2, ctrl1, ctrl2, vyyy, emit;
 		double v;

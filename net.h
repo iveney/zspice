@@ -1,9 +1,11 @@
 // ----------------------------------------------------------------//
 // Filename : net.h
-// Author : Xiao Zigang <zxiao2@illinois.edu>
+// Author : Zigang Xiao <zxiao2@illinois.edu>
 //
 // Definition of nets
 // ----------------------------------------------------------------//
+// - Zigang Xiao - Sun Sep 19 17:16:42 CDT 2010
+//   * added a macro for fast traversing the net list
 // - Zigang Xiao - Mon Sep 13 12:54:13 CDT 2010
 //   * first create the file
 
@@ -56,7 +58,6 @@ public:
 
 	// component sets, there 11 different types
 	set<string> netset[NUM_NETTYPE];
-private:
 	hash_map<string, Net> netlist;
 };
 

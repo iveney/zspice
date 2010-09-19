@@ -32,7 +32,7 @@ void Triplet::push(int i, int j, double x){
 }
 
 void linear_dc_analysis(Netlist & netlist, Nodelist & nodelist);
-void stamp_matrix(Netlist & netlist, Nodelist & nodelist, Triplet &, double *);
+bool stamp_matrix(Netlist & netlist, Nodelist & nodelist, Triplet &, double *);
 void solve_dc(Triplet & t, double * J, double * v, int n);
 void output_result(Netlist &, Nodelist & , double *v, int n);
 
