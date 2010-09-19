@@ -1,0 +1,41 @@
+* representative
+voltage at node a = 1.000000e+00
+voltage at node b = 6.000000e-01
+voltage at node c = 1.600000e+00
+voltage at node d = 1.701538e+01
+voltage at node e = -3.040000e+01
+voltage at node f = -1.600000e+01
+voltage at node g = -2.200000e+00
+voltage at node h = -1.075513e+03
+current throught source v1 = -2.000000e-01
+current throught source e1 = 2.569231e+00
+current throught source h1 = 8.962609e+01
+current throught source f1 = -1.600000e+00
+
+* large
+run-time: 0.01593
+machine clock frequency: 2.26 GHz Intel Core 2 Duo
+voltage at node 1 = 1.999980e-10
+voltage at node 2 = 5.999940e-10
+voltage at node 3 = 1.199988e-09
+voltage at node 4 = 1.999980e-09
+voltage at node 5 = 2.999970e-09
+voltage at node 6 = 4.199958e-09
+voltage at node 7 = 5.599944e-09
+voltage at node 8 = 7.199928e-09
+voltage at node 9 = 8.999910e-09
+voltage at node 10 = 1.099989e-08
+voltage at node 11 = 1.319987e-08
+voltage at node 12 = 1.559984e-08
+voltage at node 13 = 1.819982e-08
+voltage at node 14 = 2.099979e-08
+voltage at node 15 = 2.399976e-08
+voltage at node 16 = 2.719973e-08
+voltage at node 17 = 3.059970e-08
+voltage at node 18 = 3.419966e-08
+voltage at node 19 = 3.799962e-08
+voltage at node 20 = 4.199958e-08
+
+* error
+Error: dependent voltage source [v2] of cccs [f1] not present!
+Error: dependent voltage source [v3] of ccvs [h1] not present!

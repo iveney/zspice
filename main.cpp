@@ -35,7 +35,7 @@ int main(int argc, char *argv[]){
 	cout<<"** Node information **"<<endl;
 	cout<<nodelist<<endl;
 
-	cout<<"Start to solve the circuit ... "<<endl;
+	cout<<"Start to analyze the circuit ... "<<endl;
 	linear_dc_analysis(netlist,nodelist);
 
 	return 0;

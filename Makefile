@@ -5,7 +5,7 @@ OBJ=$(SRC:.cpp=.o) dc_linear.o
 BIN=zspice
 DBG=debug
 CFLAGS=
-OPT=-Wall -g
+OPT=-Wall -g -DPHASE1OUTPUT
 SPARSE=SuiteSparse
 LIBS=$(SPARSE)/UMFPACK/Lib/libumfpack.a \
      $(SPARSE)/AMD/Lib/libamd.a \

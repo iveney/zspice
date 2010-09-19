@@ -11,6 +11,7 @@
 #include <cstdlib>
 #include <algorithm>
 #include <iomanip>
+#include <ctime>
 #include "global.h"
 #include "util.h"
 #include "dc_linear.h"
@@ -47,6 +48,7 @@ void linear_dc_analysis(Netlist & netlist, Nodelist & nodelist){
 	memset((void*)J, 0, sizeof(double)*size);
 
 	// stamp the matrix
+	cout<<"Stamping matrix..."<<endl;
 	bool ret = stamp_matrix(netlist, nodelist, tri, J);
 	if( ret == false ){
 		report_exit("**** job aborted ****\n");
@@ -56,6 +58,7 @@ void linear_dc_analysis(Netlist & netlist, Nodelist & nodelist){
 	J[0]=0.0;
 
 	// solve matrix and output
+	cout<<"Solving the sparse matrix..."<<endl;
 	solve_dc(tri, J, v, size);
 	output_result(netlist, nodelist, v, size);
 	
@@ -73,26 +76,44 @@ void output_result(Netlist & netlist, Nodelist & nodelist, double *v, int n){
 	for(i=1; i<nodelist.size(); i++){ // do not output ground=0
 		Node & nd = nodelist.nodelist[i];
 		int id = nodelist.name2idx[nd.name];
+#ifndef PHASE1OUTPUT
 		cout<<nd.name<<": "<<scientific<<right<<v[id]<<endl;
+#else
+		cout<<"voltage at node "<<nd.name<<" = "<<scientific<<v[id]<<endl;
+#endif
 	}
 
 	Net net;
 	const int set_types[] = {VSRC, VCVS, CCVS};
 	int nn= sizeof(set_types)/sizeof(int);
 	for(i=0;i<nn;i++){
+#ifndef PHASE1OUTPUT
 		cout<<endl<<"** branch current of "
 			  <<nettype_str[set_types[i]]<<" **"<<endl;
+#endif
 		foreach_net_in(netlist, set_types[i], net){
 			int id = net2int[net.name];
+#ifndef PHASE1OUTPUT	
 			cout<<net.name<<": "<<scientific<<right<<v[id]<<endl;
+#else
+			cout<<"current throught source "<<net.name<<" = "
+				<<scientific<<v[id]<<endl;
+#endif
 		}
 	}
 
 	// for cccs, it is controlled by the current, just compute it
+#ifndef PHASE1OUTPUT
 	cout<<endl<<"** branch current of cccs **"<<endl;
+#endif
 	foreach_net_in(netlist, CCCS, net){
 		int id = net2int[net.vyyy];
+#ifndef PHASE1OUTPUT
 		cout<<net.name<<": "<<scientific<<right<<net.value*v[id]<<endl;
+#else
+		cout<<"current throught source "<<net.name<<" = "
+		    <<scientific<<net.value*v[id]<<endl;
+#endif
 	}
 	cout<<endl;
 }
@@ -157,7 +178,13 @@ void solve_dc(Triplet & t, double * J, double * v, int n){
 		report_exit("umfpack_di_numeric failed\n") ;
 	}
 	umfpack_di_free_symbolic (&Symbolic) ;
+
+	clock_t t1,t2;
+	t1=clock();
+	// mearuse the run time
 	status = umfpack_di_solve(UMFPACK_A, Ap, Ai, Ax, v, J, Numeric, Control, null) ;
+	t2=clock();
+	cout<<"Runtime = "<<1.0*(t2-t1)/CLOCKS_PER_SEC<<endl;
 	if( status < 0 ){
 		umfpack_di_report_status (Control, status) ;
 		report_exit("umfpack_di_solve failed\n") ;

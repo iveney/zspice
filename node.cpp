@@ -38,6 +38,7 @@ bool Nodelist::insert_node(const Node & node){
 	return true;
 }
 
+// output a node
 ostream & operator <<(ostream & s, Node & node){
 	s<<std::left<<setw(3)<<node.name<<std::right<<": [ ";
 	vector<string>::iterator it;
@@ -47,6 +48,7 @@ ostream & operator <<(ostream & s, Node & node){
 	return s;
 }
 
+// output a node list
 ostream & operator <<(ostream & s, Nodelist & nlist){
 	vector<Node>::iterator it;
 	for(it=nlist.nodelist.begin();it!=nlist.nodelist.end();it++){
