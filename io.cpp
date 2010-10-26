@@ -4,6 +4,9 @@
 //
 // implementation file of io.h
 // ----------------------------------------------------------------//
+// - Zigang Xiao Mon Oct 25 22:57:53 CDT 2010
+//   * added function for parser, now can parse diode
+//
 // - Zigang Xiao - Wed Sep 15 15:48:58 CDT 2010
 //   * Update the read_netlist function
 
@@ -15,6 +18,8 @@
 #include "node.h"
 using namespace std;
 
+// read strings in the format `(name)'
+// return `name'
 string read_bracket(ifstream & ifs){
 	char lb,c;
 	string name;
@@ -29,13 +34,15 @@ string read_bracket(ifstream & ifs){
 	return name;
 }
 
+// read strings in the format `v(name)=value'
+// write value to name and value
 void read_name_value_pair(ifstream & ifs, string & name, double & value){
 	char eq;
 	name = read_bracket(ifs);
 	ifs>>eq>>value;
 }
 
-// read the initial values
+// read the initial values of voltage
 // e.g., v(node1)=1.02
 //       i(vsrc) =4.50
 void read_initial_values(ifstream & ifs, Nodelist & nodelist){

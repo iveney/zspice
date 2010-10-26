@@ -13,22 +13,23 @@
 #include "net.h"
 #include "global.h"
 
-// calculate the difference
+// calculate the voltage difference between two voltage vectors
 double voltage_diff(double * Vnew, double * Vold, int n){
 	double r=0.0,tmp;
-	int i;
-	for(i=0;i<n;i++) {
+	for(int i=0;i<n;i++) {
 		tmp = Vnew[i] - Vold[i];
 		r+=tmp*tmp;
 	}
 	return sqrt(r);
 }
 
+// given a nodelist, copy the voltage values to a vector vs
 void copy_voltages(Nodelist & nodelist, double * vs){
 	for(int i=0;i<nodelist.size();i++)
 		vs[i] = nodelist.nodelist[i].v;
 }
 
+// performs Newton-Raphson iteration here
 void NR_iteration(Netlist & netlist, Nodelist & nodelist,
 		double *J, double *v, int size){
 	// output input node information
@@ -43,20 +44,24 @@ void NR_iteration(Netlist & netlist, Nodelist & nodelist,
 	int counter=0;
 	double diff=0;
 	do{
+		// copy old value of voltages
 		copy_voltages(nodelist, Vold);
-		// linearize the non-linear device and stamp and solve
+
+		// linearize the non-linear device, stamp and solve
 		linear_dc(netlist,nodelist,J,v,size);
 		update_node_voltages(nodelist,v);
+
+		// copy new value of voltages
 		copy_voltages(nodelist, Vnew);
 		diff = voltage_diff(Vnew,Vold,nodelist.size());
 		cout<<"iteration: "<<++counter<<", difference="<<diff<<endl;
 	}while(diff>EPSILON);
 	
 	cout<<"Total number of iterations: "<<counter<<endl<<endl;
-	// finally, output again
 	delete [] Vold;
 	delete [] Vnew;
 
+	// finally, output again
 	cout<<"Result:"<<endl;
 	nodelist.output_node_voltages();
 }

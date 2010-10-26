@@ -61,10 +61,12 @@ Node & Nodelist::operator [] (string name){
 	return nodelist[name2idx[name]];
 }
 
+// return the size of the Nodelist
 const int Nodelist::size(){
 	return nodelist.size();
 }
 
+// output the voltages of nodes
 void Nodelist::output_node_voltages(){
 	int i;
 	for(i=0;i<this->size();i++){
@@ -72,5 +74,3 @@ void Nodelist::output_node_voltages(){
 		cout<<"voltage at "<<nd.name<<"="<<scientific<<nd.v<<endl;
 	}
 }
-
-

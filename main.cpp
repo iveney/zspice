@@ -4,10 +4,13 @@
 //
 // Program entry.
 // ----------------------------------------------------------------//
+// - Zigang Xiao - Mon Oct 25 22:56:38 CDT 2010
+//   * added part of phase 2, lack of BJT
+//
 // - Zigang Xiao - Sun Sep 19 17:16:05 CDT 2010
 //   * Finish phase 1 linear dc analysis
 //   * added file existence detection
-//
+// 
 // - Zigang Xiao - Sun Sep 12 23:57:25 CDT 2010
 //   * first create the file
 

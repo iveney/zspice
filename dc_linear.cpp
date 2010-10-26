@@ -4,6 +4,10 @@
 //
 // define function for linear dc analysis
 // ----------------------------------------------------------------//
+// - Zigang Xiao - Mon Oct 25 22:53:38 CDT 2010
+//   * rewrite dc_analysis part, incorporate NR-iteration
+//   * added non-linear dc analysis : diode and bjt 
+//
 // - Zigang Xiao - Wed Sep 15 16:31:56 CDT 2010
 //   * created file
 
@@ -13,6 +17,7 @@
 #include <iomanip>
 #include <ctime>
 #include <cmath>
+#include <cassert>
 #include "global.h"
 #include "util.h"
 #include "dc_linear.h"
@@ -21,8 +26,8 @@
 using namespace std;
 using namespace __gnu_cxx;
 
-// for vsrc, vcvs, ccvs, map the net name to integer index in the matrix
-hash_map<string, int> net2int;
+///////////////////////////////////////////////////////////////////////
+// class definition of triplet
 
 // Y[0][0] is always 1, hence add this when initializing
 Triplet::Triplet(){
@@ -31,7 +36,21 @@ Triplet::Triplet(){
 	Tx.push_back(1.0);
 }
 
+// insert a triplet 
+void Triplet::push(int i, int j, double x){
+	if( i==0 || j == 0 ) return;
+	Ti.push_back(i);
+	Tj.push_back(j);
+	Tx.push_back(x);
+}
+
+// return the number of elements in a triplet instance
 int Triplet::size(){return Ti.size();}
+
+///////////////////////////////////////////////////////////////////////
+
+// for vsrc, vcvs, ccvs, map the net name to integer index in the matrix
+hash_map<string, int> net2int;
 
 // Given netlist and nodelist, perform dc analysis
 void dc_analysis(Netlist & netlist, Nodelist & nodelist, DC_TYPE dc_type){
@@ -47,24 +66,23 @@ void dc_analysis(Netlist & netlist, Nodelist & nodelist, DC_TYPE dc_type){
 	double * v = new double[size];
 	double * J = new double[size];
 
+	assert(dc_type == LINEAR || dc_type == NON_LINEAR);
 	// linear dc analysis
 	if( dc_type == LINEAR ){
 		linear_dc(netlist,nodelist,J,v,size);
 		output_result(netlist, nodelist, v, size);
 	}
 	// non-linear dc analysis
-	else if (dc_type == NON_LINEAR) { 
+	else// (dc_type == NON_LINEAR)
 		NR_iteration(netlist,nodelist,J,v,size);
-	}
-	else{
-		report_exit("Unknow dc type, must be LINEAR or NON_LINEAR!");
-	}
 
 	// release resourse
 	delete [] v;
 	delete [] J;
 }
 
+// perform linear dc analysis
+// can be used as a sub-routine in NR-iteration
 void linear_dc(Netlist & netlist, Nodelist & nodelist,
 		double *J, double *v, int size){
 	// stamp the matrix
@@ -84,9 +102,9 @@ void linear_dc(Netlist & netlist, Nodelist & nodelist,
 	solve_dc(tri, J, v, size);
 }
 
+// after dc_analysis, remember to call this function to update node voltages
 void update_node_voltages(Nodelist & nodelist, double *v){
-	int i;
-	for(i=1;i<nodelist.size();i++){
+	for(int i=1;i<nodelist.size();i++){
 		Node & nd = nodelist.nodelist[i];
 		int id = nodelist.name2idx[nd.name];
 		nd.v = v[id];
@@ -226,7 +244,6 @@ void solve_dc(Triplet & t, double * J, double * v, int n){
 	delete [] Tj;
 	delete [] Tx;
 }
-
 
 // stamp the matrix according to the elements (nets)
 // the index of nodes in the matrix are the same as their stored order in nodelist

@@ -14,6 +14,7 @@
 #include "net.h"
 using namespace std;
 
+// initialize the type to be UNDEF
 Net::Net():type(UNDEF){
 }
 
@@ -57,6 +58,7 @@ void Net::set(NODETYPE type, string name, string node1, string node2, double val
 	this->value = value;
 }
 
+// opeartor [] overload
 Net & Netlist::operator [](string name){
 	return netlist[name];
 }

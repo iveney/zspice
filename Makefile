@@ -46,10 +46,10 @@ test: test.cpp
 	$(CC) -c $< $(OPT) -o $@
 
 dc_linear.o: dc_linear.cpp dc_linear.h
-	$(CC) -c $(OPT) $(CFLAGS) $(INC) -lm dc_linear.cpp
+	$(CC) -c $(OPT) $(CFLAGS) $(INC) dc_linear.cpp
 
 dc_nonlinear.o: dc_nonlinear.h dc_nonlinear.cpp
-	$(CC) -c $(OPT) $(CFLAGS) $(INC) -lm dc_nonlinear.cpp
+	$(CC) -c $(OPT) $(CFLAGS) $(INC) dc_nonlinear.cpp
 
 copy_libs: $(LIBS) $(AMD_HDR) $(UMFPACK_HDR) $(SPARSE_HDR)
 	mkdir -p ./headers

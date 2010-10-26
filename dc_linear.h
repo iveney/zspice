@@ -17,19 +17,14 @@ using std::vector;
 class Triplet{
 public:
 	Triplet();
-	inline void push(int i,int j,double x);;
+	inline void push(int i,int j,double x);
 	int size();
 	vector<int> Ti;
 	vector<int> Tj;
 	vector<double> Tx;
 };
 
-void Triplet::push(int i, int j, double x){
-	if( i==0 || j == 0 ) return;
-	Ti.push_back(i);
-	Tj.push_back(j);
-	Tx.push_back(x);
-}
+
 
 void dc_analysis(Netlist & netlist, Nodelist & nodelist, DC_TYPE dc_type);
 bool stamp_matrix(Netlist & netlist, Nodelist & nodelist, Triplet &, double *);
