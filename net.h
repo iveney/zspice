@@ -38,7 +38,7 @@ public:
 	string ctrl[2];
 	string vyyy;
 	string emit;
-	double value;
+	double value; // charateristic value - I don't know what it means.
 	POLARITY polarity;
 };
 

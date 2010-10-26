@@ -27,6 +27,7 @@ public:
 	friend ostream & operator <<(ostream & s, Node & node);
 	string name;
 	vector<string> nets;
+	double v; // voltage
 };
 
 class Nodelist{
@@ -39,6 +40,7 @@ public:
 	Node & operator [] (string name);
 	const int size();
 	vector<Node> nodelist;
+	void output_node_voltages();
 };
 
 #endif

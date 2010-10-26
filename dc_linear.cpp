@@ -12,9 +12,11 @@
 #include <algorithm>
 #include <iomanip>
 #include <ctime>
+#include <cmath>
 #include "global.h"
 #include "util.h"
 #include "dc_linear.h"
+#include "dc_nonlinear.h"
 #include "umfpack.h"
 using namespace std;
 using namespace __gnu_cxx;
@@ -32,7 +34,7 @@ Triplet::Triplet(){
 int Triplet::size(){return Ti.size();}
 
 // Given netlist and nodelist, perform dc analysis
-void linear_dc_analysis(Netlist & netlist, Nodelist & nodelist){
+void dc_analysis(Netlist & netlist, Nodelist & nodelist, DC_TYPE dc_type){
 	// create matrix, note that 0 row and column is for ground
 	int size = nodelist.size();
 
@@ -42,13 +44,33 @@ void linear_dc_analysis(Netlist & netlist, Nodelist & nodelist){
 	size += netlist.netset[CCVS].size();
 
 	// use triplet form here
-	Triplet tri;
 	double * v = new double[size];
 	double * J = new double[size];
-	memset((void*)J, 0, sizeof(double)*size);
 
+	// linear dc analysis
+	if( dc_type == LINEAR ){
+		linear_dc(netlist,nodelist,J,v,size);
+		output_result(netlist, nodelist, v, size);
+	}
+	// non-linear dc analysis
+	else if (dc_type == NON_LINEAR) { 
+		NR_iteration(netlist,nodelist,J,v,size);
+	}
+	else{
+		report_exit("Unknow dc type, must be LINEAR or NON_LINEAR!");
+	}
+
+	// release resourse
+	delete [] v;
+	delete [] J;
+}
+
+void linear_dc(Netlist & netlist, Nodelist & nodelist,
+		double *J, double *v, int size){
 	// stamp the matrix
-	cout<<"Stamping matrix..."<<endl;
+	//cout<<"Stamping matrix..."<<endl;
+	Triplet tri;
+	memset((void*)J, 0, sizeof(double)*size);
 	bool ret = stamp_matrix(netlist, nodelist, tri, J);
 	if( ret == false ){
 		report_exit("**** job aborted ****\n");
@@ -58,19 +80,24 @@ void linear_dc_analysis(Netlist & netlist, Nodelist & nodelist){
 	J[0]=0.0;
 
 	// solve matrix and output
-	cout<<"Solving the sparse matrix..."<<endl;
+	//cout<<"Solving the sparse matrix..."<<endl;
 	solve_dc(tri, J, v, size);
-	output_result(netlist, nodelist, v, size);
-	
-	// release resourse
-	delete [] v;
-	delete [] J;
+}
+
+void update_node_voltages(Nodelist & nodelist, double *v){
+	int i;
+	for(i=1;i<nodelist.size();i++){
+		Node & nd = nodelist.nodelist[i];
+		int id = nodelist.name2idx[nd.name];
+		nd.v = v[id];
+	}
 }
 
 // output the final result, which includes 
 // 1) node voltages 
 // 2) currents of independent voltage sources, cccs, vcvs, ccvs
 void output_result(Netlist & netlist, Nodelist & nodelist, double *v, int n){
+	// output node voltages
 	cout<<endl<<"** Node voltages **"<<endl;
 	int i;
 	for(i=1; i<nodelist.size(); i++){ // do not output ground=0
@@ -83,13 +110,14 @@ void output_result(Netlist & netlist, Nodelist & nodelist, double *v, int n){
 #endif
 	}
 
+	// output branch currents
 	Net net;
 	const int set_types[] = {VSRC, VCVS, CCVS};
 	int nn= sizeof(set_types)/sizeof(int);
 	for(i=0;i<nn;i++){
 #ifndef PHASE1OUTPUT
 		cout<<endl<<"** branch current of "
-			  <<nettype_str[set_types[i]]<<" **"<<endl;
+			<<nettype_str[set_types[i]]<<" **"<<endl;
 #endif
 		foreach_net_in(netlist, set_types[i], net){
 			int id = net2int[net.name];
@@ -112,7 +140,7 @@ void output_result(Netlist & netlist, Nodelist & nodelist, double *v, int n){
 		cout<<net.name<<": "<<scientific<<right<<net.value*v[id]<<endl;
 #else
 		cout<<"current throught source "<<net.name<<" = "
-		    <<scientific<<net.value*v[id]<<endl;
+			<<scientific<<net.value*v[id]<<endl;
 #endif
 	}
 	cout<<endl;
@@ -153,18 +181,18 @@ void solve_dc(Triplet & t, double * J, double * v, int n){
 	}
 
 	/*
-	cout<<"nz, n ="<<nz<<" "<<n<<endl;
-	for(int i=0;i<n;i++)
-		cout<<"J["<<i<<"]="<<J[i]<<endl;
+	   cout<<"nz, n ="<<nz<<" "<<n<<endl;
+	   for(int i=0;i<n;i++)
+	   cout<<"J["<<i<<"]="<<J[i]<<endl;
 
-	for(int i=0;i<n_col+1;i++)
-		cout<<"Ap["<<i<<"]="<<Ap[i]<<endl;
-			
-	for(int i=0;i<nz;i++)
-		cout<<"Ai["<<setw(2)<<i<<"]="<<setw(2)<<Ai[i]
-		    <<" Ax["<<setw(2)<<i<<"]="<<setw(2)<<Ax[i]<<endl;
-		    */
-	
+	   for(int i=0;i<n_col+1;i++)
+	   cout<<"Ap["<<i<<"]="<<Ap[i]<<endl;
+
+	   for(int i=0;i<nz;i++)
+	   cout<<"Ai["<<setw(2)<<i<<"]="<<setw(2)<<Ai[i]
+	   <<" Ax["<<setw(2)<<i<<"]="<<setw(2)<<Ax[i]<<endl;
+	   */
+
 	double *null = (double *) NULL;
 	void *Symbolic, *Numeric;
 	status = umfpack_di_symbolic(n, n, Ap, Ai, Ax, &Symbolic, Control, null) ; 
@@ -184,7 +212,7 @@ void solve_dc(Triplet & t, double * J, double * v, int n){
 	// mearuse the run time
 	status = umfpack_di_solve(UMFPACK_A, Ap, Ai, Ax, v, J, Numeric, Control, null) ;
 	t2=clock();
-	cout<<"Runtime = "<<1.0*(t2-t1)/CLOCKS_PER_SEC<<endl;
+	//cout<<"Runtime = "<<1.0*(t2-t1)/CLOCKS_PER_SEC<<endl;
 	if( status < 0 ){
 		umfpack_di_report_status (Control, status) ;
 		report_exit("umfpack_di_solve failed\n") ;
@@ -203,14 +231,14 @@ void solve_dc(Triplet & t, double * J, double * v, int n){
 // stamp the matrix according to the elements (nets)
 // the index of nodes in the matrix are the same as their stored order in nodelist
 // NOTE: error will be checked here
+// TODO: split the function to several functions, each stamps a certain type of devices
 bool stamp_matrix(Netlist & netlist, Nodelist & nodelist, Triplet & t, double * J){
-	set<string>::iterator it;
+	//set<string>::iterator it;
 	bool success = true;
+	Net net;
 
 	// stamp resistor
-	set<string> & rset = netlist.netset[RSTR];
-	for(it = rset.begin(); it != rset.end(); ++it){
-		Net & net = netlist[*it];
+	foreach_net_in(netlist, RSTR, net){
 		int i = nodelist.name2idx[net.nbr[0]];
 		int j = nodelist.name2idx[net.nbr[1]];
 		double G = 1./net.value;
@@ -218,22 +246,19 @@ bool stamp_matrix(Netlist & netlist, Nodelist & nodelist, Triplet & t, double * 
 		t.push(j,j,G);
 		t.push(i,j,-G);
 		t.push(j,i,-G);
+
 	}
 
 	// stamp current source
-	set<string> & cset = netlist.netset[CSRC];
-	for(it = cset.begin(); it != cset.end(); ++it){
-		Net & net = netlist[*it];
+	foreach_net_in(netlist, CSRC, net){
 		int i = nodelist.name2idx[net.nbr[0]];
 		int j = nodelist.name2idx[net.nbr[1]];
 		J[i] += -net.value;
 		J[j] +=  net.value;
 	}
-	
+
 	// stamp vccs
-	set<string> & vccs = netlist.netset[VCCS];
-	for(it = vccs.begin(); it != vccs.end(); ++it){
-		Net & net = netlist[*it];
+	foreach_net_in(netlist, VCCS, net){
 		int p = nodelist.name2idx[net.nbr[0]];
 		int q = nodelist.name2idx[net.nbr[1]];
 		int k = nodelist.name2idx[net.ctrl[0]];
@@ -248,10 +273,8 @@ bool stamp_matrix(Netlist & netlist, Nodelist & nodelist, Triplet & t, double * 
 	// the following nets will use extra space in augmented Y
 	int ct = nodelist.size();  // counter
 
-	// stamp voltage source
-	set<string> & vsrc = netlist.netset[VSRC];
-	for(it = vsrc.begin(); it != vsrc.end(); ++it, ++ct){
-		Net & net = netlist[*it];
+	// stamp voltage source, NOTE the counter
+	foreach_net_in(netlist, VSRC, net){
 		net2int[net.name] = ct;
 		int k = nodelist.name2idx[net.nbr[0]];
 		int l = nodelist.name2idx[net.nbr[1]];
@@ -261,13 +284,11 @@ bool stamp_matrix(Netlist & netlist, Nodelist & nodelist, Triplet & t, double * 
 		t.push(l,ct,1.);
 		t.push(ct,l,1.);
 		J[ct] += net.value;
+		++ct;
 	}
 
 	// stamp cccs
-	set<string> & cccs = netlist.netset[CCCS];
-	for(it = cccs.begin(); it != cccs.end(); ++it){
-		Net & net = netlist[*it];
-		//net2int[net.name] = ct;
+	foreach_net_in(netlist, CCCS, net){
 		int p = nodelist.name2idx[net.nbr[0]];
 		int q = nodelist.name2idx[net.nbr[1]];
 
@@ -276,22 +297,20 @@ bool stamp_matrix(Netlist & netlist, Nodelist & nodelist, Triplet & t, double * 
 		// check if it exists
 		if( netlist.netlist.find(ctrl) == netlist.netlist.end() ){
 			cerr<<"Error: dependent voltage source ["<<ctrl
-			    <<"] of cccs ["<<net.name<<"] not present!"<<endl;
+				<<"] of cccs ["<<net.name<<"] not present!"<<endl;
 			success = false;
 			continue;
 		}
 
 		// need to find out where the controlling node is stamped
 		int ctrl_index = net2int[ctrl];
-		
+
 		t.push(p,ctrl_index, net.value); // alpha
 		t.push(q,ctrl_index,-net.value); // alpha
 	}
 
-	// stamp vcvs
-	set<string> & vcvs = netlist.netset[VCVS];
-	for(it = vcvs.begin(); it != vcvs.end(); ++it, ++ct){
-		Net & net = netlist[*it];
+	// stamp vcvs, need counter
+	foreach_net_in(netlist, VCVS, net){
 		net2int[net.name] = ct;
 		int p = nodelist.name2idx[net.nbr[0]];
 		int q = nodelist.name2idx[net.nbr[1]];
@@ -304,22 +323,21 @@ bool stamp_matrix(Netlist & netlist, Nodelist & nodelist, Triplet & t, double * 
 		t.push(ct,q,-1.);
 		t.push(ct,k,-net.value); // mu
 		t.push(ct,l, net.value); // mu
+		ct++;
 	}
 
-	// stamp ccvs, add only one row and column!
-	set<string> & ccvs = netlist.netset[CCVS];
-	for(it = ccvs.begin(); it != ccvs.end(); ++it, ++ct){
-		Net & net = netlist[*it];
+	// stamp ccvs, add only one row and column, NEED counter
+	foreach_net_in(netlist, CCVS, net){
 		net2int[net.name] = ct;
 		int p = nodelist.name2idx[net.nbr[0]];
 		int q = nodelist.name2idx[net.nbr[1]];
-		
+
 		// need to find the controlling node
 		string ctrl = net.vyyy;
 		// check if it exists
 		if( netlist.netlist.find(ctrl) == netlist.netlist.end() ){
 			cerr<<"Error: dependent voltage source ["<<ctrl
-			    <<"] of ccvs ["<<net.name<<"] not present!"<<endl;
+				<<"] of ccvs ["<<net.name<<"] not present!"<<endl;
 			success = false;
 			continue;
 		}
@@ -332,7 +350,31 @@ bool stamp_matrix(Netlist & netlist, Nodelist & nodelist, Triplet & t, double * 
 		t.push(q,ct,-1.);
 		t.push(ct,q,-1.);
 		t.push(ct,ctrl_index,-net.value);
+		++ct;
 	}
-	// stamp is over!
+
+	// ************************************************************** //
+	// ** linearize non-linear devices: Diode **
+	foreach_net_in(netlist, DIODE, net){
+		int k = nodelist.name2idx[net.nbr[0]];
+		int l = nodelist.name2idx[net.nbr[1]];
+		Node & nd1 = nodelist[net.nbr[0]];
+		Node & nd2 = nodelist[net.nbr[1]];
+		double Vd = nd1.v - nd2.v;
+		double e = exp(Vd/Vt);
+		double Geq = Is * e / Vt;
+		double Ieq = Is * (e-1.0) - Vd*Geq;
+		t.push(k,k,Geq);
+		t.push(l,l,Geq);
+		t.push(k,l,-Geq);
+		t.push(l,k,-Geq);
+		J[k] += -Ieq;
+		J[l] += Ieq;
+	}
+
+	// ** linearize non-linear devices: Diode **
+	//foreach_net_in(netlist, DIODE, net){
+	//}
+
 	return success;
 }

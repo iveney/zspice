@@ -31,10 +31,13 @@ void Triplet::push(int i, int j, double x){
 	Tx.push_back(x);
 }
 
-void linear_dc_analysis(Netlist & netlist, Nodelist & nodelist);
+void dc_analysis(Netlist & netlist, Nodelist & nodelist, DC_TYPE dc_type);
 bool stamp_matrix(Netlist & netlist, Nodelist & nodelist, Triplet &, double *);
 void solve_dc(Triplet & t, double * J, double * v, int n);
 void output_result(Netlist &, Nodelist & , double *v, int n);
+void linear_dc(Netlist & netlist, Nodelist & nodelist,
+		double *J, double *v, int size);
+void update_node_voltages(Nodelist & nodelist, double *v);
 
 template<class T>
 void vector_to_array(vector<T> v, T * arr);

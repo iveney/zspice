@@ -11,7 +11,7 @@
 #include "node.h"
 using namespace std;
 
-Node::Node(string n):name(n){}
+Node::Node(string n):name(n),v(0.0){}
 
 void Node::insert_net(const Net & net){
 	nets.push_back(net.name);
@@ -64,3 +64,13 @@ Node & Nodelist::operator [] (string name){
 const int Nodelist::size(){
 	return nodelist.size();
 }
+
+void Nodelist::output_node_voltages(){
+	int i;
+	for(i=0;i<this->size();i++){
+		Node & nd = this->nodelist[i];
+		cout<<"voltage at "<<nd.name<<"="<<scientific<<nd.v<<endl;
+	}
+}
+
+
