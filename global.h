@@ -13,6 +13,7 @@
 enum NODETYPE{RSTR, VSRC, CSRC, VCCS, VCVS, CCVS, CCCS, DIODE, 
 	BJT, CAPCT, INDCT, UNDEF}; // the last type is undef
 enum POLARITY{NPN, PNP};
+enum VOL_TYPE{DC,AC,SIN};
 enum DC_TYPE{LINEAR,NON_LINEAR};
 const char * const nettype_str[]={
 	"resistor", 

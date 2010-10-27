@@ -23,7 +23,7 @@ using namespace __gnu_cxx;
 class Net{
 public:
 	Net();
-	Net(NODETYPE type, string name, string node1, string node2, double value);
+	Net(NODETYPE type, string name, string node1, string node2, double value=0.);
 	Net(NODETYPE t, string n, string node1, string node2,
 		string ctrl1, string ctrl2, double v);
 	Net(NODETYPE t, string n, string node1, string node2, string vy, double v);
@@ -31,6 +31,9 @@ public:
 			string emit, POLARITY pol);
 
 	void set(NODETYPE type, string name, string node1, string node2, double value);
+
+	void set_voltage(VOL_TYPE vtype=DC, double value=0., double offset=0.,
+			double amplitude=0., double freq=0.);
 
 	NODETYPE type;
 	string name;
@@ -40,6 +43,9 @@ public:
 	string emit;
 	double value; // charateristic value - I don't know what it means.
 	POLARITY polarity;
+	VOL_TYPE vtype;
+
+	double offset,amplitude,freq;
 };
 
 // functor of translating string to char *

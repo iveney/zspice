@@ -12,6 +12,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <cassert>
 #include "net.h"
 #include "util.h"
 #include "io.h"
@@ -76,6 +77,31 @@ void read_initial_values(ifstream & ifs, Nodelist & nodelist){
 	ifs>>skipws;
 }
 
+// read a ac/dc value from input string
+VOL_TYPE input_voltage(ifstream & ifs, double & value, double & off,
+		double &amp, double & freq){
+	ifs.ignore(256,' ');
+	char a = ifs.peek();
+	if( (a >= '0') && (a <= '9') ){
+		ifs>>value;
+		return DC;
+	}
+	else if( a == 'a') {
+		char c,eq;
+		ifs>>a>>c>>eq; // "ac="
+		assert( a == 'a' && c =='c' && eq == '=' );
+		ifs>>value;
+		return AC;
+	}
+	else {// sin
+		string sin;
+		ifs>>sin; //"sin"
+		ifs>>off>>amp>>freq;
+		value=0.0;
+		return SIN;
+	}
+}
+
 // given a filename, parse it and store the nets in netlist
 // return the size of the square matrix
 void read_netlist(char * filename, Netlist & netlist, Nodelist & nodelist){
@@ -111,8 +137,9 @@ void read_netlist(char * filename, Netlist & netlist, Nodelist & nodelist){
 
 		// start to read netlist
 		string node1, node2, ctrl1, ctrl2, vyyy, emit;
-		double v;
+		double v,off,amp,freq;
 		char c = name[0];
+		VOL_TYPE vtype;
 
 		// read two more node names and insert to node list
 		ifs>>node1>>node2;
@@ -125,8 +152,9 @@ void read_netlist(char * filename, Netlist & netlist, Nodelist & nodelist){
 				netlist.netset[RSTR].insert(name);
 				break;
 			case 'v': // independent voltage source
-				ifs>>v;
-				netlist[name]=Net(VSRC, name, node1, node2, v); 
+				vtype = input_voltage(ifs,v,off,amp,freq);
+				netlist[name]=Net(VSRC,name, node1, node2, v); 
+				netlist[name].set_voltage(vtype,v,off,amp,freq);
 				netlist.netset[VSRC].insert(name);
 				break;
 			case 'i': // current source
@@ -143,16 +171,20 @@ void read_netlist(char * filename, Netlist & netlist, Nodelist & nodelist){
 				nodelist.insert_node(Node(ctrl2));
 				break;
 			case 'e': // vcvs
-				ifs>>ctrl1>>ctrl2>>v;
+				ifs>>ctrl1>>ctrl2;
+				vtype = input_voltage(ifs,v,off,amp,freq);
 				netlist[name]=Net(VCVS, name, node1, node2, 
 						ctrl1, ctrl2, v);
+				netlist[name].set_voltage(vtype,v,off,amp,freq);
 				netlist.netset[VCVS].insert(name);
 				nodelist.insert_node(Node(ctrl1));
 				nodelist.insert_node(Node(ctrl2));
 				break;
 			case 'h': // ccvs
-				ifs>>vyyy>>v;
+				ifs>>vyyy;
+				vtype = input_voltage(ifs,v,off,amp,freq);
 				netlist[name]=Net(CCVS, name, node1, node2, vyyy, v);
+				netlist[name].set_voltage(vtype,v,off,amp,freq);
 				netlist.netset[CCVS].insert(name);
 				break;
 			case 'f': // cccs

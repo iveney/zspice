@@ -11,6 +11,7 @@
 #include <iostream>
 #include <set>
 #include <iomanip>
+#include <cassert>
 #include "net.h"
 using namespace std;
 
@@ -18,8 +19,18 @@ using namespace std;
 Net::Net():type(UNDEF){
 }
 
+
+void Net::set_voltage(VOL_TYPE vtype, double value, double offset,
+		double amplitude, double freq){
+	this->vtype = vtype;
+	this->value = value;
+	this->offset = offset;
+	this->amplitude = amplitude;
+	this->freq = freq;
+}
+
 // constructor for resistor, vsrc, csrc, cap, ind, diode
-Net::Net(NODETYPE t, string n, string node1, string node2, double v=0.0):
+Net::Net(NODETYPE t, string n, string node1, string node2, double v):
 	type(t), name(n), value(v){
 	// for diode, do not need to provide parameter v
 	nbr[0]=node1;
