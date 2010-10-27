@@ -45,6 +45,7 @@ public:
 	POLARITY polarity;
 	VOL_TYPE vtype;
 
+	double current;
 	double offset,amplitude,freq;
 };
 

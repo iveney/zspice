@@ -46,7 +46,7 @@ void read_name_value_pair(ifstream & ifs, string & name, double & value){
 // read the initial values of voltage
 // e.g., v(node1)=1.02
 //       i(vsrc) =4.50
-void read_initial_values(ifstream & ifs, Nodelist & nodelist){
+void read_initial_values(ifstream & ifs, Netlist & netlist, Nodelist & nodelist){
 	char d;
 	string name;
 	int idx;
@@ -64,8 +64,8 @@ void read_initial_values(ifstream & ifs, Nodelist & nodelist){
 			break;
 		case 'i':
 			read_name_value_pair(ifs,name,guess);
-			// TODO: set vsrc initial value
-			//cout<<"nodeset: i "<<name<<" "<<guess<<endl;
+			netlist[name].current = guess;
+			//cout<<"net: "<<name<<" "<<guess<<endl;
 			break;
 		case ' ' : // ignore space
 			break;
@@ -131,15 +131,16 @@ void read_netlist(char * filename, Netlist & netlist, Nodelist & nodelist){
 		// check if it is initial guess
 		if( name == ".nodeset" || name == "+" ){
 			// set the initial voltage to the nodes, current to src
-			read_initial_values(ifs, nodelist);
+			read_initial_values(ifs, netlist, nodelist);
 			continue;
 		}
 
 		// start to read netlist
-		string node1, node2, ctrl1, ctrl2, vyyy, emit;
+		string node1, node2, ctrl1, ctrl2, vyyy, emit, polarity;
 		double v,off,amp,freq;
 		char c = name[0];
 		VOL_TYPE vtype;
+		POLARITY p;
 
 		// read two more node names and insert to node list
 		ifs>>node1>>node2;
@@ -197,8 +198,9 @@ void read_netlist(char * filename, Netlist & netlist, Nodelist & nodelist){
 				netlist.netset[DIODE].insert(name);
 				break;
 			case 'q': // bjt
-				ifs>>emit>>v;
-				netlist[name]=Net(BJT, name, node1, node2, emit, v); 
+				ifs>>emit>>polarity ;
+				p = (polarity == "pnp"? PNP: NPN);
+				netlist[name]=Net(BJT, name, node1, node2, emit, p); 
 				netlist.netset[BJT].insert(name);
 				nodelist.insert_node(Node(emit));
 				break;

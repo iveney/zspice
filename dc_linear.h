@@ -35,7 +35,7 @@ void linear_dc(Netlist & netlist, Nodelist & nodelist,
 		double *J, double *v, int size);
 void update_node_voltages(Nodelist & nodelist, double *v);
 bool stamp_linear(Netlist & netlist, Nodelist & nodelist, 
-		Triplet & t, double * J, ANALYSIS_TYPE atype);
+		Triplet & t, double *v, double * J, ANALYSIS_TYPE atype);
 bool stamp_nonlinear(Netlist & netlist, Nodelist & nodelist, 
 		Triplet & t, double * J);
 

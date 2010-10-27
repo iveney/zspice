@@ -126,7 +126,7 @@ void output_result(Netlist & netlist, Nodelist & nodelist, double *v, int n){
 #endif
 	}
 
-	// output branch currents
+	// output branch currents of Voltage source, VCVS and CCVS
 	Net net;
 	const int set_types[] = {VSRC, VCVS, CCVS};
 	int nn= sizeof(set_types)/sizeof(int);
@@ -146,7 +146,7 @@ void output_result(Netlist & netlist, Nodelist & nodelist, double *v, int n){
 		}
 	}
 
-	// for cccs, it is controlled by the current, just compute it
+	// for CCCS, it is controlled by some vyyy, then just compute it
 #ifndef PHASE1OUTPUT
 	cout<<endl<<"** branch current of cccs **"<<endl;
 #endif
@@ -245,7 +245,7 @@ void solve_dc(Triplet & t, double * J, double * v, int n){
 
 // stamp linear devices
 bool stamp_linear(Netlist & netlist, Nodelist & nodelist, 
-		Triplet & t, double * J, ANALYSIS_TYPE atype){
+		Triplet & t, double *v, double * J, ANALYSIS_TYPE atype){
 	bool success = true;
 	Net net;
 
@@ -292,11 +292,13 @@ bool stamp_linear(Netlist & netlist, Nodelist & nodelist,
 		int k = nodelist.name2idx[net.nbr[0]];
 		int l = nodelist.name2idx[net.nbr[1]];
 
+		// NOTE: stamp initial value
+		v[ct] += net.current;
 		t.push(k,ct,1.);
 		t.push(ct,k,1.);
 		t.push(l,ct,1.);
 		t.push(ct,l,1.);
-		J[ct] += net.value;
+		J[ct] += net.value;  // Vkl
 		++ct;
 	}
 
@@ -331,6 +333,8 @@ bool stamp_linear(Netlist & netlist, Nodelist & nodelist,
 		int k = nodelist.name2idx[net.ctrl[0]];
 		int l = nodelist.name2idx[net.ctrl[1]];
 
+		// NOTE: stamp initial value
+		v[ct] += net.current;
 		t.push(p,ct, 1.);
 		t.push(ct,p, 1.);
 		t.push(q,ct,-1.);
@@ -360,6 +364,8 @@ bool stamp_linear(Netlist & netlist, Nodelist & nodelist,
 		// need to find out where the controlling node is stamped
 		int ctrl_index = net2int[ctrl];
 
+		// NOTE: stamp initial value
+		v[ct] += net.current;
 		t.push(p,ct, 1.);
 		t.push(ct,p, 1.);
 		t.push(q,ct,-1.);
@@ -394,9 +400,10 @@ bool stamp_nonlinear(Netlist & netlist, Nodelist & nodelist,
 		J[l] += Ieq;
 	}
 
-	// ** linearize non-linear devices: Diode **
-	//foreach_net_in(netlist, DIODE, net){
-	//}
+	// ** linearize non-linear devices: BJT **
+	foreach_net_in(netlist, BJT, net){
+		// construct h_{c1}^{k-1}
+	}
 	return success;
 }
 

@@ -31,7 +31,7 @@ void Net::set_voltage(VOL_TYPE vtype, double value, double offset,
 
 // constructor for resistor, vsrc, csrc, cap, ind, diode
 Net::Net(NODETYPE t, string n, string node1, string node2, double v):
-	type(t), name(n), value(v){
+	type(t), name(n), value(v), current(0.0){
 	// for diode, do not need to provide parameter v
 	nbr[0]=node1;
        	nbr[1]=node2;
@@ -40,7 +40,7 @@ Net::Net(NODETYPE t, string n, string node1, string node2, double v):
 // constructor for vccs, vcvs
 Net::Net(NODETYPE t, string n, string node1, string node2,
 		string ctrl1, string ctrl2, double v):
-	type(t), name(n), value(v){
+	type(t), name(n), value(v), current(0.0){
 	nbr[0]=node1;
        	nbr[1]=node2;
 	ctrl[0]=ctrl1;
@@ -48,8 +48,8 @@ Net::Net(NODETYPE t, string n, string node1, string node2,
 }
 
 // constructor for ccvs, cccs
-Net::Net(NODETYPE t, string n, string node1, string node2,
-		string vy, double v): type(t), name(n), vyyy(vy), value(v){
+Net::Net(NODETYPE t, string n, string node1, string node2, string vy, double v): 
+	type(t), name(n), vyyy(vy), value(v), current(0.0){
 	nbr[0]=node1;
        	nbr[1]=node2;
 }
