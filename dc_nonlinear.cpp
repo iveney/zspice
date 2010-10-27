@@ -29,6 +29,7 @@ void copy_voltages(Nodelist & nodelist, double * vs){
 		vs[i] = nodelist.nodelist[i].v;
 }
 
+double * Jold; // used to keep the old currents
 // performs Newton-Raphson iteration here
 void NR_iteration(Netlist & netlist, Nodelist & nodelist,
 		double *v, double *J, int size){
@@ -37,24 +38,31 @@ void NR_iteration(Netlist & netlist, Nodelist & nodelist,
 	nodelist.output_node_voltages();
 	cout<<endl<<"Iteration begins:"<<endl;
 
+	// backup the voltages
 	double * Vold, *Vnew;
 	Vold = new double[nodelist.size()];
 	Vnew = new double[nodelist.size()];
+
+	// backup the currents
+	Jold = new double[size];
+	memset((void*)J, 0, sizeof(double)*size);
 	
 	int counter=0;
 	double diff=0;
 	do{
-		// copy old value of voltages
+		// copy old value of voltages and currents
 		copy_voltages(nodelist, Vold);
+		memcpy(Jold, J, sizeof(double)*size); // J[i]=0 at 1st 
 
 		// linearize the non-linear device, stamp and solve
 		dc_core(netlist,nodelist,v,J,size);
 
-		// now v contains the computed voltages
+		// update new value of voltages and currents
 		update_node_voltages(nodelist,v);
 
 		// copy new value of voltages
 		copy_voltages(nodelist, Vnew);
+
 		diff = voltage_diff(Vnew,Vold,nodelist.size());
 		cout<<"iteration: "<<++counter<<", difference="<<diff<<endl;
 	}while(diff>EPSILON);
@@ -62,6 +70,7 @@ void NR_iteration(Netlist & netlist, Nodelist & nodelist,
 	cout<<"Total number of iterations: "<<counter<<endl<<endl;
 	delete [] Vold;
 	delete [] Vnew;
+	delete [] Jold;
 
 	// finally, output again
 	cout<<"Result:"<<endl;

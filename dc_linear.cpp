@@ -26,6 +26,8 @@
 using namespace std;
 using namespace __gnu_cxx;
 
+extern double * Jold;
+
 ///////////////////////////////////////////////////////////////////////
 // class definition of triplet
 
@@ -65,6 +67,8 @@ void dc_analysis(Netlist & netlist, Nodelist & nodelist){
 	// use triplet form here
 	double * v = new double[size];
 	double * J = new double[size];
+	memset((void*)J, 0, sizeof(double)*size);
+	memset((void*)v, 0, sizeof(double)*size);
 
 	if( netlist.netset[DIODE].size() + netlist.netset[BJT].size() == 0) {
 		// No non-linear device: linear dc analysis
@@ -87,6 +91,7 @@ void dc_core(Netlist & netlist, Nodelist & nodelist,
 	//cout<<"Stamping matrix..."<<endl;
 	Triplet tri;
 	memset((void*)J, 0, sizeof(double)*size);
+	memset((void*)v, 0, sizeof(double)*size);
 	bool ret = stamp_matrix(netlist, nodelist, tri, v, J, DC);
 	if( ret == false ) report_exit("**** job aborted ****\n");
 
@@ -400,7 +405,6 @@ bool stamp_nonlinear(Netlist & netlist, Nodelist & nodelist,
 	}
 
 	// ** linearize non-linear devices: BJT **
-	/*
 	foreach_net_in(netlist, BJT, net){
 		// find the names of three terminals
 		string clct = net.nbr[0];
@@ -426,10 +430,27 @@ bool stamp_nonlinear(Netlist & netlist, Nodelist & nodelist,
 			- Is * (1 - Vbc / VAf - Vbe / VAr) * exp(Vbc / Vt) / Vt
 			- Is * exp(Vbc / Vt) / Br / Vt;
 
-		//double hc3 = 
+		// construct h_{c3}^{k-1}, note: Jold stores old value
+		double hc3 = Jold[c] - hc1 * Vbe - hc2 * Vbc;
 
+		double hb1 = Is * exp(Vbe / Vt) / Vt / Bf; // h_{b1}^{k-1}
+		double hb2 = Is * exp(Vbc / Vt) / Vt / Br; // h_{b2}^{k-1}
+		double hb3 = Jold[b] - hb1 * Vbe - hb2 * Vbc;
+		
+		// finally, start to stamp
+		t.push(c, b, hc1 + hc2);
+		t.push(c, c, -hc2);
+		t.push(c, e, -hc1);
+		t.push(b, b, hb1 + hb2);
+		t.push(b, c, -hb2);
+		t.push(b, e, -hb1);
+		t.push(e, b, -(hc1 + hc2 + hb1 + hb2));
+		t.push(e, c, hc2 + hb2);
+		t.push(e, e, hc1 + hb1);
+		J[c] += -hc3;
+		J[b] += -hb3;
+		J[e] += hc3 + hb3;
 	}
-	*/
 	return success;
 }
 
