@@ -245,12 +245,9 @@ void solve_dc(Triplet & t, double * J, double * v, int n){
 	delete [] Tx;
 }
 
-// stamp the matrix according to the elements (nets)
-// the index of nodes in the matrix are the same as their stored order in nodelist
-// NOTE: error will be checked here
-// TODO: split the function to several functions, each stamps a certain type of devices
-bool stamp_matrix(Netlist & netlist, Nodelist & nodelist, Triplet & t, double * J){
-	//set<string>::iterator it;
+// stamp linear devices
+bool stamp_linear(Netlist & netlist, Nodelist & nodelist, 
+		Triplet & t, double * J){
 	bool success = true;
 	Net net;
 
@@ -369,8 +366,15 @@ bool stamp_matrix(Netlist & netlist, Nodelist & nodelist, Triplet & t, double * 
 		t.push(ct,ctrl_index,-net.value);
 		++ct;
 	}
+	return success;
+}
 
-	// ************************************************************** //
+// stamp the non-linear devices
+bool stamp_nonlinear(Netlist & netlist, Nodelist & nodelist, 
+		Triplet & t, double * J){
+	Net net;
+
+	bool success = true;
 	// ** linearize non-linear devices: Diode **
 	foreach_net_in(netlist, DIODE, net){
 		int k = nodelist.name2idx[net.nbr[0]];
@@ -392,6 +396,16 @@ bool stamp_matrix(Netlist & netlist, Nodelist & nodelist, Triplet & t, double * 
 	// ** linearize non-linear devices: Diode **
 	//foreach_net_in(netlist, DIODE, net){
 	//}
+	return success;
+}
 
+// stamp the matrix according to the elements (nets)
+// the index of nodes in the matrix are the same as order in nodelist
+// NOTE: error will be checked here
+bool stamp_matrix(Netlist & netlist, Nodelist & nodelist, 
+		Triplet & t, double * J){
+	bool success = stamp_linear(netlist, nodelist, t, J);
+	if(!success) return false;
+	stamp_nonlinear(netlist, nodelist, t, J);
 	return success;
 }
