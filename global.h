@@ -36,11 +36,20 @@ static const double EPSILON = 1E-10;
 // constants for non-linear devices
 static const double Vt = 0.02585126075417;
 static const double Is = 10E-15;
-static const double TAO = 2E10-11;
+static const double TAO = 2E-11;
 static const double Cj = 10E-14;
 static const double Vj = 0.8;
 static const double Fc = 0.5;
 static const double Mj = 0.5;
+static const double Tr = 2E-10;
+static const double Cjbe = 10E-11;
+static const double Cjbc = 10E-11;
+static const double VAf = 100;
+static const double VAr = 100;
+static const double Bf = 100;
+static const double Br = 4;
+static const double Tf = 2E-11;
+static const double Cjcs = 2E-14;
 
 #define abs(a) ((a)>0?(a):-(a))
 #define zero(a) (abs(a)<EPSILON)

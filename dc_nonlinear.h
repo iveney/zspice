@@ -11,6 +11,6 @@
 
 // performs newton-raphson iteraion
 void NR_iteration(Netlist & netlist, Nodelist & nodelist,
-		double *J, double *v, int size);
+		double *v, double *J, int size);
 double voltage_diff(double * Vnew, double * Vold, int n);
 void copy_voltages(Nodelist & nodelist, double * vs);

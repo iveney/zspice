@@ -37,7 +37,7 @@ public:
 
 	NODETYPE type;
 	string name;
-	string nbr[2];
+	string nbr[2]; // for BJT, they denotes collector and base
 	string ctrl[2];
 	string vyyy;
 	string emit;

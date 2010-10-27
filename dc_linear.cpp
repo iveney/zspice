@@ -68,36 +68,34 @@ void dc_analysis(Netlist & netlist, Nodelist & nodelist){
 
 	if( netlist.netset[DIODE].size() + netlist.netset[BJT].size() == 0) {
 		// No non-linear device: linear dc analysis
-		linear_dc(netlist,nodelist,J,v,size);
+		dc_core(netlist,nodelist,v,J,size);
 		output_result(netlist, nodelist, v, size);
 	}
 	else // non-linear dc analysis
-		NR_iteration(netlist,nodelist,J,v,size);
+		NR_iteration(netlist,nodelist,v,J,size);
 
 	// release resourse
 	delete [] v;
 	delete [] J;
 }
 
-// perform linear dc analysis
+// perform dc analysis
 // can be used as a sub-routine in NR-iteration
-void linear_dc(Netlist & netlist, Nodelist & nodelist,
-		double *J, double *v, int size){
+void dc_core(Netlist & netlist, Nodelist & nodelist,
+		double *v, double *J, int size){
 	// stamp the matrix
 	//cout<<"Stamping matrix..."<<endl;
 	Triplet tri;
 	memset((void*)J, 0, sizeof(double)*size);
-	bool ret = stamp_matrix(netlist, nodelist, tri, J, DC);
-	if( ret == false ){
-		report_exit("**** job aborted ****\n");
-	}
+	bool ret = stamp_matrix(netlist, nodelist, tri, v, J, DC);
+	if( ret == false ) report_exit("**** job aborted ****\n");
 
 	// this is important: cross out the ground (reference) node 
 	J[0]=0.0;
 
 	// solve matrix and output
 	//cout<<"Solving the sparse matrix..."<<endl;
-	solve_dc(tri, J, v, size);
+	solve_dc(tri, v, J, size);
 }
 
 // after dc_analysis, remember to call this function to update node voltages
@@ -169,7 +167,7 @@ void vector_to_array(vector<T> v, T * arr){
 }
 
 // Given the matrix, solve them, the result is stored in `v'
-void solve_dc(Triplet & t, double * J, double * v, int n){
+void solve_dc(Triplet & t, double * v, double * J, int n){
 	// convert to column compressed form 
 	int n_row = n; // do not count ground row
 	int n_col = n; // do not count ground column
@@ -377,6 +375,7 @@ bool stamp_linear(Netlist & netlist, Nodelist & nodelist,
 }
 
 // stamp the non-linear devices
+// NOTE: some terms rely on the value of last time
 bool stamp_nonlinear(Netlist & netlist, Nodelist & nodelist, 
 		Triplet & t, double * J){
 	Net net;
@@ -401,9 +400,36 @@ bool stamp_nonlinear(Netlist & netlist, Nodelist & nodelist,
 	}
 
 	// ** linearize non-linear devices: BJT **
+	/*
 	foreach_net_in(netlist, BJT, net){
+		// find the names of three terminals
+		string clct = net.nbr[0];
+		string base = net.nbr[1];
+		string emit = net.emit;
+
+		// find the index of c,b,e
+		int c = nodelist.name2idx[clct];
+		int b = nodelist.name2idx[base];
+		int e = nodelist.name2idx[emit];
+
+		double Vbc = nodelist[base].v - nodelist[clct].v;
+		double Vbe = nodelist[base].v - nodelist[emit].v;
+
 		// construct h_{c1}^{k-1}
+		double hc1 = 
+			Is * (1 - Vbc / VAf - Vbe/VAr) * exp(Vbe / Vt) / Vt - 
+			Is * (exp(Vbe / Vt) - exp(Vbc / Vt)) / VAr;
+		
+		// construct h_{c2}^{k-1}
+		double hc2 = 
+			- Is * (exp(Vbe / Vt) - exp(Vbc / Vt)) / VAf 
+			- Is * (1 - Vbc / VAf - Vbe / VAr) * exp(Vbc / Vt) / Vt
+			- Is * exp(Vbc / Vt) / Br / Vt;
+
+		//double hc3 = 
+
 	}
+	*/
 	return success;
 }
 
@@ -411,8 +437,8 @@ bool stamp_nonlinear(Netlist & netlist, Nodelist & nodelist,
 // the index of nodes in the matrix are the same as order in nodelist
 // NOTE: error will be checked here
 bool stamp_matrix(Netlist & netlist, Nodelist & nodelist, 
-		Triplet & t, double * J, ANALYSIS_TYPE atype){
-	bool success = stamp_linear(netlist, nodelist, t, J, atype);
+		Triplet & t, double *v, double * J, ANALYSIS_TYPE atype){
+	bool success = stamp_linear(netlist, nodelist, t, v, J, atype);
 	if(!success) return false;
 	stamp_nonlinear(netlist, nodelist, t, J);
 	return success;

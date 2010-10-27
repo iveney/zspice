@@ -31,7 +31,7 @@ void copy_voltages(Nodelist & nodelist, double * vs){
 
 // performs Newton-Raphson iteration here
 void NR_iteration(Netlist & netlist, Nodelist & nodelist,
-		double *J, double *v, int size){
+		double *v, double *J, int size){
 	// output input node information
 	cout<<endl<<"Input nodes:"<<endl;
 	nodelist.output_node_voltages();
@@ -48,7 +48,9 @@ void NR_iteration(Netlist & netlist, Nodelist & nodelist,
 		copy_voltages(nodelist, Vold);
 
 		// linearize the non-linear device, stamp and solve
-		linear_dc(netlist,nodelist,J,v,size);
+		dc_core(netlist,nodelist,v,J,size);
+
+		// now v contains the computed voltages
 		update_node_voltages(nodelist,v);
 
 		// copy new value of voltages
