@@ -38,13 +38,8 @@ int main(int argc, char *argv[]){
 	cout<<"** Node information **"<<endl;
 	cout<<nodelist<<endl;
 
-	// linear_dc_analysis
-	//cout<<"Start to analyze the linear dc circuit ... "<<endl;
-	//dc_analysis(netlist,nodelist,LINEAR);
-
-	// non_linear dc analysis
-	cout<<"Start to analyze the non-linear dc circuit ... "<<endl;
-	dc_analysis(netlist,nodelist,NON_LINEAR);
+	cout<<"Start to analyze the dc circuit ... "<<endl;
+	dc_analysis(netlist,nodelist);
 
 	return 0;
 }

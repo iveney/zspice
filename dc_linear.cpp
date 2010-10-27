@@ -47,13 +47,13 @@ void Triplet::push(int i, int j, double x){
 // return the number of elements in a triplet instance
 int Triplet::size(){return Ti.size();}
 
-///////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
 
 // for vsrc, vcvs, ccvs, map the net name to integer index in the matrix
 hash_map<string, int> net2int;
 
 // Given netlist and nodelist, perform dc analysis
-void dc_analysis(Netlist & netlist, Nodelist & nodelist, DC_TYPE dc_type){
+void dc_analysis(Netlist & netlist, Nodelist & nodelist){
 	// create matrix, note that 0 row and column is for ground
 	int size = nodelist.size();
 
@@ -66,14 +66,12 @@ void dc_analysis(Netlist & netlist, Nodelist & nodelist, DC_TYPE dc_type){
 	double * v = new double[size];
 	double * J = new double[size];
 
-	assert(dc_type == LINEAR || dc_type == NON_LINEAR);
-	// linear dc analysis
-	if( dc_type == LINEAR ){
+	if( netlist.netset[DIODE].size() + netlist.netset[BJT].size() == 0) {
+		// No non-linear device: linear dc analysis
 		linear_dc(netlist,nodelist,J,v,size);
 		output_result(netlist, nodelist, v, size);
 	}
-	// non-linear dc analysis
-	else// (dc_type == NON_LINEAR)
+	else // non-linear dc analysis
 		NR_iteration(netlist,nodelist,J,v,size);
 
 	// release resourse
@@ -89,7 +87,7 @@ void linear_dc(Netlist & netlist, Nodelist & nodelist,
 	//cout<<"Stamping matrix..."<<endl;
 	Triplet tri;
 	memset((void*)J, 0, sizeof(double)*size);
-	bool ret = stamp_matrix(netlist, nodelist, tri, J);
+	bool ret = stamp_matrix(netlist, nodelist, tri, J, DC);
 	if( ret == false ){
 		report_exit("**** job aborted ****\n");
 	}
@@ -247,7 +245,7 @@ void solve_dc(Triplet & t, double * J, double * v, int n){
 
 // stamp linear devices
 bool stamp_linear(Netlist & netlist, Nodelist & nodelist, 
-		Triplet & t, double * J){
+		Triplet & t, double * J, ANALYSIS_TYPE atype){
 	bool success = true;
 	Net net;
 
@@ -256,8 +254,8 @@ bool stamp_linear(Netlist & netlist, Nodelist & nodelist,
 		int i = nodelist.name2idx[net.nbr[0]];
 		int j = nodelist.name2idx[net.nbr[1]];
 		double G = 1./net.value;
-		t.push(i,i,G);
-		t.push(j,j,G);
+		t.push(i,i, G);
+		t.push(j,j, G);
 		t.push(i,j,-G);
 		t.push(j,i,-G);
 
@@ -289,6 +287,7 @@ bool stamp_linear(Netlist & netlist, Nodelist & nodelist,
 
 	// stamp voltage source, NOTE the counter
 	foreach_net_in(netlist, VSRC, net){
+		if(net.vtype == AC && atype == DC) continue;
 		net2int[net.name] = ct;
 		int k = nodelist.name2idx[net.nbr[0]];
 		int l = nodelist.name2idx[net.nbr[1]];
@@ -325,6 +324,7 @@ bool stamp_linear(Netlist & netlist, Nodelist & nodelist,
 
 	// stamp vcvs, need counter
 	foreach_net_in(netlist, VCVS, net){
+		if(net.vtype == AC && atype == DC) continue;
 		net2int[net.name] = ct;
 		int p = nodelist.name2idx[net.nbr[0]];
 		int q = nodelist.name2idx[net.nbr[1]];
@@ -342,6 +342,7 @@ bool stamp_linear(Netlist & netlist, Nodelist & nodelist,
 
 	// stamp ccvs, add only one row and column, NEED counter
 	foreach_net_in(netlist, CCVS, net){
+		if(net.vtype == AC && atype == DC) continue;
 		net2int[net.name] = ct;
 		int p = nodelist.name2idx[net.nbr[0]];
 		int q = nodelist.name2idx[net.nbr[1]];
@@ -403,8 +404,8 @@ bool stamp_nonlinear(Netlist & netlist, Nodelist & nodelist,
 // the index of nodes in the matrix are the same as order in nodelist
 // NOTE: error will be checked here
 bool stamp_matrix(Netlist & netlist, Nodelist & nodelist, 
-		Triplet & t, double * J){
-	bool success = stamp_linear(netlist, nodelist, t, J);
+		Triplet & t, double * J, ANALYSIS_TYPE atype){
+	bool success = stamp_linear(netlist, nodelist, t, J, atype);
 	if(!success) return false;
 	stamp_nonlinear(netlist, nodelist, t, J);
 	return success;
