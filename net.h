@@ -30,23 +30,33 @@ public:
 	Net(NODETYPE t, string n, string collect, string base, 
 			string emit, POLARITY pol);
 
-	void set(NODETYPE type, string name, string node1, string node2, double value);
+	void set(NODETYPE type, string name, string node1, string node2, 
+			double value);
 
 	void set_voltage(VOL_TYPE vtype=DC, double value=0., double offset=0.,
 			double amplitude=0., double freq=0.);
 
+	void BJT_init();
+
+	double compute_Ic(double Vc, double Vb, double Ve);
+	double compute_Ib(double Vc, double Vb, double Ve);
+
 	NODETYPE type;
 	string name;
-	string nbr[2]; // for BJT, they denotes collector and base
+	string nbr[2];     // as of BJT, they denotes collector and base
 	string ctrl[2];
 	string vyyy;
-	string emit;
-	double value; // charateristic value - I don't know what it means.
-	POLARITY polarity;
-	VOL_TYPE vtype;
+	double value;      // charateristic value - I don't know what it means.
 
-	double current;
-	double offset,amplitude,freq;
+	VOL_TYPE vtype;    
+	double current;    // stores the voltage source branch current
+	double offset,amplitude,freq;  // for sin signal
+
+	// for BJT
+	string emit;       
+	POLARITY polarity; // BJT polarity
+	double Ic, Ib;     
+	double hc[4], hb[4];
 };
 
 // functor of translating string to char *

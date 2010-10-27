@@ -26,7 +26,7 @@
 using namespace std;
 using namespace __gnu_cxx;
 
-extern double * Jold;
+//extern double * Jold;
 
 ///////////////////////////////////////////////////////////////////////
 // class definition of triplet
@@ -290,7 +290,10 @@ bool stamp_linear(Netlist & netlist, Nodelist & nodelist,
 
 	// stamp voltage source, NOTE the counter
 	foreach_net_in(netlist, VSRC, net){
-		if(net.vtype == AC && atype == DC) continue;
+		if(net.vtype == AC && atype == DC) {
+			net.value = 0.0;
+			continue;
+		}
 		net2int[net.name] = ct;
 		int k = nodelist.name2idx[net.nbr[0]];
 		int l = nodelist.name2idx[net.nbr[1]];
@@ -329,7 +332,10 @@ bool stamp_linear(Netlist & netlist, Nodelist & nodelist,
 
 	// stamp vcvs, need counter
 	foreach_net_in(netlist, VCVS, net){
-		if(net.vtype == AC && atype == DC) continue;
+		if(net.vtype == AC && atype == DC) {
+			net.value = 0.0;
+			continue;
+		}
 		net2int[net.name] = ct;
 		int p = nodelist.name2idx[net.nbr[0]];
 		int q = nodelist.name2idx[net.nbr[1]];
@@ -349,7 +355,10 @@ bool stamp_linear(Netlist & netlist, Nodelist & nodelist,
 
 	// stamp ccvs, add only one row and column, NEED counter
 	foreach_net_in(netlist, CCVS, net){
-		if(net.vtype == AC && atype == DC) continue;
+		if(net.vtype == AC && atype == DC) {
+			net.value = 0.0;
+			continue;
+		}
 		net2int[net.name] = ct;
 		int p = nodelist.name2idx[net.nbr[0]];
 		int q = nodelist.name2idx[net.nbr[1]];
@@ -416,8 +425,16 @@ bool stamp_nonlinear(Netlist & netlist, Nodelist & nodelist,
 		int b = nodelist.name2idx[base];
 		int e = nodelist.name2idx[emit];
 
-		double Vbc = nodelist[base].v - nodelist[clct].v;
-		double Vbe = nodelist[base].v - nodelist[emit].v;
+		double Vc = nodelist[clct].v;
+		double Vb = nodelist[base].v;
+		double Ve = nodelist[emit].v;
+
+		double Vbc = Vb - Vc;
+		double Vbe = Vb - Ve;
+
+		// IMPORTANT: compute the Ic, Ib from last iteration
+		double Ib = net.Ib;
+		double Ic = net.Ic;
 
 		// construct h_{c1}^{k-1}
 		double hc1 = 
@@ -430,12 +447,12 @@ bool stamp_nonlinear(Netlist & netlist, Nodelist & nodelist,
 			- Is * (1 - Vbc / VAf - Vbe / VAr) * exp(Vbc / Vt) / Vt
 			- Is * exp(Vbc / Vt) / Br / Vt;
 
-		// construct h_{c3}^{k-1}, note: Jold stores old value
-		double hc3 = Jold[c] - hc1 * Vbe - hc2 * Vbc;
+		// construct h_{c3}^{k-1}
+		double hc3 = Ic - hc1 * Vbe - hc2 * Vbc;
 
 		double hb1 = Is * exp(Vbe / Vt) / Vt / Bf; // h_{b1}^{k-1}
 		double hb2 = Is * exp(Vbc / Vt) / Vt / Br; // h_{b2}^{k-1}
-		double hb3 = Jold[b] - hb1 * Vbe - hb2 * Vbc;
+		double hb3 = Ib - hb1 * Vbe - hb2 * Vbc;
 		
 		// finally, start to stamp
 		t.push(c, b, hc1 + hc2);
@@ -450,6 +467,10 @@ bool stamp_nonlinear(Netlist & netlist, Nodelist & nodelist,
 		J[c] += -hc3;
 		J[b] += -hb3;
 		J[e] += hc3 + hb3;
+
+		// update BJT value
+		net.hb[1]=hb1; net.hb[2]=hb2; net.hb[3]=hb3;
+		net.hc[1]=hc1; net.hc[2]=hc2; net.hc[3]=hc3;
 	}
 	return success;
 }

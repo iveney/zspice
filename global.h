@@ -35,15 +35,15 @@ static const double EPSILON = 1E-10;
 
 // constants for non-linear devices
 static const double Vt = 0.02585126075417;
-static const double Is = 10E-15;
+static const double Is = 1E-15;
 static const double TAO = 2E-11;
-static const double Cj = 10E-14;
+static const double Cj = 1E-14;
 static const double Vj = 0.8;
 static const double Fc = 0.5;
 static const double Mj = 0.5;
 static const double Tr = 2E-10;
-static const double Cjbe = 10E-11;
-static const double Cjbc = 10E-11;
+static const double Cjbe = 1E-11;
+static const double Cjbc = 1E-11;
 static const double VAf = 100;
 static const double VAr = 100;
 static const double Bf = 100;

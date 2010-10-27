@@ -29,7 +29,26 @@ void copy_voltages(Nodelist & nodelist, double * vs){
 		vs[i] = nodelist.nodelist[i].v;
 }
 
-double * Jold; // used to keep the old currents
+void update_BJT_currents(Netlist & netlist, Nodelist & nodelist){
+	set<string>::iterator it;
+	set<string> & bjts = netlist.netset[BJT];
+	for(it=bjts.begin(); it!=bjts.end(); ++it){
+		Net & net = netlist[*it];
+
+		// find the names of three terminals
+		string clct = net.nbr[0];
+		string base = net.nbr[1];
+		string emit = net.emit;
+
+		double Vc = nodelist[clct].v;
+		double Vb = nodelist[base].v;
+		double Ve = nodelist[emit].v;
+
+		net.compute_Ib(Vc, Vb, Ve);
+		net.compute_Ic(Vc, Vb, Ve);
+	}
+}
+
 // performs Newton-Raphson iteration here
 void NR_iteration(Netlist & netlist, Nodelist & nodelist,
 		double *v, double *J, int size){
@@ -44,7 +63,6 @@ void NR_iteration(Netlist & netlist, Nodelist & nodelist,
 	Vnew = new double[nodelist.size()];
 
 	// backup the currents
-	Jold = new double[size];
 	memset((void*)J, 0, sizeof(double)*size);
 	
 	int counter=0;
@@ -52,13 +70,15 @@ void NR_iteration(Netlist & netlist, Nodelist & nodelist,
 	do{
 		// copy old value of voltages and currents
 		copy_voltages(nodelist, Vold);
-		memcpy(Jold, J, sizeof(double)*size); // J[i]=0 at 1st 
 
 		// linearize the non-linear device, stamp and solve
 		dc_core(netlist,nodelist,v,J,size);
 
-		// update new value of voltages and currents
-		update_node_voltages(nodelist,v);
+		// update new value of voltages
+		update_node_voltages(nodelist, v);
+		
+		// update new value of currents
+		update_BJT_currents(netlist, nodelist);
 
 		// copy new value of voltages
 		copy_voltages(nodelist, Vnew);
@@ -70,7 +90,6 @@ void NR_iteration(Netlist & netlist, Nodelist & nodelist,
 	cout<<"Total number of iterations: "<<counter<<endl<<endl;
 	delete [] Vold;
 	delete [] Vnew;
-	delete [] Jold;
 
 	// finally, output again
 	cout<<"Result:"<<endl;

@@ -1,8 +1,8 @@
 
 vcc supply 0 5
 isrc cbias 0 1e-3
-qsrc1 cbias cbias supply pnp
-qsrc2 out cbias supply pnp
+qsrc1 cbias cbias supply npn
+qsrc2 out cbias supply npn
 qamp out b 0 npn
 
 rs b input2 1e4

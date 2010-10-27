@@ -59,6 +59,7 @@ Net::Net(NODETYPE t, string n, string collect, string base, string em, POLARITY 
 	type(t), name(n), emit(em), polarity(pol){
 	nbr[0]=collect;
        	nbr[1]=base;
+	this->BJT_init();
 }
 
 void Net::set(NODETYPE type, string name, string node1, string node2, double value){
@@ -67,6 +68,20 @@ void Net::set(NODETYPE type, string name, string node1, string node2, double val
 	nbr[0]=node1;
 	nbr[1]=node2;
 	this->value = value;
+}
+
+void Net::BJT_init(){
+	Ic = Ib = 0.0;
+	for(int i=1;i<=3;i++)
+		hc[i]=hb[i] = 0.0;
+}
+
+double Net::compute_Ic(double Vc, double Vb, double Ve){
+	return this->Ic = (hc[1]+hc[2]) * Vb - hc[2] * Vc - hc[1] * Ve + hc[3];
+}
+
+double Net::compute_Ib(double Vc, double Vb, double Ve){
+	return this->Ib = (hb[1]+hb[2]) * Vb - hb[2] * Vc - hb[1] * Ve + hb[3];
 }
 
 // opeartor [] overload
