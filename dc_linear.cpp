@@ -432,7 +432,6 @@ bool stamp_nonlinear(Netlist & netlist, Nodelist & nodelist,
 	set<string> & bjts = netlist.netset[BJT];
 	for(it=bjts.begin(); it!=bjts.end(); ++it){
 		Net & net = netlist[*it];
-	//	cout<<"stamping "<<net.name<<endl;
 		// find the names of three terminals
 		string clct = net.nbr[0];
 		string base = net.nbr[1];
@@ -465,14 +464,14 @@ bool stamp_nonlinear(Netlist & netlist, Nodelist & nodelist,
 
 		// construct h_{c1}^{k-1}
 		double hc1 = 
-			Is * (1. - Vbc / VAf - Vbe / VAr) * exp(Vbe / Vt) / Vt - 
-			Is * (exp(Vbe / Vt) - exp(Vbc / Vt)) / VAr;
+			 Is * (1. - Vbc / VAf - Vbe / VAr) * exp(Vbe / Vt) / Vt
+		       - Is * (exp(Vbe / Vt) - exp(Vbc / Vt)) / VAr;
 		
 		// construct h_{c2}^{k-1}
 		double hc2 = 
-			- Is * (exp(Vbe / Vt) - exp(Vbc / Vt)) / VAf 
-			- Is * (1. - Vbc / VAf - Vbe / VAr) * exp(Vbc / Vt) / Vt
-			- Is * exp(Vbc / Vt) / Br / Vt;
+		      - Is * (exp(Vbe / Vt) - exp(Vbc / Vt)) / VAf 
+		      - Is * (1. - Vbc / VAf - Vbe / VAr) * exp(Vbc / Vt) / Vt
+		      - Is * exp(Vbc / Vt) / Br / Vt;
 
 		// construct h_{c3}^{k-1}
 		double hc3 = Ic - hc1 * Vbe - hc2 * Vbc;
