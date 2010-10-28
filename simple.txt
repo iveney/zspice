@@ -1,4 +1,5 @@
-r1 a 0 5
+r1 b 0 5
 v1 a 0 10
+v2 a b ac=10
 
 .end

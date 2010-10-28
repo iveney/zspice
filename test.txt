@@ -1,0 +1,10 @@
+
+r1 a c 2
+r2 a 0 5
+r3 b 0 4
+v2 b c ac=1
+v1 a b 5
+
+.op
+
+.end

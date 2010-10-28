@@ -1,0 +1,11 @@
+vcc a d -5
+r1 b d .5
+r2 c 0 .2
+r3 d 0 .4
+q1 a b c npn
+
+.nodeset v(a)=-3 i(vcc)=.4                                                
+
+.op
+
+.end

@@ -14,4 +14,7 @@ vin input1 0 0.9
 
 .op
 
+.plot ac VM(out) VP(out)
+.ac DEC 100 10K 100MEG
+
 .end

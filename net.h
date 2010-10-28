@@ -36,8 +36,9 @@ public:
 	void set_voltage(VOL_TYPE vtype=DC, double value=0., double offset=0.,
 			double amplitude=0., double freq=0.);
 
-	void BJT_init();
 
+	// auxiliary function to compute some values for BJT
+	void init_BJT();
 	double compute_Ic(double Vc, double Vb, double Ve);
 	double compute_Ib(double Vc, double Vb, double Ve);
 

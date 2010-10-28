@@ -59,7 +59,7 @@ Net::Net(NODETYPE t, string n, string collect, string base, string em, POLARITY 
 	type(t), name(n), emit(em), polarity(pol){
 	nbr[0]=collect;
        	nbr[1]=base;
-	this->BJT_init();
+	this->init_BJT();
 }
 
 void Net::set(NODETYPE type, string name, string node1, string node2, double value){
@@ -70,21 +70,31 @@ void Net::set(NODETYPE type, string name, string node1, string node2, double val
 	this->value = value;
 }
 
-void Net::BJT_init(){
+void Net::init_BJT(){
 	Ic = Ib = 0.0;
 	for(int i=1;i<=3;i++)
 		hc[i]=hb[i] = 0.0;
 }
 
 double Net::compute_Ic(double Vc, double Vb, double Ve){
-	return this->Ic = (hc[1]+hc[2]) * Vb - hc[2] * Vc - hc[1] * Ve + hc[3];
+//	cout<<"update IC from "<< this->Ic;
+	Ic = (hc[1]+hc[2]) * Vb - hc[2] * Vc - hc[1] * Ve;
+	if( polarity == PNP ) Ic = -Ic;
+	Ic += hc[3];
+//	cout<<" to "<<Ic<<endl;
+	return Ic;
 }
 
 double Net::compute_Ib(double Vc, double Vb, double Ve){
-	return this->Ib = (hb[1]+hb[2]) * Vb - hb[2] * Vc - hb[1] * Ve + hb[3];
+//	cout<<"update IB from "<<Ib;
+	Ib = (hb[1]+hb[2]) * Vb - hb[2] * Vc - hb[1] * Ve;
+	if( polarity == PNP ) Ib = -Ib;
+	Ib += hb[3];
+//	cout<<" to "<<Ib<<endl;
+	return Ib;
 }
 
-// opeartor [] overload
+// opeartor [ ] overload
 Net & Netlist::operator [](string name){
 	return netlist[name];
 }

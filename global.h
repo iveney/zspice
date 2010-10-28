@@ -44,12 +44,13 @@ static const double Mj = 0.5;
 static const double Tr = 2E-10;
 static const double Cjbe = 1E-11;
 static const double Cjbc = 1E-11;
-static const double VAf = 100;
-static const double VAr = 100;
-static const double Bf = 100;
-static const double Br = 4;
+static const double VAf = 100.;
+static const double VAr = 100.;
+static const double Bf = 100.;
+static const double Br = 4.;
 static const double Tf = 2E-11;
 static const double Cjcs = 2E-14;
+static const double DAMPEN = 2*Vt;
 
 #define abs(a) ((a)>0?(a):-(a))
 #define zero(a) (abs(a)<EPSILON)

@@ -82,7 +82,7 @@ VOL_TYPE input_voltage(ifstream & ifs, double & value, double & off,
 		double &amp, double & freq){
 	ifs.ignore(256,' ');
 	char a = ifs.peek();
-	if( (a >= '0') && (a <= '9') ){
+	if( a == '-' || ((a >= '0') && (a <= '9')) ){
 		ifs>>value;
 		return DC;
 	}
