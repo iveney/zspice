@@ -17,6 +17,7 @@ using std::vector;
 class Triplet{
 public:
 	Triplet();
+	void merge();
 	inline void push(int i,int j,double x);
 	int size();
 	vector<int> Ti;
@@ -28,14 +29,14 @@ public:
 
 void dc_analysis(Netlist & netlist, Nodelist & nodelist);
 bool stamp_matrix(Netlist & netlist, Nodelist & nodelist, Triplet &, 
-		double *, double *, ANALYSIS_TYPE);
+		double *, ANALYSIS_TYPE);
 void solve_dc(Triplet & t, double * v, double * J, int n);
 void output_result(Netlist &, Nodelist & , double *v, int n);
 void dc_core(Netlist & netlist, Nodelist & nodelist,
 		double *v, double *J, int size);
 void update_node_voltages(Nodelist & nodelist, double *v);
 bool stamp_linear(Netlist & netlist, Nodelist & nodelist, 
-		Triplet & t, double *v, double * J, ANALYSIS_TYPE atype);
+		Triplet & t, double * J, ANALYSIS_TYPE atype);
 bool stamp_nonlinear(Netlist & netlist, Nodelist & nodelist, 
 		Triplet & t, double * J);
 

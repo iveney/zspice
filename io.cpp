@@ -203,6 +203,7 @@ void read_netlist(char * filename, Netlist & netlist, Nodelist & nodelist){
 				netlist[name]=Net(BJT, name, node1, node2, emit, p); 
 				netlist.netset[BJT].insert(name);
 				nodelist.insert_node(Node(emit));
+				nodelist[emit].insert_net(name);
 				break;
 			case 'c': // capacitor
 				ifs>>v;

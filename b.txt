@@ -1,11 +1,11 @@
-vcc a d -5
-r1 b d .5
-r2 c 0 .2
-r3 d 0 .4
-q1 a b c npn
 
-.nodeset v(a)=-3 i(vcc)=.4                                                
+v1 a 0 10
+r1 a b 20
+r2 a c 3000
+q1 b c 0 npn
 
-.op
+.nodeset v(b)=3.78 v(c)=0.857
+
+.op                                        
 
 .end

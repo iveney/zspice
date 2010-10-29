@@ -55,7 +55,8 @@ Net::Net(NODETYPE t, string n, string node1, string node2, string vy, double v):
 }
 
 // constructor for bjt
-Net::Net(NODETYPE t, string n, string collect, string base, string em, POLARITY pol):
+Net::Net(NODETYPE t, string n, string collect, string base, 
+		string em, POLARITY pol):
 	type(t), name(n), emit(em), polarity(pol){
 	nbr[0]=collect;
        	nbr[1]=base;
@@ -79,7 +80,7 @@ void Net::init_BJT(){
 double Net::compute_Ic(double Vc, double Vb, double Ve){
 //	cout<<"update IC from "<< this->Ic;
 	Ic = (hc[1]+hc[2]) * Vb - hc[2] * Vc - hc[1] * Ve;
-	if( polarity == PNP ) Ic = -Ic;
+	//if( polarity == PNP ) Ic = -Ic;
 	Ic += hc[3];
 //	cout<<" to "<<Ic<<endl;
 	return Ic;
@@ -88,7 +89,7 @@ double Net::compute_Ic(double Vc, double Vb, double Ve){
 double Net::compute_Ib(double Vc, double Vb, double Ve){
 //	cout<<"update IB from "<<Ib;
 	Ib = (hb[1]+hb[2]) * Vb - hb[2] * Vc - hb[1] * Ve;
-	if( polarity == PNP ) Ib = -Ib;
+	//if( polarity == PNP ) Ib = -Ib;
 	Ib += hb[3];
 //	cout<<" to "<<Ib<<endl;
 	return Ib;

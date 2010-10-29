@@ -30,6 +30,7 @@ void copy_voltages(Nodelist & nodelist, double * vs){
 		vs[i] = nodelist.nodelist[i].v;
 }
 
+// update the BJT currents according to analytical form
 void update_BJT_currents(Netlist & netlist, Nodelist & nodelist){
 	set<string>::iterator it;
 	set<string> & bjts = netlist.netset[BJT];
@@ -45,29 +46,7 @@ void update_BJT_currents(Netlist & netlist, Nodelist & nodelist){
 		double Vb = nodelist[base].v;
 		double Ve = nodelist[emit].v;
 
-		net.compute_Ib(Vc, Vb, Ve);
-		net.compute_Ic(Vc, Vb, Ve);
-	}
-}
-
-// initialize the value of BJTs, namely Ic, Ib and Ie = Ic+Ib
-// Note the difference between PNP and NPN
-void BJT_initialize(Netlist & netlist, Nodelist & nodelist){
-	set<string>::iterator it;
-	set<string> & bjts = netlist.netset[BJT];
-	for(it=bjts.begin(); it!=bjts.end(); ++it){
-		Net & net = netlist[*it];
-
-		// find the names of three terminals
-		string clct = net.nbr[0];
-		string base = net.nbr[1];
-		string emit = net.emit;
-
-		double Vc = nodelist[clct].v;
-		double Vb = nodelist[base].v;
-		double Ve = nodelist[emit].v;
-
-		// default NPN 
+		// new below
 		double Vbc = Vb - Vc;
 		double Vbe = Vb - Ve;
 
@@ -85,14 +64,6 @@ void BJT_initialize(Netlist & netlist, Nodelist & nodelist){
 		net.Ib = Is * 
 			(  (exp(Vbe / Vt) - 1) / Bf 
 			 + (exp(Vbc / Vt) - 1) / Br );
-
-		if( net.polarity == PNP ){
-			net.Ic = - net.Ic;
-			net.Ib = - net.Ib;
-		}
-
-		//cout<<" ** Ic = "<<net.Ic<<endl;
-		//cout<<" ** Ib = "<<net.Ib<<endl;
 	}
 }
 
@@ -109,16 +80,13 @@ void NR_iteration(Netlist & netlist, Nodelist & nodelist,
 	Vold = new double[nodelist.size()];
 	Vnew = new double[nodelist.size()];
 
-	// backup the currents
-	memset((void*)J, 0, sizeof(double)*size);
-
 	// initialize BJT branch currents
-	BJT_initialize(netlist, nodelist);
+	update_BJT_currents(netlist, nodelist);
 	
 	int counter=0;
 	double diff=0;
 	do{
-		// copy old value of voltages and currents
+		// backup old value of voltages to Vold
 		copy_voltages(nodelist, Vold);
 
 		// linearize the non-linear device, stamp and solve
@@ -127,15 +95,15 @@ void NR_iteration(Netlist & netlist, Nodelist & nodelist,
 		// update new value of voltages
 		update_node_voltages(nodelist, v);
 		
-		// copy new value of voltages
+		// copy new value of voltages to Vnew
 		copy_voltages(nodelist, Vnew);
 
-		// update new value of currents
+		// update new value of currents (Ib, Ic) for next iteration
 		update_BJT_currents(netlist, nodelist);
 
 		diff = voltage_diff(Vnew,Vold,nodelist.size());
-		cout<<endl<<"iteration: "<<++counter<<", difference="<<diff<<endl;
-		nodelist.output_node_voltages();
+		cout<<"iteration: "<<++counter<<", difference = "<<diff<<endl;
+		//nodelist.output_node_voltages();
 	}while(diff>EPSILON);
 	
 	cout<<"Total number of iterations: "<<counter<<endl<<endl;

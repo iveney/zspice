@@ -38,9 +38,23 @@ Triplet::Triplet(){
 	Tx.push_back(1.0);
 }
 
+void Triplet::merge(){
+	for(int k=0;k<size();k++){
+		for(int l=k+1;l<size();l++){
+			if( Ti[k] == Ti[l] && Tj[k] == Tj[l] ){
+				Tx[k]+=Tx[l];
+				Ti.erase(Ti.begin()+l);
+				Tj.erase(Tj.begin()+l);
+				Tx.erase(Tx.begin()+l);
+			}
+		}
+	}
+}
+
 // insert a triplet 
 void Triplet::push(int i, int j, double x){
-	if( i==0 || j == 0 ) return;
+	// NOTE: cross-out the zero-th row and column
+	if( i==0 || j == 0 ) return; 
 	Ti.push_back(i);
 	Tj.push_back(j);
 	Tx.push_back(x);
@@ -94,11 +108,14 @@ void dc_core(Netlist & netlist, Nodelist & nodelist,
 	Triplet tri;
 	memset((void*)J, 0, sizeof(double)*size);
 	memset((void*)v, 0, sizeof(double)*size);
-	bool ret = stamp_matrix(netlist, nodelist, tri, v, J, DC);
+	bool ret = stamp_matrix(netlist, nodelist, tri, J, DC);
 	if( ret == false ) report_exit("**** job aborted ****\n");
 
 	// this is important: cross out the ground (reference) node 
 	J[0]=0.0;
+
+	// DEBUG: output J;
+	// for(int i=0;i<size;i++) cout<<i<<" "<<J[i]<<endl;
 
 	// solve matrix and output
 	//cout<<"Solving the sparse matrix..."<<endl;
@@ -202,11 +219,20 @@ void solve_dc(Triplet & t, double * v, double * J, int n){
 	vector_to_array<int>(t.Tj, Tj);
 	vector_to_array<double>(t.Tx, Tx);
 
+	// DEBUG: output triplet
+	//t.merge();
+	//for(int i=0;i<t.size();i++){
+		//cout<<t.Ti[i]<<" "<<t.Tj[i]<<" : "<<t.Tx[i]<<endl;
+	//}
+
 	int status;
 	double Control [UMFPACK_CONTROL];
 	umfpack_di_defaults (Control) ;
 	status = umfpack_di_triplet_to_col(n_row, n_col, nz, Ti, Tj, Tx, 
 			Ap, Ai, Ax, (int *) NULL);
+
+	//status = umfpack_di_triplet_to_col(n_row, n_col, nz, Ti, Tj, Tx, 
+	//		Ap, Ai, Ax, (int *) NULL);
 
 	if( status < 0 ) {
 		umfpack_di_report_status (Control, status) ;
@@ -262,7 +288,7 @@ void solve_dc(Triplet & t, double * v, double * J, int n){
 
 // stamp linear devices
 bool stamp_linear(Netlist & netlist, Nodelist & nodelist, 
-		Triplet & t, double *v, double * J, ANALYSIS_TYPE atype){
+		Triplet & t, double * J, ANALYSIS_TYPE atype){
 	bool success = true;
 	Net net;
 
@@ -313,11 +339,11 @@ bool stamp_linear(Netlist & netlist, Nodelist & nodelist,
 		int l = nodelist.name2idx[net.nbr[1]];
 
 		// NOTE: stamp initial value
-		// v[ct] += net.current;
 		t.push(k,ct,1.);
 		t.push(ct,k,1.);
 		t.push(l,ct,-1.);
 		t.push(ct,l,-1.);
+		//cout<<"stamping v "<<net.value<<" to "<<ct<<endl;
 		J[ct] += net.value;  // Vkl
 		++ct;
 	}
@@ -357,7 +383,6 @@ bool stamp_linear(Netlist & netlist, Nodelist & nodelist,
 		int l = nodelist.name2idx[net.ctrl[1]];
 
 		// NOTE: stamp initial value
-		// v[ct] += net.current;
 		t.push(p,ct, 1.);
 		t.push(ct,p, 1.);
 		t.push(q,ct,-1.);
@@ -391,7 +416,6 @@ bool stamp_linear(Netlist & netlist, Nodelist & nodelist,
 		int ctrl_index = net2int[ctrl];
 
 		// NOTE: stamp initial value
-		// v[ct] += net.current;
 		t.push(p,ct, 1.);
 		t.push(ct,p, 1.);
 		t.push(q,ct,-1.);
@@ -432,6 +456,8 @@ bool stamp_nonlinear(Netlist & netlist, Nodelist & nodelist,
 	set<string> & bjts = netlist.netset[BJT];
 	for(it=bjts.begin(); it!=bjts.end(); ++it){
 		Net & net = netlist[*it];
+		//cout<<"stamping "<<net.name<<" p = "<<net.polarity<<endl;
+
 		// find the names of three terminals
 		string clct = net.nbr[0];
 		string base = net.nbr[1];
@@ -447,7 +473,9 @@ bool stamp_nonlinear(Netlist & netlist, Nodelist & nodelist,
 		double Vc = nodelist[clct].v;
 		double Vb = nodelist[base].v;
 		double Ve = nodelist[emit].v;
-		//cout<<"Vol c="<<Vc<<" b="<<Vb<<" e="<<Ve<<endl;
+		//cout<<"Vol "<<clct<<"="<<Vc
+		//   <<" "<<base<<"="<<Vb
+		//  <<" "<<emit<<"="<<Ve<<endl;
 
 		double Vbc = Vb - Vc;
 		double Vbe = Vb - Ve;
@@ -457,7 +485,7 @@ bool stamp_nonlinear(Netlist & netlist, Nodelist & nodelist,
 		}
 		//cout<<"Vbc="<<Vbc<<" Vbe="<<Vbe<<endl;
 
-		// IMPORTANT: compute the Ic, Ib from last iteration
+		// get Ic, Ib from last iteration
 		double Ib = net.Ib;
 		double Ic = net.Ic;
 		//cout<<"Ib="<<Ib<<" Ic="<<Ic<<endl;
@@ -482,6 +510,7 @@ bool stamp_nonlinear(Netlist & netlist, Nodelist & nodelist,
 		double hb3 = Ib - hb1 * Vbe - hb2 * Vbc;
 		//cout<<"Hb 1="<<hb1<<" 2="<<hb2<<" 3="<<hb3<<endl;
 
+		/*
 		if( net.polarity == PNP ){
 			hc1 = -hc1;
 			hc2 = -hc2;
@@ -490,25 +519,35 @@ bool stamp_nonlinear(Netlist & netlist, Nodelist & nodelist,
 			hb2 = -hb2;
 			//hb3 = -hb3;
 		}
+		*/
 		
 		// finally, start to stamp
-		double Scb = hc1 + hc2,  Scc = -hc2,       Sce = -hc1,
-		       Sbb = hb1 + hb2,  Sbc = -hb2,       Sbe = -hb1;
-		double Seb = -(Scb+Sbb), Sec = -(Scc+Sbc), See = -(Sce+Sbe);
+		double Scb = hc1 + hc2,  Scc = -hc2,       Sce = -hc1;
+		double Sbb = hb1 + hb2,  Sbc = -hb2,       Sbe = -hb1;
+		double Seb = -(Sbb+Scb), Sec = -(Sbc+Scc), See = -(Sbe+Sce);
 
+		/*
 		if( net.polarity == PNP ){
-			Scb = -Scb; Scc = -Scc; Sce = -Sce;
 			Sbb = -Sbb; Sbc = -Sbc; Sbe = -Sbe;
+			Scb = -Scb; Scc = -Scc; Sce = -Sce;
 			Seb = -Seb; Sec = -Sec; See = -See;
 		}
+		*/
 
 		t.push(c, b, Scb); t.push(c, c, Scc); t.push(c, e, Sce);
 		t.push(b, b, Sbb); t.push(b, c, Sbc); t.push(b, e, Sbe);
 		t.push(e, b, Seb); t.push(e, c, Sec); t.push(e, e, See);
 
-		J[c] += -hc3       + Ic;
-		J[b] += -hb3       + Ib;
-		J[e] +=  hc3 + hb3 +(Ic + Ib);
+		if( net.polarity == NPN ){
+			J[c] += -hc3;       
+			J[b] += -hb3;      
+			J[e] +=  hc3 + hb3; 
+		}
+		else{
+			J[c] += hc3;       
+			J[b] += hb3;      
+			J[e] += -(hc3 + hb3); 
+		}
 
 		// update BJT value
 		net.hb[1]=hb1; net.hb[2]=hb2; net.hb[3]=hb3;
@@ -522,8 +561,8 @@ bool stamp_nonlinear(Netlist & netlist, Nodelist & nodelist,
 // the index of nodes in the matrix are the same as order in nodelist
 // NOTE: error will be checked here
 bool stamp_matrix(Netlist & netlist, Nodelist & nodelist, 
-		Triplet & t, double *v, double * J, ANALYSIS_TYPE atype){
-	bool success = stamp_linear(netlist, nodelist, t, v, J, atype);
+		Triplet & t, double * J, ANALYSIS_TYPE atype){
+	bool success = stamp_linear(netlist, nodelist, t, J, atype);
 	if(!success) return false;
 	stamp_nonlinear(netlist, nodelist, t, J);
 	return success;
