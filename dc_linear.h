@@ -12,20 +12,8 @@
 #include <vector>
 #include "node.h"
 #include "net.h"
+#include "triplet.h"
 using std::vector;
-
-class Triplet{
-public:
-	Triplet();
-	void merge();
-	inline void push(int i,int j,double x);
-	int size();
-	vector<int> Ti;
-	vector<int> Tj;
-	vector<double> Tx;
-};
-
-
 
 void dc_analysis(Netlist & netlist, Nodelist & nodelist);
 bool stamp_matrix(Netlist & netlist, Nodelist & nodelist, Triplet &, 
@@ -37,10 +25,5 @@ void dc_core(Netlist & netlist, Nodelist & nodelist,
 void update_node_voltages(Nodelist & nodelist, double *v);
 bool stamp_linear(Netlist & netlist, Nodelist & nodelist, 
 		Triplet & t, double * J, ANALYSIS_TYPE atype);
-bool stamp_nonlinear(Netlist & netlist, Nodelist & nodelist, 
-		Triplet & t, double * J);
-
-template<class T>
-void vector_to_array(vector<T> v, T * arr);
 
 #endif

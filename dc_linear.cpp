@@ -4,9 +4,14 @@
 //
 // define function for linear dc analysis
 // ----------------------------------------------------------------//
+// - Zigang Xiao - Fri Oct 29 16:41:52 CDT 2010
+//   * Finish writing newton iteration part
+//   * added non-linear dc analysis : bjt 
+//   * separate triplet to a new cpp/h
+//
 // - Zigang Xiao - Mon Oct 25 22:53:38 CDT 2010
 //   * rewrite dc_analysis part, incorporate NR-iteration
-//   * added non-linear dc analysis : diode and bjt 
+//   * added non-linear dc analysis : diode
 //
 // - Zigang Xiao - Wed Sep 15 16:31:56 CDT 2010
 //   * created file
@@ -19,51 +24,13 @@
 #include <cmath>
 #include <cassert>
 #include "global.h"
+#include "triplet.h"
 #include "util.h"
 #include "dc_linear.h"
 #include "dc_nonlinear.h"
 #include "umfpack.h"
 using namespace std;
 using namespace __gnu_cxx;
-
-//extern double * Jold;
-
-///////////////////////////////////////////////////////////////////////
-// class definition of triplet
-
-// Y[0][0] is always 1, hence add this when initializing
-Triplet::Triplet(){
-	Ti.push_back(0);
-	Tj.push_back(0);
-	Tx.push_back(1.0);
-}
-
-void Triplet::merge(){
-	for(int k=0;k<size();k++){
-		for(int l=k+1;l<size();l++){
-			if( Ti[k] == Ti[l] && Tj[k] == Tj[l] ){
-				Tx[k]+=Tx[l];
-				Ti.erase(Ti.begin()+l);
-				Tj.erase(Tj.begin()+l);
-				Tx.erase(Tx.begin()+l);
-			}
-		}
-	}
-}
-
-// insert a triplet 
-void Triplet::push(int i, int j, double x){
-	// NOTE: cross-out the zero-th row and column
-	if( i==0 || j == 0 ) return; 
-	Ti.push_back(i);
-	Tj.push_back(j);
-	Tx.push_back(x);
-}
-
-// return the number of elements in a triplet instance
-int Triplet::size(){return Ti.size();}
-
-////////////////////////////////////////////////////////////////////////////////////
 
 // for vsrc, vcvs, ccvs, map the net name to integer index in the matrix
 hash_map<string, int> net2int;
@@ -87,9 +54,10 @@ void dc_analysis(Netlist & netlist, Nodelist & nodelist){
 	if( netlist.netset[DIODE].size() + netlist.netset[BJT].size() == 0) {
 		// No non-linear device: linear dc analysis
 		dc_core(netlist,nodelist,v,J,size);
-		output_result(netlist, nodelist, v, size);
+		//output_result(netlist, nodelist, v, size);
 		update_node_voltages(nodelist, v);
 		nodelist.output_node_voltages();
+		netlist.output_branch_currents(net2int, v);
 	}
 	else // non-linear dc analysis
 		NR_iteration(netlist,nodelist,v,J,size);
@@ -194,12 +162,6 @@ void output_result(Netlist & netlist, Nodelist & nodelist, double *v, int n){
 #endif
 	}
 	cout<<endl;
-}
-
-// given a vector, copy its element to a basic array
-template<class T>
-void vector_to_array(vector<T> v, T * arr){
-	copy(v.begin(), v.end(), arr);
 }
 
 // Given the matrix, solve them, the result is stored in `v'
@@ -422,137 +384,6 @@ bool stamp_linear(Netlist & netlist, Nodelist & nodelist,
 		t.push(ct,q,-1.);
 		t.push(ct,ctrl_index,-net.value);
 		++ct;
-	}
-	return success;
-}
-
-// stamp the non-linear devices
-// NOTE: some terms rely on the value of last time
-bool stamp_nonlinear(Netlist & netlist, Nodelist & nodelist, 
-		Triplet & t, double * J){
-	Net net;
-
-	bool success = true;
-	// ** linearize non-linear devices: Diode **
-	foreach_net_in(netlist, DIODE, net){
-		int k = nodelist.name2idx[net.nbr[0]];
-		int l = nodelist.name2idx[net.nbr[1]];
-		Node & nd1 = nodelist[net.nbr[0]];
-		Node & nd2 = nodelist[net.nbr[1]];
-		double Vd = nd1.v - nd2.v;
-		double e = exp(Vd/Vt);
-		double Geq = Is * e / Vt;
-		double Ieq = Is * (e-1.0) - Vd*Geq;
-		t.push(k,k,Geq);
-		t.push(l,l,Geq);
-		t.push(k,l,-Geq);
-		t.push(l,k,-Geq);
-		J[k] += -Ieq;
-		J[l] += Ieq;
-	}
-
-	// ** linearize non-linear devices: BJT **
-	set<string>::iterator it;
-	set<string> & bjts = netlist.netset[BJT];
-	for(it=bjts.begin(); it!=bjts.end(); ++it){
-		Net & net = netlist[*it];
-		//cout<<"stamping "<<net.name<<" p = "<<net.polarity<<endl;
-
-		// find the names of three terminals
-		string clct = net.nbr[0];
-		string base = net.nbr[1];
-		string emit = net.emit;
-		//cout<<"BJT c="<<clct<<" b="<<base<<" e="<<emit<<endl;
-
-		// find the index of c,b,e
-		int c = nodelist.name2idx[clct];
-		int b = nodelist.name2idx[base];
-		int e = nodelist.name2idx[emit];
-		//cout<<"index c="<<c<<" b="<<b<<" e="<<e<<endl;
-
-		double Vc = nodelist[clct].v;
-		double Vb = nodelist[base].v;
-		double Ve = nodelist[emit].v;
-		//cout<<"Vol "<<clct<<"="<<Vc
-		//   <<" "<<base<<"="<<Vb
-		//  <<" "<<emit<<"="<<Ve<<endl;
-
-		double Vbc = Vb - Vc;
-		double Vbe = Vb - Ve;
-		if( net.polarity == PNP ){
-			Vbc = -Vbc;
-			Vbe = -Vbe;
-		}
-		//cout<<"Vbc="<<Vbc<<" Vbe="<<Vbe<<endl;
-
-		// get Ic, Ib from last iteration
-		double Ib = net.Ib;
-		double Ic = net.Ic;
-		//cout<<"Ib="<<Ib<<" Ic="<<Ic<<endl;
-
-		// construct h_{c1}^{k-1}
-		double hc1 = 
-			 Is * (1. - Vbc / VAf - Vbe / VAr) * exp(Vbe / Vt) / Vt
-		       - Is * (exp(Vbe / Vt) - exp(Vbc / Vt)) / VAr;
-		
-		// construct h_{c2}^{k-1}
-		double hc2 = 
-		      - Is * (exp(Vbe / Vt) - exp(Vbc / Vt)) / VAf 
-		      - Is * (1. - Vbc / VAf - Vbe / VAr) * exp(Vbc / Vt) / Vt
-		      - Is * exp(Vbc / Vt) / Br / Vt;
-
-		// construct h_{c3}^{k-1}
-		double hc3 = Ic - hc1 * Vbe - hc2 * Vbc;
-		//cout<<"Hc 1="<<hc1<<" 2="<<hc2<<" 3="<<hc3<<endl;
-
-		double hb1 = Is * exp(Vbe / Vt) / Vt / Bf; // h_{b1}^{k-1}
-		double hb2 = Is * exp(Vbc / Vt) / Vt / Br; // h_{b2}^{k-1}
-		double hb3 = Ib - hb1 * Vbe - hb2 * Vbc;
-		//cout<<"Hb 1="<<hb1<<" 2="<<hb2<<" 3="<<hb3<<endl;
-
-		/*
-		if( net.polarity == PNP ){
-			hc1 = -hc1;
-			hc2 = -hc2;
-			//hc3 = -hc3;
-			hb1 = -hb1;
-			hb2 = -hb2;
-			//hb3 = -hb3;
-		}
-		*/
-		
-		// finally, start to stamp
-		double Scb = hc1 + hc2,  Scc = -hc2,       Sce = -hc1;
-		double Sbb = hb1 + hb2,  Sbc = -hb2,       Sbe = -hb1;
-		double Seb = -(Sbb+Scb), Sec = -(Sbc+Scc), See = -(Sbe+Sce);
-
-		/*
-		if( net.polarity == PNP ){
-			Sbb = -Sbb; Sbc = -Sbc; Sbe = -Sbe;
-			Scb = -Scb; Scc = -Scc; Sce = -Sce;
-			Seb = -Seb; Sec = -Sec; See = -See;
-		}
-		*/
-
-		t.push(c, b, Scb); t.push(c, c, Scc); t.push(c, e, Sce);
-		t.push(b, b, Sbb); t.push(b, c, Sbc); t.push(b, e, Sbe);
-		t.push(e, b, Seb); t.push(e, c, Sec); t.push(e, e, See);
-
-		if( net.polarity == NPN ){
-			J[c] += -hc3;       
-			J[b] += -hb3;      
-			J[e] +=  hc3 + hb3; 
-		}
-		else{
-			J[c] += hc3;       
-			J[b] += hb3;      
-			J[e] += -(hc3 + hb3); 
-		}
-
-		// update BJT value
-		net.hb[1]=hb1; net.hb[2]=hb2; net.hb[3]=hb3;
-		net.hc[1]=hc1; net.hc[2]=hc2; net.hc[3]=hc3;
-		//cout<<endl;
 	}
 	return success;
 }

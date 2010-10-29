@@ -9,6 +9,7 @@
 #include <iomanip>
 #include <stdlib.h>
 #include <stdio.h>
+#include "util.h"
 using namespace std;
 
 // report an error string and exit the program
@@ -41,6 +42,7 @@ void delete_matrix(double ** m, int n){
 	delete [] m;
 }
 
+// give a 2D array, output it
 void output_matrix(double ** m,int n){
 	int precision = 4;
 	int width = precision+8;

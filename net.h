@@ -36,7 +36,6 @@ public:
 	void set_voltage(VOL_TYPE vtype=DC, double value=0., double offset=0.,
 			double amplitude=0., double freq=0.);
 
-
 	// auxiliary function to compute some values for BJT
 	void init_BJT();
 	double compute_Ic(double Vc, double Vb, double Ve);
@@ -73,6 +72,8 @@ class Netlist{
 public:
 	Net & operator [] (string name);
 	friend ostream & operator <<(ostream &s, Netlist& );
+	void output_branch_currents(hash_map<string,int> & net2int, 
+		double * v);
 
 	// component sets, there 11 different types
 	set<string> netset[NUM_NETTYPE];

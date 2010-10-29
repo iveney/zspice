@@ -69,8 +69,12 @@ const int Nodelist::size(){
 // output the voltages of nodes
 void Nodelist::output_node_voltages(){
 	int i;
+	int width = 7;
+	// node voltages
 	for(i=0;i<this->size();i++){
 		Node & nd = this->nodelist[i];
-		cout<<"voltage at "<<setw(7)<<nd.name<<" = "<<scientific<<nd.v<<endl;
+		cout<<"voltage at "<<setw(width)
+		    <<nd.name<<" = "<<scientific<<nd.v<<endl;
 	}
+
 }

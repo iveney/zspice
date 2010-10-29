@@ -9,11 +9,13 @@
 
 #include <string>
 #include <iostream>
+#include <ext/hash_map>
 #include <set>
 #include <iomanip>
 #include <cassert>
 #include "net.h"
 using namespace std;
+using namespace __gnu_cxx;
 
 // initialize the type to be UNDEF
 Net::Net():type(UNDEF){
@@ -99,6 +101,31 @@ double Net::compute_Ib(double Vc, double Vb, double Ve){
 Net & Netlist::operator [](string name){
 	return netlist[name];
 }
+
+// output branch currents
+void Netlist::output_branch_currents(hash_map<string,int> & net2int, 
+		double * v){
+	// output branch currents of Voltage source, VCVS and CCVS
+	Net net;
+	const int set_types[] = {VSRC, VCVS, CCVS};
+	int nn= sizeof(set_types)/sizeof(int);
+	for(int i=0;i<nn;i++){
+		foreach_net_in(*this, set_types[i], net){
+			int id = net2int[net.name];
+			cout<<"current throught source "<<net.name<<" = "
+				<<scientific<<v[id]<<endl;
+		}
+	}
+
+	// for CCCS, it is controlled by some vyyy, then just compute it
+	foreach_net_in(*this, CCCS, net){
+		int id = net2int[net.vyyy];
+		cout<<"current throught source "<<net.name<<" = "
+			<<scientific<<net.value*v[id]<<endl;
+	}
+	cout<<endl;
+}
+
 
 // categorized output
 ostream & operator <<(ostream & s, Netlist & l){
