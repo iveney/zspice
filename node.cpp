@@ -21,6 +21,17 @@ void Node::insert_net(const string & netname){
 	nets.push_back(netname);
 }
 
+
+// output a node
+ostream & operator <<(ostream & s, Node & node){
+	s<<std::left<<setw(3)<<node.name<<std::right<<": [ ";
+	vector<string>::iterator it;
+	for(it=node.nets.begin(); it!=node.nets.end(); it++)
+		s<<*it<<" ";
+	cout<<"]";
+	return s;
+}
+
 Nodelist::Nodelist(){
 	Node ground("0");
 	this->insert_node(ground);
@@ -36,25 +47,6 @@ bool Nodelist::insert_node(const Node & node){
 	idx2name[idx] = node.name;
 	nodelist.push_back(node);
 	return true;
-}
-
-// output a node
-ostream & operator <<(ostream & s, Node & node){
-	s<<std::left<<setw(3)<<node.name<<std::right<<": [ ";
-	vector<string>::iterator it;
-	for(it=node.nets.begin(); it!=node.nets.end(); it++)
-		s<<*it<<" ";
-	cout<<"]";
-	return s;
-}
-
-// output a node list
-ostream & operator <<(ostream & s, Nodelist & nlist){
-	vector<Node>::iterator it;
-	for(it=nlist.nodelist.begin();it!=nlist.nodelist.end();it++){
-		s<<*it<<endl;
-	}
-	return s;
 }
 
 Node & Nodelist::operator [] (string name){
@@ -78,3 +70,14 @@ void Nodelist::output_node_voltages(){
 	}
 
 }
+
+// output a node list
+ostream & operator <<(ostream & s, Nodelist & nlist){
+	vector<Node>::iterator it;
+	for(it=nlist.nodelist.begin();it!=nlist.nodelist.end();it++){
+		s<<*it<<endl;
+	}
+	return s;
+}
+
+

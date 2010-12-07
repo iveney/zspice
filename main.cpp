@@ -23,23 +23,42 @@
 #include "main.h"
 using namespace std;
 
-int main(int argc, char *argv[]){
-	if(argc < 2)
-		report_exit("Usage: zspice netlist\n");
-	char * filename = argv[1];
+const static char *str_help="Supported types:\n 1: DC\n 2: AC";
 
-	Netlist netlist;
-	Nodelist nodelist;
-	read_netlist(filename, netlist, nodelist);
-
+void output_netlist_info(Netlist & netlist, Nodelist & nodelist){
 	cout<<endl;
 	cout<<"** Net information **"<<endl;
 	cout<<netlist<<endl;
 	cout<<"** Node information **"<<endl;
 	cout<<nodelist<<endl;
+}
 
-	cout<<"Start to analyze the dc circuit ... "<<endl;
-	dc_analysis(netlist,nodelist);
+int main(int argc, char *argv[]){
+	if(argc < 3)
+		report_exit("Usage: zspice netlist type\n");
+	char * filename = argv[1];
+	int type = atoi(argv[2]);
+
+	Netlist netlist;
+	Nodelist nodelist;
+	read_netlist(filename, netlist, nodelist);
+
+	switch(type){
+	case 1: // DC analysis
+		cout<<"** DC analysis **"<<endl;
+		output_netlist_info(netlist,nodelist);
+		dc_analysis(netlist,nodelist);
+		break;
+	case 2: // AC analysis
+		cout<<"** AC analysis **"<<endl;
+		output_netlist_info(netlist,nodelist);
+		// ac_analysis(netlist,nodelist);
+		break;
+	default:
+		cout<<"Unknown type. ";
+		cout<<str_help<<endl;
+		break;
+	}
 
 	return 0;
 }

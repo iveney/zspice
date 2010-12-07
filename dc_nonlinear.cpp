@@ -105,29 +105,10 @@ bool stamp_nonlinear(Netlist & netlist, Nodelist & nodelist,
 		double hb3 = Ib - hb1 * Vbe - hb2 * Vbc;
 		//cout<<"Hb 1="<<hb1<<" 2="<<hb2<<" 3="<<hb3<<endl;
 
-		/*
-		if( net.polarity == PNP ){
-			hc1 = -hc1;
-			hc2 = -hc2;
-			//hc3 = -hc3;
-			hb1 = -hb1;
-			hb2 = -hb2;
-			//hb3 = -hb3;
-		}
-		*/
-		
 		// finally, start to stamp
 		double Scb = hc1 + hc2,  Scc = -hc2,       Sce = -hc1;
 		double Sbb = hb1 + hb2,  Sbc = -hb2,       Sbe = -hb1;
 		double Seb = -(Sbb+Scb), Sec = -(Sbc+Scc), See = -(Sbe+Sce);
-
-		/*
-		if( net.polarity == PNP ){
-			Sbb = -Sbb; Sbc = -Sbc; Sbe = -Sbe;
-			Scb = -Scb; Scc = -Scc; Sce = -Sce;
-			Seb = -Seb; Sec = -Sec; See = -See;
-		}
-		*/
 
 		t.push(c, b, Scb); t.push(c, c, Scc); t.push(c, e, Sce);
 		t.push(b, b, Sbb); t.push(b, c, Sbc); t.push(b, e, Sbe);

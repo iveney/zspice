@@ -292,8 +292,11 @@ bool stamp_linear(Netlist & netlist, Nodelist & nodelist,
 
 	// stamp voltage source, NOTE the counter
 	foreach_net_in(netlist, VSRC, net){
+		// we need to identify the analysis type
+		double value = net.value;
 		if(net.vtype == AC && atype == DC) {
-			net.value = 0.0;
+			// AC voltage source in DC analysis 
+			value = 0.0;
 			//continue;
 		}
 		net2int[net.name] = ct;
@@ -306,7 +309,7 @@ bool stamp_linear(Netlist & netlist, Nodelist & nodelist,
 		t.push(l,ct,-1.);
 		t.push(ct,l,-1.);
 		//cout<<"stamping v "<<net.value<<" to "<<ct<<endl;
-		J[ct] += net.value;  // Vkl
+		J[ct] += value;  // Vkl
 		++ct;
 	}
 

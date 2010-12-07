@@ -1,7 +1,7 @@
 CC=g++
 SRC=util.cpp net.cpp io.cpp node.cpp triplet.cpp
 HDR=$(SRC:.cpp=.h)
-OBJ=$(SRC:.cpp=.o) dc_linear.o dc_nonlinear.o
+OBJ=$(SRC:.cpp=.o) dc_linear.o dc_nonlinear.o ac_analysis.o
 BIN=zspice
 DBG=debug
 CFLAGS=
@@ -50,6 +50,9 @@ dc_linear.o: dc_linear.cpp dc_linear.h
 
 dc_nonlinear.o: dc_nonlinear.h dc_nonlinear.cpp
 	$(CC) -c $(OPT) $(CFLAGS) $(INC) dc_nonlinear.cpp
+
+ac_analysis.o: ac_analysis.h ac_analysis.cpp
+	$(CC) -c $(OPT) $(CFLAGS) $(INC) ac_analysis.cpp
 
 copy_libs: $(LIBS) $(AMD_HDR) $(UMFPACK_HDR) $(SPARSE_HDR)
 	mkdir -p ./headers
