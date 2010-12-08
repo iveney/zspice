@@ -7,6 +7,8 @@
 // - Zigang Xiao - Mon Oct 25 12:45:28 CDT 2010
 //   * first create the file
 //
+#ifndef __DC_NONLINEAR_H__
+#define __DC_NONLINEAR_H__
 #include "dc_linear.h"
 
 // performs newton-raphson iteraion
@@ -17,3 +19,17 @@ void copy_voltages(Nodelist & nodelist, double * vs);
 bool stamp_nonlinear(Netlist & netlist, Nodelist & nodelist, 
 		Triplet & t, double * J);
 void update_BJT_currents(Netlist & netlist, Nodelist & nodelist);
+
+void stamp_diode(Netlist & netlist, Nodelist & nodelist,
+		Triplet & t, double * J);
+
+void stamp_capacitor(Netlist & netlist, Nodelist & nodelist,
+		Triplet & t, double f, ANALYSIS_TYPE atype);
+
+void stamp_inductor(Netlist & netlist, Nodelist & nodelist,
+		Triplet & t, double f, ANALYSIS_TYPE atype);
+
+void stamp_BJT_AC(Netlist & netlist, Nodelist & nodelist,
+		Triplet & t, double f);
+
+#endif

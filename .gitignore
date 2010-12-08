@@ -9,4 +9,5 @@ SuiteSparse
 test
 libs
 headers
+*.dat
 .DS_Store

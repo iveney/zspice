@@ -21,14 +21,44 @@ using namespace __gnu_cxx;
 
 extern hash_map<string,int> net2int;
 
-// stamp the non-linear devices
-// NOTE: some terms rely on the value of last time
-bool stamp_nonlinear(Netlist & netlist, Nodelist & nodelist, 
-		Triplet & t, double * J){
+void stamp_capacitor(Netlist & netlist, Nodelist & nodelist,
+		Triplet & t, double f, ANALYSIS_TYPE atype){
+	// in DC analysis, OPEN circuit
+	if( atype == DC ) return; 
 	Net net;
+	foreach_net_in(netlist, CAPCT, net){
+		int i = nodelist.name2idx[net.nbr[0]];
+		int j = nodelist.name2idx[net.nbr[1]];
+		double Geq = 2*PI*f*net.value; // jwC
+		t.push(i,i, 0, Geq);
+		t.push(j,j, 0, Geq);
+		t.push(i,j, 0, -Geq);
+		t.push(j,i, 0, -Geq);
+	}
+}
 
-	bool success = true;
+
+void stamp_inductor(Netlist & netlist, Nodelist & nodelist,
+		Triplet & t, double f, ANALYSIS_TYPE atype){
+	// in DC analysis, SHORT circuit
+	if( atype == DC ) return; 
+	Net net;
+	foreach_net_in(netlist, CAPCT, net){
+		int i = nodelist.name2idx[net.nbr[0]];
+		int j = nodelist.name2idx[net.nbr[1]];
+		double Geq = 1/(2*PI*f*net.value); // 1/jwL
+		t.push(i,i, 0, Geq);
+		t.push(j,j, 0, Geq);
+		t.push(i,j, 0, -Geq);
+		t.push(j,i, 0, -Geq);
+	}
+}
+
+// AC is not handled in Diode
+void stamp_diode(Netlist & netlist, Nodelist & nodelist,
+		Triplet & t, double * J){
 	// ** linearize non-linear devices: Diode **
+	Net net;
 	foreach_net_in(netlist, DIODE, net){
 		int k = nodelist.name2idx[net.nbr[0]];
 		int l = nodelist.name2idx[net.nbr[1]];
@@ -45,7 +75,10 @@ bool stamp_nonlinear(Netlist & netlist, Nodelist & nodelist,
 		J[k] += -Ieq;
 		J[l] += Ieq;
 	}
+}
 
+void stamp_BJT_DC(Netlist & netlist, Nodelist & nodelist,
+		Triplet & t, double * J){
 	// ** linearize non-linear devices: BJT **
 	set<string>::iterator it;
 	set<string> & bjts = netlist.netset[BJT];
@@ -87,14 +120,14 @@ bool stamp_nonlinear(Netlist & netlist, Nodelist & nodelist,
 
 		// construct h_{c1}^{k-1}
 		double hc1 = 
-			 Is * (1. - Vbc / VAf - Vbe / VAr) * exp(Vbe / Vt) / Vt
-		       - Is * (exp(Vbe / Vt) - exp(Vbc / Vt)) / VAr;
-		
+			Is * (1. - Vbc / VAf - Vbe / VAr) * exp(Vbe / Vt) / Vt
+			- Is * (exp(Vbe / Vt) - exp(Vbc / Vt)) / VAr;
+
 		// construct h_{c2}^{k-1}
 		double hc2 = 
-		      - Is * (exp(Vbe / Vt) - exp(Vbc / Vt)) / VAf 
-		      - Is * (1. - Vbc / VAf - Vbe / VAr) * exp(Vbc / Vt) / Vt
-		      - Is * exp(Vbc / Vt) / Br / Vt;
+			- Is * (exp(Vbe / Vt) - exp(Vbc / Vt)) / VAf 
+			- Is * (1. - Vbc / VAf - Vbe / VAr) * exp(Vbc / Vt) / Vt
+			- Is * exp(Vbc / Vt) / Br / Vt;
 
 		// construct h_{c3}^{k-1}
 		double hc3 = Ic - hc1 * Vbe - hc2 * Vbc;
@@ -130,6 +163,47 @@ bool stamp_nonlinear(Netlist & netlist, Nodelist & nodelist,
 		net.hc[1]=hc1; net.hc[2]=hc2; net.hc[3]=hc3;
 		//cout<<endl;
 	}
+}
+
+void stamp_BJT_AC(Netlist & netlist, Nodelist & nodelist,
+		Triplet & t, double f){
+	// no imaginary part?
+	Net net;
+	double w = 2*PI*f;
+	foreach_net_in(netlist, BJT, net){
+		string clct = net.nbr[0];
+		string base = net.nbr[1];
+		string emit = net.emit;
+
+		// find the index of c,b,e
+		int c = nodelist.name2idx[clct];
+		int b = nodelist.name2idx[base];
+		int e = nodelist.name2idx[emit];
+
+		t.push(b,b,net.B[0] * w);
+		t.push(b,c,net.B[1] * w);
+		t.push(b,e,net.B[2] * w);
+
+		t.push(c,b,net.C[0] * w);
+		t.push(c,c,net.C[1] * w);
+		t.push(c,e,net.C[2] * w);
+
+		t.push(e,b,net.E[0] * w);
+		t.push(e,c,net.E[1] * w);
+		t.push(e,e,net.E[2] * w);
+	}
+}
+
+// stamp the non-linear devices
+// NOTE: some terms rely on the value of last time
+bool stamp_nonlinear(Netlist & netlist, Nodelist & nodelist, 
+		Triplet & t, double * J){
+	Net net;
+
+	bool success = true;
+	stamp_diode(netlist, nodelist, t, J);
+	stamp_BJT_DC(netlist, nodelist, t, J);
+
 	return success;
 }
 

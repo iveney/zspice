@@ -13,6 +13,7 @@ Triplet::Triplet(){
 	Ti.push_back(0);
 	Tj.push_back(0);
 	Tx.push_back(1.0);
+	Tz.push_back(0.0);
 }
 
 // stupidly merge elements at the same position
@@ -24,19 +25,21 @@ void Triplet::merge(){
 				Ti.erase(Ti.begin()+l);
 				Tj.erase(Tj.begin()+l);
 				Tx.erase(Tx.begin()+l);
+				Tz.erase(Tz.begin()+l);
 			}
 		}
 	}
 }
 
 // insert a triplet 
-void Triplet::push(int i, int j, double x){
+void Triplet::push(int i, int j, double x, double z){
 	// NOTE: cross-out the zero-th row and column
 	// 	 do not stamp them
 	if( i == 0 || j == 0 ) return; 
 	Ti.push_back(i);
 	Tj.push_back(j);
 	Tx.push_back(x);
+	Tz.push_back(z);
 }
 
 // return the number of elements in a triplet instance

@@ -7,6 +7,8 @@
 // ----------------------------------------------------------------//
 // - Zigang Xiao - Fri Oct 29 16:44:11 CDT 2010
 //   * created file
+// - Zigang Xiao - Tue Dec  7 21:57:13 CST 2010
+//   * modified to adapt complex number
 
 #ifndef __TRIPLET_H__
 #define __TRIPLET_H__
@@ -18,11 +20,14 @@ class Triplet{
 public:
 	Triplet();
 	void merge();
-	void push(int i,int j,double x);
+	void push(int i,int j,double x,double z=.0);
 	int size();
 	vector<int> Ti;
 	vector<int> Tj;
 	vector<double> Tx;
+
+	// newly added: for complex number
+	vector<double> Tz;
 };
 
 #endif

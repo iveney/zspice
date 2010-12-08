@@ -19,6 +19,8 @@
 #include "node.h"
 using namespace std;
 
+extern double vin;
+
 // read strings in the format `(name)'
 // return `name'
 string read_bracket(ifstream & ifs){
@@ -157,6 +159,7 @@ void read_netlist(char * filename, Netlist & netlist, Nodelist & nodelist){
 				netlist[name]=Net(VSRC,name, node1, node2, v); 
 				netlist[name].set_voltage(vtype,v,off,amp,freq);
 				netlist.netset[VSRC].insert(name);
+				if( name == "vin" ) vin = v;
 				break;
 			case 'i': // current source
 				ifs>>v;

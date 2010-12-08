@@ -55,3 +55,9 @@ void output_matrix(double ** m,int n){
 	}
 	cout<<endl;
 }
+
+string get_basename(char * filename){
+	string fn(filename);
+	size_t pos = fn.find(".");
+	return fn.substr(0,pos);
+}

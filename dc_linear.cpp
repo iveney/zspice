@@ -252,12 +252,13 @@ void solve_dc(Triplet & t, double * v, double * J, int n){
 }
 
 bool stamp_resistor(Netlist & netlist, Nodelist & nodelist,
-		Triplet & t, double * J, ANALYSIS_TYPE atype){
+		Triplet & t){
 	Net net;
 	// stamp resistor
 	foreach_net_in(netlist, RSTR, net){
 		int i = nodelist.name2idx[net.nbr[0]];
 		int j = nodelist.name2idx[net.nbr[1]];
+		// nothing to do with imaginary part and J
 		double G = 1./net.value;
 		t.push(i,i, G);
 		t.push(j,j, G);
@@ -272,10 +273,14 @@ bool stamp_csrc(Netlist & netlist, Nodelist & nodelist,
 	Net net;
 	// stamp current source
 	foreach_net_in(netlist, CSRC, net){
+		double value = net.value;
 		int i = nodelist.name2idx[net.nbr[0]];
 		int j = nodelist.name2idx[net.nbr[1]];
-		J[i] += -net.value;
-		J[j] +=  net.value;
+		if( atype == DC ){ 
+			J[i] += -value;
+			J[j] +=  value;
+		}
+		// for AC, open circuit, i.e., I=0
 	}
 	return true;
 }
@@ -285,6 +290,8 @@ bool stamp_vccs(Netlist & netlist, Nodelist & nodelist,
 	// stamp vccs
 	Net net;
 	foreach_net_in(netlist, VCCS, net){
+		// for AC, open circuit, i.e., I=0, do nothing
+		if( atype == AC ) continue;
 		int p = nodelist.name2idx[net.nbr[0]];
 		int q = nodelist.name2idx[net.nbr[1]];
 		int k = nodelist.name2idx[net.ctrl[0]];
@@ -294,12 +301,14 @@ bool stamp_vccs(Netlist & netlist, Nodelist & nodelist,
 		t.push(q,l,net.value);
 		t.push(p,l,-net.value);
 		t.push(q,k,-net.value);
+		// nothing to do w/ J
 	}
 	return true;
 }
 
 bool stamp_vsrc(Netlist & netlist, Nodelist & nodelist,
-		Triplet & t, double * J, ANALYSIS_TYPE atype, int & ct){
+		Triplet & t, double * J, 
+		ANALYSIS_TYPE atype, int & ct){
 	Net net;
 	// stamp voltage source, NOTE the counter
 	foreach_net_in(netlist, VSRC, net){
@@ -334,6 +343,7 @@ bool stamp_cccs(Netlist & netlist, Nodelist & nodelist,
 	Net net;
 	// stamp cccs
 	foreach_net_in(netlist, CCCS, net){
+		if( atype == AC ) continue;
 		int p = nodelist.name2idx[net.nbr[0]];
 		int q = nodelist.name2idx[net.nbr[1]];
 
@@ -361,9 +371,12 @@ bool stamp_vcvs(Netlist & netlist, Nodelist & nodelist,
 	Net net;
 	// stamp vcvs, need counter
 	foreach_net_in(netlist, VCVS, net){
-		if(net.vtype == AC && atype == DC) {
-			net.value = 0.0;
-			//continue;
+		double value = net.value;
+		if(net.vtype == AC && atype == DC ||
+		   net.vtype == DC && atype == AC) {
+			//    AC voltage source in DC analysis 
+			// or DC voltage source in AC analysis 
+			value = 0.0;
 		}
 		net2int[net.name] = ct;
 		int p = nodelist.name2idx[net.nbr[0]];
@@ -376,8 +389,8 @@ bool stamp_vcvs(Netlist & netlist, Nodelist & nodelist,
 		t.push(ct,p, 1.);
 		t.push(q,ct,-1.);
 		t.push(ct,q,-1.);
-		t.push(ct,k,-net.value); // mu
-		t.push(ct,l, net.value); // mu
+		t.push(ct,k,-value); // mu
+		t.push(ct,l, value); // mu
 		ct++;
 	}
 	return true;
@@ -389,10 +402,14 @@ bool stamp_ccvs(Netlist & netlist, Nodelist & nodelist,
 	Net net;
 	// stamp ccvs, add only one row and column, NEED counter
 	foreach_net_in(netlist, CCVS, net){
-		if(net.vtype == AC && atype == DC) {
-			net.value = 0.0;
-			//continue;
+		double value = net.value;
+		if(net.vtype == AC && atype == DC ||
+		   net.vtype == DC && atype == AC) {
+			//    AC voltage source in DC analysis 
+			// or DC voltage source in AC analysis 
+			value = 0.0;
 		}
+
 		net2int[net.name] = ct;
 		int p = nodelist.name2idx[net.nbr[0]];
 		int q = nodelist.name2idx[net.nbr[1]];
@@ -415,7 +432,7 @@ bool stamp_ccvs(Netlist & netlist, Nodelist & nodelist,
 		t.push(ct,p, 1.);
 		t.push(q,ct,-1.);
 		t.push(ct,q,-1.);
-		t.push(ct,ctrl_index,-net.value);
+		t.push(ct,ctrl_index,-value);
 		++ct;
 	}
 	return success;
@@ -427,7 +444,7 @@ bool stamp_linear(Netlist & netlist, Nodelist & nodelist,
 	bool success = true;
 	Net net;
 
-	stamp_resistor(netlist, nodelist, t, J, atype);
+	stamp_resistor(netlist, nodelist, t);
 	stamp_csrc(netlist, nodelist, t, J, atype);
 	stamp_vccs(netlist, nodelist, t, J, atype);
 	

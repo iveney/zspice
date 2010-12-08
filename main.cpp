@@ -24,7 +24,10 @@
 #include "main.h"
 using namespace std;
 
-const static char *str_help="Supported types:\n 1: DC\n 2: AC";
+const static char *str_help="Supported types:\n 0: DC\n 1: AC";
+char * filename = NULL;
+string basename;
+double vin=-1.0;
 
 void output_netlist_info(Netlist & netlist, Nodelist & nodelist){
 	cout<<endl;
@@ -37,7 +40,8 @@ void output_netlist_info(Netlist & netlist, Nodelist & nodelist){
 int main(int argc, char *argv[]){
 	if(argc < 3)
 		report_exit("Usage: zspice netlist type\n");
-	char * filename = argv[1];
+	filename = argv[1];
+	basename = get_basename(filename);
 	int type = atoi(argv[2]);
 
 	Netlist netlist;
@@ -45,12 +49,12 @@ int main(int argc, char *argv[]){
 	read_netlist(filename, netlist, nodelist);
 
 	switch(type){
-	case 1: // DC analysis
+	case DC: // DC analysis
 		cout<<"** DC analysis **"<<endl;
 		output_netlist_info(netlist,nodelist);
 		dc_analysis(netlist,nodelist,true);
 		break;
-	case 2: // AC analysis
+	case AC: // AC analysis
 		cout<<"** AC analysis **"<<endl;
 		output_netlist_info(netlist,nodelist);
 		ac_analysis(netlist,nodelist);

@@ -26,8 +26,7 @@ void update_node_voltages(Nodelist & nodelist, double *v);
 bool stamp_linear(Netlist & netlist, Nodelist & nodelist, 
 		Triplet & t, double * J, ANALYSIS_TYPE atype);
 
-bool stamp_resistor(Netlist & netlist, Nodelist & nodelist,
-		Triplet & t, double * J, ANALYSIS_TYPE atype);
+bool stamp_resistor(Netlist & netlist, Nodelist & nodelist, Triplet & t);
 
 bool stamp_vccs(Netlist & netlist, Nodelist & nodelist,
 		Triplet & t, double * J, ANALYSIS_TYPE atype);
@@ -35,7 +34,16 @@ bool stamp_vccs(Netlist & netlist, Nodelist & nodelist,
 bool stamp_vsrc(Netlist & netlist, Nodelist & nodelist,
 		Triplet & t, double * J, ANALYSIS_TYPE atype, int & ct);
 
+bool stamp_csrc(Netlist & netlist, Nodelist & nodelist,
+		Triplet & t, double * J, ANALYSIS_TYPE atype);
+
 bool stamp_cccs(Netlist & netlist, Nodelist & nodelist,
 		Triplet & t, double * J, ANALYSIS_TYPE atype);
+
+bool stamp_vcvs(Netlist & netlist, Nodelist & nodelist,
+		Triplet & t, double * J, ANALYSIS_TYPE atype, int & ct);
+
+bool stamp_ccvs(Netlist & netlist, Nodelist & nodelist,
+		Triplet & t, double * J, ANALYSIS_TYPE atype, int & ct);
 
 #endif

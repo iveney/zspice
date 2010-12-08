@@ -51,8 +51,9 @@ static const double Br = 4.;
 static const double Tf = 2E-11;
 static const double Cjcs = 2E-14;
 static const double DAMPEN = 2*Vt;
+static const double PI = 3.1415926535897932384626433832;
 
-#define abs(a) ((a)>0?(a):-(a))
+//#define abs(a) ((a)>0?(a):-(a))
 #define zero(a) (abs(a)<EPSILON)
 
 #endif

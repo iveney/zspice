@@ -57,7 +57,11 @@ public:
 	POLARITY polarity; // BJT polarity
 	double Ic, Ib;     
 	double hc[4], hb[4];
-	double Cc, Cbe, Cbc; // parastic capacitance
+
+	// BJT AC analysis
+	// i.e.: B[3] = {BB, BC, BE}
+	double B[3], C[3], E[3];
+	// double Cc, Cbe, Cbc; // parastic capacitance
 };
 
 // functor of translating string to char *
