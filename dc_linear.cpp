@@ -442,7 +442,6 @@ bool stamp_ccvs(Netlist & netlist, Nodelist & nodelist,
 bool stamp_linear(Netlist & netlist, Nodelist & nodelist, 
 		Triplet & t, double * J, ANALYSIS_TYPE atype){
 	bool success = true;
-	Net net;
 
 	stamp_resistor(netlist, nodelist, t);
 	stamp_csrc(netlist, nodelist, t, J, atype);

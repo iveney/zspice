@@ -10,6 +10,7 @@
 //
 #include <cmath>
 #include <vector>
+#include <iomanip>
 #include <fstream>
 #include <complex>
 #include "ac_analysis.h"
@@ -222,10 +223,13 @@ void ac_analysis(Netlist & netlist, Nodelist & nodelist){
 
 
 	// set a frequency and stamp the matrix
-	double step = 10.0;
-	double inc = pow(10.0,1.0/step);
+	int step = 100;
 	double init = 10E3, final = 100E6;
+	double inc = pow(10.0,1.0/step);
+	//double inc = (final-init)/step;
+	cout<<"vin="<<vin<<endl;
 	for(double f=init;f<=final;f*=inc){
+	//for(double f=init;f<=final;f+=inc){
 		t = t_copy;
 		memcpy((void*)Jx,(void*)Jx_copy,sizeof(double)*size);
 		memset((void*)Jz, 0, sizeof(double)*size);
@@ -246,9 +250,11 @@ void ac_analysis(Netlist & netlist, Nodelist & nodelist){
 		complex<double> vout(vx[id],vz[id]);
 		double s = abs(vout)/vin;
 		double gain = 20*log10(s);
+		//double phase = arg(vout)*180.0/PI;
 		double phase = atan(s)*180.0/PI;
-		of1<<f<<" "<<gain<<endl;
-		of2<<f<<" "<<phase<<endl;
+		//double phase = atan2(vout.imag(),vout.real())*180.0/PI;
+		of1<<scientific<<f<<" "<<gain<<endl;
+		of2<<scientific<<f<<" "<<phase<<endl;
 	}
 	delete [] vx;
 	delete [] vz;
