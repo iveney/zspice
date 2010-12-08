@@ -284,9 +284,7 @@ void ac_analysis(Netlist & netlist, Nodelist & nodelist){
 		double s = abs(vout)/vin;
 		double gain = 20*log10(s);
 		double phase = arg(vout)*180.0/PI;
-		//double phase = atan(s)*180.0/PI;
-		//double phase = atan2(vout.imag(),vout.real())*180.0/PI;
-		cout<<"freq="<<f<<" sol="<<vout<<" s="<<s<<endl;
+		//cout<<"freq="<<f<<" sol="<<vout<<" s="<<s<<endl;
 		of1<<scientific<<f<<" "<<gain<<endl;
 		of2<<scientific<<f<<" "<<phase<<endl;
 	}
@@ -295,6 +293,8 @@ void ac_analysis(Netlist & netlist, Nodelist & nodelist){
 	delete [] Jx;
 	delete [] Jz;
 	delete [] Jx_copy;
+	cout<<"Figures are output to "<<of1_name<<" (magnitude) and "
+	    <<of2_name<<" (phase)"<<endl;
 	of1.close();
 	of2.close();
 }
