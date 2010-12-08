@@ -251,12 +251,9 @@ void solve_dc(Triplet & t, double * v, double * J, int n){
 	delete [] Tx;
 }
 
-// stamp linear devices
-bool stamp_linear(Netlist & netlist, Nodelist & nodelist, 
+bool stamp_resistor(Netlist & netlist, Nodelist & nodelist,
 		Triplet & t, double * J, ANALYSIS_TYPE atype){
-	bool success = true;
 	Net net;
-
 	// stamp resistor
 	foreach_net_in(netlist, RSTR, net){
 		int i = nodelist.name2idx[net.nbr[0]];
@@ -267,7 +264,12 @@ bool stamp_linear(Netlist & netlist, Nodelist & nodelist,
 		t.push(i,j,-G);
 		t.push(j,i,-G);
 	}
+	return true;
+}
 
+bool stamp_csrc(Netlist & netlist, Nodelist & nodelist,
+		Triplet & t, double * J, ANALYSIS_TYPE atype){
+	Net net;
 	// stamp current source
 	foreach_net_in(netlist, CSRC, net){
 		int i = nodelist.name2idx[net.nbr[0]];
@@ -275,8 +277,13 @@ bool stamp_linear(Netlist & netlist, Nodelist & nodelist,
 		J[i] += -net.value;
 		J[j] +=  net.value;
 	}
+	return true;
+}
 
+bool stamp_vccs(Netlist & netlist, Nodelist & nodelist,
+		Triplet & t, double * J, ANALYSIS_TYPE atype){
 	// stamp vccs
+	Net net;
 	foreach_net_in(netlist, VCCS, net){
 		int p = nodelist.name2idx[net.nbr[0]];
 		int q = nodelist.name2idx[net.nbr[1]];
@@ -288,18 +295,21 @@ bool stamp_linear(Netlist & netlist, Nodelist & nodelist,
 		t.push(p,l,-net.value);
 		t.push(q,k,-net.value);
 	}
+	return true;
+}
 
-	// the following nets will use extra space in augmented Y
-	int ct = nodelist.size();  // counter
-
+bool stamp_vsrc(Netlist & netlist, Nodelist & nodelist,
+		Triplet & t, double * J, ANALYSIS_TYPE atype, int & ct){
+	Net net;
 	// stamp voltage source, NOTE the counter
 	foreach_net_in(netlist, VSRC, net){
 		// we need to identify the analysis type
 		double value = net.value;
-		if(net.vtype == AC && atype == DC) {
-			// AC voltage source in DC analysis 
+		if(net.vtype == AC && atype == DC ||
+		   net.vtype == DC && atype == AC) {
+			//    AC voltage source in DC analysis 
+			// or DC voltage source in AC analysis 
 			value = 0.0;
-			//continue;
 		}
 		net2int[net.name] = ct;
 		int k = nodelist.name2idx[net.nbr[0]];
@@ -314,7 +324,14 @@ bool stamp_linear(Netlist & netlist, Nodelist & nodelist,
 		J[ct] += value;  // Vkl
 		++ct;
 	}
+	return true;
+}
 
+
+bool stamp_cccs(Netlist & netlist, Nodelist & nodelist,
+		Triplet & t, double * J, ANALYSIS_TYPE atype){
+	bool success = true;
+	Net net;
 	// stamp cccs
 	foreach_net_in(netlist, CCCS, net){
 		int p = nodelist.name2idx[net.nbr[0]];
@@ -336,7 +353,12 @@ bool stamp_linear(Netlist & netlist, Nodelist & nodelist,
 		t.push(p,ctrl_index, net.value); // alpha
 		t.push(q,ctrl_index,-net.value); // alpha
 	}
+	return success;
+}
 
+bool stamp_vcvs(Netlist & netlist, Nodelist & nodelist,
+		Triplet & t, double * J, ANALYSIS_TYPE atype, int & ct){
+	Net net;
 	// stamp vcvs, need counter
 	foreach_net_in(netlist, VCVS, net){
 		if(net.vtype == AC && atype == DC) {
@@ -358,7 +380,13 @@ bool stamp_linear(Netlist & netlist, Nodelist & nodelist,
 		t.push(ct,l, net.value); // mu
 		ct++;
 	}
+	return true;
+}
 
+bool stamp_ccvs(Netlist & netlist, Nodelist & nodelist,
+		Triplet & t, double * J, ANALYSIS_TYPE atype, int & ct){
+	bool success=true;
+	Net net;
 	// stamp ccvs, add only one row and column, NEED counter
 	foreach_net_in(netlist, CCVS, net){
 		if(net.vtype == AC && atype == DC) {
@@ -390,6 +418,27 @@ bool stamp_linear(Netlist & netlist, Nodelist & nodelist,
 		t.push(ct,ctrl_index,-net.value);
 		++ct;
 	}
+	return success;
+}
+
+// stamp linear devices
+bool stamp_linear(Netlist & netlist, Nodelist & nodelist, 
+		Triplet & t, double * J, ANALYSIS_TYPE atype){
+	bool success = true;
+	Net net;
+
+	stamp_resistor(netlist, nodelist, t, J, atype);
+	stamp_csrc(netlist, nodelist, t, J, atype);
+	stamp_vccs(netlist, nodelist, t, J, atype);
+	
+	// the following nets will use extra space in augmented Y
+	int ct = nodelist.size();  // counter
+
+	stamp_vsrc(netlist, nodelist, t, J, atype, ct);
+	success &= stamp_cccs(netlist, nodelist, t, J, atype);
+	stamp_vcvs(netlist, nodelist, t, J, atype, ct);
+	success &= stamp_ccvs(netlist, nodelist, t, J, atype, ct);
+
 	return success;
 }
 

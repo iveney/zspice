@@ -103,6 +103,8 @@ void ac_analysis(Netlist & netlist, Nodelist & nodelist){
 	double init = 10E3, final = 100E6;
 	for(double f=init;f<=final;f*=inc){
 		// stamp the fixed part: resistor, voltage source)
+		// NOTE: DC current is OPEN circuit
+		//       DC voltage is SHORT circuit
 
 		// stamp the frequency-related part:
 		// capacitor, inductor, bjt
