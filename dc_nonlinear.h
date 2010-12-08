@@ -32,4 +32,7 @@ void stamp_inductor(Netlist & netlist, Nodelist & nodelist,
 void stamp_BJT_AC(Netlist & netlist, Nodelist & nodelist,
 		Triplet & t, double f);
 
+void stamp_BJT_DC(Netlist & netlist, Nodelist & nodelist,
+		Triplet & t, double * J);
+
 #endif

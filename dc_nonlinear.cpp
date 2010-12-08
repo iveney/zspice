@@ -180,17 +180,17 @@ void stamp_BJT_AC(Netlist & netlist, Nodelist & nodelist,
 		int b = nodelist.name2idx[base];
 		int e = nodelist.name2idx[emit];
 
-		t.push(b,b,net.B[0] * w);
-		t.push(b,c,net.B[1] * w);
-		t.push(b,e,net.B[2] * w);
+		t.push(b,b,0,net.B[0] * w);
+		t.push(b,c,0,net.B[1] * w);
+		t.push(b,e,0,net.B[2] * w);
 
-		t.push(c,b,net.C[0] * w);
-		t.push(c,c,net.C[1] * w);
-		t.push(c,e,net.C[2] * w);
+		t.push(c,b,0,net.C[0] * w);
+		t.push(c,c,0,net.C[1] * w);
+		t.push(c,e,0,net.C[2] * w);
 
-		t.push(e,b,net.E[0] * w);
-		t.push(e,c,net.E[1] * w);
-		t.push(e,e,net.E[2] * w);
+		t.push(e,b,0,net.E[0] * w);
+		t.push(e,c,0,net.E[1] * w);
+		t.push(e,e,0,net.E[2] * w);
 	}
 }
 

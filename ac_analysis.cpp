@@ -86,6 +86,13 @@ void compute_BJT_cap(Net & net, Nodelist & nodelist){
 	double Cbe = compute_Cbe(Vbe, Vbc, net.polarity);
 	double Cbe2 = compute_Cbe2(Vbe, Vbc, net.polarity);
 	double Cbc = compute_Cbc(Vbe, Vbc, net.polarity);
+	/*
+	cout<<net.name<<": "<<endl;
+	cout<<"Qc="<<Cc<<endl;
+	cout<<"Qbe="<<Cbe<<endl;
+	cout<<"Qbe2="<<Cbe2<<endl;
+	cout<<"Qbc="<<Cbc<<endl;
+	*/
 
 	net.B[0] =   Cbe  + Cbe2 + Cbc;
 	net.B[1] = -(Cbe2 + Cbc);
@@ -98,6 +105,13 @@ void compute_BJT_cap(Net & net, Nodelist & nodelist){
 	net.E[0] = -(Cbe  + Cbe2);
 	net.E[1] =   Cbe2;
 	net.E[2] =   Cbe;
+
+	/*
+	cout<<net.name<<endl;
+	for(int i=0;i<3;i++){
+		cout<<net.B[i]<<" "<<net.C[i]<<" "<<net.E[i]<<endl;
+	}
+	*/
 }
 
 // after obtaining the DC operating point, compute capacitance of BJT
@@ -214,6 +228,10 @@ void ac_analysis(Netlist & netlist, Nodelist & nodelist){
 	// backup the triplet and real part in t_copy, Jx_copy
 	stamp_linear(netlist, nodelist, t_copy, Jx_copy, AC);
 
+	// this is a trick: use Jx as a dummy J, since we do not stamp
+	// J anyway (i.e., Jx will be cleared later)
+	stamp_BJT_DC(netlist, nodelist, t_copy, Jx);
+
 	string of1_name = basename+"_g.dat";
 	string of2_name = basename+"_p.dat";
 	ofstream of1(of1_name.c_str(),ios::out);
@@ -221,13 +239,29 @@ void ac_analysis(Netlist & netlist, Nodelist & nodelist){
 	if( !of1.is_open() || !of2.is_open() )
 		report_exit("Opening file error!\n");
 
+	/*
+	for(int i=0;i<t_copy.size();i++){
+		cout<<t_copy.Ti[i]<<","<<t_copy.Tj[i]<<"="
+			<<t_copy.Tx[i]<<","<<t_copy.Tz[i]<<endl;
+	}
+	*/
+
+	/*
+	for(int i=0;i<size;i++)
+		cout<<i<<" "<<Jx_copy[i]<<" "<<Jz[i]<<endl;
+	cout<<"vin="<<vin<<endl;
+	Net & nv = netlist["vin2"];
+	cout<<nodelist.name2idx[nv.nbr[0]]
+	<<" "<<nodelist.name2idx[nv.nbr[1]]<<endl;
+	*/
 
 	// set a frequency and stamp the matrix
+	int id = nodelist.name2idx["out"];
+	//cout<<"output id="<<id<<endl;
 	int step = 100;
 	double init = 10E3, final = 100E6;
 	double inc = pow(10.0,1.0/step);
 	//double inc = (final-init)/step;
-	cout<<"vin="<<vin<<endl;
 	for(double f=init;f<=final;f*=inc){
 	//for(double f=init;f<=final;f+=inc){
 		t = t_copy;
@@ -244,15 +278,15 @@ void ac_analysis(Netlist & netlist, Nodelist & nodelist){
 		Jx[0] = Jz[0] = 0.0;
 
 		solve_ac(t, vx, vz, Jx, Jz, size);
-
+		
 		// now we got solutions, compute gain and phase
-		int id = nodelist.name2idx["out"];
 		complex<double> vout(vx[id],vz[id]);
 		double s = abs(vout)/vin;
 		double gain = 20*log10(s);
-		//double phase = arg(vout)*180.0/PI;
-		double phase = atan(s)*180.0/PI;
+		double phase = arg(vout)*180.0/PI;
+		//double phase = atan(s)*180.0/PI;
 		//double phase = atan2(vout.imag(),vout.real())*180.0/PI;
+		cout<<"freq="<<f<<" sol="<<vout<<" s="<<s<<endl;
 		of1<<scientific<<f<<" "<<gain<<endl;
 		of2<<scientific<<f<<" "<<phase<<endl;
 	}

@@ -313,6 +313,8 @@ bool stamp_vsrc(Netlist & netlist, Nodelist & nodelist,
 	// stamp voltage source, NOTE the counter
 	foreach_net_in(netlist, VSRC, net){
 		// we need to identify the analysis type
+		//if(atype == AC && net.vtype == AC)
+			//cout<<"stamping vin2="<<net.value<<endl;
 		double value = net.value;
 		if(net.vtype == AC && atype == DC ||
 		   net.vtype == DC && atype == AC) {
@@ -329,7 +331,7 @@ bool stamp_vsrc(Netlist & netlist, Nodelist & nodelist,
 		t.push(ct,k,1.);
 		t.push(l,ct,-1.);
 		t.push(ct,l,-1.);
-		//cout<<"stamping v "<<net.value<<" to "<<ct<<endl;
+		//cout<<"stamping v="<<net.value<<" to "<<ct<<endl;
 		J[ct] += value;  // Vkl
 		++ct;
 	}
