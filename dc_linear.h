@@ -15,7 +15,7 @@
 #include "triplet.h"
 using std::vector;
 
-void dc_analysis(Netlist & netlist, Nodelist & nodelist);
+void dc_analysis(Netlist & netlist, Nodelist & nodelist, bool output);
 bool stamp_matrix(Netlist & netlist, Nodelist & nodelist, Triplet &, 
 		double *, ANALYSIS_TYPE);
 void solve_dc(Triplet & t, double * v, double * J, int n);

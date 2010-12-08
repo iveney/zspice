@@ -189,12 +189,14 @@ void update_BJT_currents(Netlist & netlist, Nodelist & nodelist){
 }
 
 // performs Newton-Raphson iteration here
-void NR_iteration(Netlist & netlist, Nodelist & nodelist,
-		double *v, double *J, int size){
-	// output input node information
-	cout<<endl<<"Input nodes:"<<endl;
-	nodelist.output_node_voltages();
-	cout<<endl<<"Iteration begins:"<<endl;
+double NR_iteration(Netlist & netlist, Nodelist & nodelist,
+		double *v, double *J, int size, bool output){
+	if( output == true ){
+		// output input node information
+		cout<<endl<<"Input nodes:"<<endl;
+		nodelist.output_node_voltages();
+		cout<<endl<<"Iteration begins:"<<endl;
+	}
 
 	// backup the voltages
 	double * Vold, *Vnew;
@@ -223,16 +225,23 @@ void NR_iteration(Netlist & netlist, Nodelist & nodelist,
 		update_BJT_currents(netlist, nodelist);
 
 		diff = voltage_diff(Vnew,Vold,nodelist.size());
-		cout<<"iteration: "<<++counter<<", difference = "<<diff<<endl;
+		if( output == true ){
+			cout<<"iteration: "<<++counter
+			    <<", difference = "<<diff<<endl;
+		}
 		//nodelist.output_node_voltages();
 	}while(diff>EPSILON);
 	
-	cout<<"Total number of iterations: "<<counter<<endl<<endl;
 	delete [] Vold;
 	delete [] Vnew;
 
-	// finally, output again
-	cout<<"Result:"<<endl;
-	nodelist.output_node_voltages();
-	netlist.output_branch_currents(net2int,v);
+	if( output == true ){
+		cout<<"Total number of iterations: "<<counter<<endl;
+		// finally, output again
+		cout<<"\nResult:"<<endl;
+		nodelist.output_node_voltages();
+		netlist.output_branch_currents(net2int,v);
+	}
+
+	return counter;
 }

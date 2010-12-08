@@ -20,6 +20,7 @@
 #include "node.h"
 #include "io.h"
 #include "dc_linear.h"
+#include "ac_analysis.h"
 #include "main.h"
 using namespace std;
 
@@ -47,12 +48,12 @@ int main(int argc, char *argv[]){
 	case 1: // DC analysis
 		cout<<"** DC analysis **"<<endl;
 		output_netlist_info(netlist,nodelist);
-		dc_analysis(netlist,nodelist);
+		dc_analysis(netlist,nodelist,true);
 		break;
 	case 2: // AC analysis
 		cout<<"** AC analysis **"<<endl;
 		output_netlist_info(netlist,nodelist);
-		// ac_analysis(netlist,nodelist);
+		ac_analysis(netlist,nodelist);
 		break;
 	default:
 		cout<<"Unknown type. ";

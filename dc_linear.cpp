@@ -36,7 +36,7 @@ using namespace __gnu_cxx;
 hash_map<string, int> net2int;
 
 // Given netlist and nodelist, perform dc analysis
-void dc_analysis(Netlist & netlist, Nodelist & nodelist){
+void dc_analysis(Netlist & netlist, Nodelist & nodelist, bool output){
 	// create matrix, note that 0 row and column is for ground
 	int size = nodelist.size();
 
@@ -56,11 +56,14 @@ void dc_analysis(Netlist & netlist, Nodelist & nodelist){
 		dc_core(netlist,nodelist,v,J,size);
 		//output_result(netlist, nodelist, v, size);
 		update_node_voltages(nodelist, v);
-		nodelist.output_node_voltages();
-		netlist.output_branch_currents(net2int, v);
+		if( output == true){
+			nodelist.output_node_voltages();
+			netlist.output_branch_currents(net2int, v);
+		}
 	}
-	else // non-linear dc analysis
-		NR_iteration(netlist,nodelist,v,J,size);
+	else{ // non-linear dc analysis
+		NR_iteration(netlist,nodelist,v,J,size,output);
+	}
 
 	// release resourse
 	delete [] v;
@@ -263,7 +266,6 @@ bool stamp_linear(Netlist & netlist, Nodelist & nodelist,
 		t.push(j,j, G);
 		t.push(i,j,-G);
 		t.push(j,i,-G);
-
 	}
 
 	// stamp current source

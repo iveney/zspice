@@ -13,8 +13,8 @@
 #include "net.h"
 #include "node.h"
 double compute_Cc(double Vc, POLARITY pol);
-double compute_Cbe(double Vbe, POLARITY pol);
-double compute_Cbc(double Vbc, POLARITY pol);
+double compute_Cbe(double Vbe, double Vbc, POLARITY pol);
+double compute_Cbc(double Vbe, double Vbc, POLARITY pol);
 void compute_BJT_cap(Net & net, Nodelist & nodelist);
 void compute_caps(Netlist & netlist, Nodelist & nodelist);
 void ac_analysis(Netlist & netlist, Nodelist & nodelist);

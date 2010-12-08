@@ -10,8 +10,8 @@
 #include "dc_linear.h"
 
 // performs newton-raphson iteraion
-void NR_iteration(Netlist & netlist, Nodelist & nodelist,
-		double *v, double *J, int size);
+double NR_iteration(Netlist & netlist, Nodelist & nodelist,
+		double *v, double *J, int size, bool output);
 double voltage_diff(double * Vnew, double * Vold, int n);
 void copy_voltages(Nodelist & nodelist, double * vs);
 bool stamp_nonlinear(Netlist & netlist, Nodelist & nodelist, 
