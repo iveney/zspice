@@ -15,6 +15,8 @@
 //   * first create the file
 
 #include <iostream>
+#include <vector>
+#include <string>
 #include "util.h"
 #include "net.h"
 #include "node.h"
@@ -24,10 +26,11 @@
 #include "main.h"
 using namespace std;
 
-const static char *str_help="Supported types:\n 0: DC\n 1: AC";
-char * filename = NULL;
-string basename;
-double vin=-1.0;
+ANALYSIS_TYPE g_atype = DC; // default to DC
+char * g_filename = NULL;
+string g_basename;
+double g_vin=-1.0;
+vector<string> g_output_node;
 
 void output_netlist_info(Netlist & netlist, Nodelist & nodelist){
 	cout<<endl;
@@ -38,17 +41,16 @@ void output_netlist_info(Netlist & netlist, Nodelist & nodelist){
 }
 
 int main(int argc, char *argv[]){
-	if(argc < 3)
-		report_exit("Usage: zspice netlist type\n");
-	filename = argv[1];
-	basename = get_basename(filename);
-	int type = atoi(argv[2]);
+	if(argc < 2)
+		report_exit("Usage: zspice netlist\n");
+	g_filename = argv[1];
+	g_basename = get_basename(g_filename);
 
 	Netlist netlist;
 	Nodelist nodelist;
-	read_netlist(filename, netlist, nodelist);
+	read_netlist(g_filename, netlist, nodelist);
 
-	switch(type){
+	switch(g_atype){
 	case DC: // DC analysis
 		cout<<"** DC analysis **"<<endl;
 		output_netlist_info(netlist,nodelist);
@@ -59,9 +61,11 @@ int main(int argc, char *argv[]){
 		output_netlist_info(netlist,nodelist);
 		ac_analysis(netlist,nodelist);
 		break;
+	case TRAN:
+		cout<<"** Transient analysis **"<<endl;
+		break;
 	default:
 		cout<<"Unknown type. ";
-		cout<<str_help<<endl;
 		break;
 	}
 

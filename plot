@@ -11,7 +11,7 @@ if [[ "$1" == *_g* ]];then
 	ylabel="Volts Mag (dB)"
 elif [[ "$1" == *_p* ]];then
 	ptype=Phase
-	ylabel="Volts Mag (dB)"
+	ylabel="Volts Phase (degree)"
 else
 	ptype=Unknown
 fi

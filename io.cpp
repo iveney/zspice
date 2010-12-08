@@ -12,6 +12,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <string>
 #include <cassert>
 #include "net.h"
 #include "util.h"
@@ -19,7 +20,9 @@
 #include "node.h"
 using namespace std;
 
-extern double vin;
+extern ANALYSIS_TYPE g_atype;
+extern double g_vin;
+extern vector<string> g_output_node;
 
 // read strings in the format `(name)'
 // return `name'
@@ -79,6 +82,17 @@ void read_initial_values(ifstream & ifs, Netlist & netlist, Nodelist & nodelist)
 	ifs>>skipws;
 }
 
+// read in output node names
+void read_output_node(string line){
+	char * l = new char[line.size()+1];
+	strcpy(l, line.c_str());
+	const char * sep = "()";
+	char * name = strtok(l, sep); // .plot ac VM(
+	name = strtok(NULL, sep);// name) ...
+	g_output_node.push_back(string(name)); 
+	delete [] l;
+}
+
 // read a ac/dc value from input string
 VOL_TYPE input_voltage(ifstream & ifs, double & value, double & off,
 		double &amp, double & freq){
@@ -110,13 +124,24 @@ void read_netlist(char * filename, Netlist & netlist, Nodelist & nodelist){
 	ifstream ifs(filename);
 	if( ifs.fail() )
 		report_exit("File not exist!\n");
-	string name;
+	string name,line,dummy;
 	int line_counter = 0;
 	// read the node name
 	while( ifs>>name ){
 		// check format
-		if( name == ".end" || name == ".op" ) break;
 		line_counter++;
+		if( name == ".end" ) break;
+		if( name == ".op" ) continue;
+		if( name == ".ac" ){
+			getline(ifs,dummy);
+			continue;
+		}
+		if( name == ".plot" ){// perform AC analysis
+			g_atype = AC;
+			getline(ifs, line);
+			read_output_node(line);
+			continue;
+		}
 
 		// check device multiple definition
 		if( netlist.netlist.find(name) != netlist.netlist.end() ){
@@ -124,7 +149,6 @@ void read_netlist(char * filename, Netlist & netlist, Nodelist & nodelist){
 				definition of device ["
 				<<name<<"] at line "<<line_counter<<": ";
 			// skip the whole line;
-			string dummy;
 			getline(ifs, dummy);
 			cerr<<name<<dummy<<endl;
 			continue;
@@ -159,7 +183,7 @@ void read_netlist(char * filename, Netlist & netlist, Nodelist & nodelist){
 				netlist[name]=Net(VSRC,name, node1, node2, v); 
 				netlist[name].set_voltage(vtype,v,off,amp,freq);
 				netlist.netset[VSRC].insert(name);
-				if(vtype == AC) vin = v;
+				if(vtype == AC) g_vin = v; // mark the vin value!
 				break;
 			case 'i': // current source
 				ifs>>v;
@@ -219,7 +243,7 @@ void read_netlist(char * filename, Netlist & netlist, Nodelist & nodelist){
 				netlist.netset[INDCT].insert(name);
 				break;
 			default: // Uknown type, report error and exit
-				string error_msg(name+": Unknown type");
+				string error_msg(name+": Unknown type\n");
 				report_exit(error_msg.c_str());
 				break;
 		}

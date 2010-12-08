@@ -21,8 +21,9 @@
 #include "util.h"
 using namespace std;
 
-extern string basename;
-extern double vin;
+extern string g_basename;
+extern double g_vin;
+extern vector<string> g_output_node;
 
 double compute_Cc(double Vc, POLARITY pol){
 	double Cc;
@@ -232,8 +233,10 @@ void ac_analysis(Netlist & netlist, Nodelist & nodelist){
 	// J anyway (i.e., Jx will be cleared later)
 	stamp_BJT_DC(netlist, nodelist, t_copy, Jx);
 
-	string of1_name = basename+"_g.dat";
-	string of2_name = basename+"_p.dat";
+	string out_name = g_output_node[0];
+	int id = nodelist.name2idx[out_name];
+	string of1_name = g_basename+"_"+out_name+"_g.dat";
+	string of2_name = g_basename+"_"+out_name+"_p.dat";
 	ofstream of1(of1_name.c_str(),ios::out);
 	ofstream of2(of2_name.c_str(),ios::out);
 	if( !of1.is_open() || !of2.is_open() )
@@ -256,8 +259,6 @@ void ac_analysis(Netlist & netlist, Nodelist & nodelist){
 	*/
 
 	// set a frequency and stamp the matrix
-	int id = nodelist.name2idx["out"];
-	//cout<<"output id="<<id<<endl;
 	int step = 100;
 	double init = 10E3, final = 100E6;
 	double inc = pow(10.0,1.0/step);
@@ -281,7 +282,7 @@ void ac_analysis(Netlist & netlist, Nodelist & nodelist){
 		
 		// now we got solutions, compute gain and phase
 		complex<double> vout(vx[id],vz[id]);
-		double s = abs(vout)/vin;
+		double s = abs(vout)/g_vin;
 		double gain = 20*log10(s);
 		double phase = arg(vout)*180.0/PI;
 		//cout<<"freq="<<f<<" sol="<<vout<<" s="<<s<<endl;
