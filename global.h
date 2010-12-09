@@ -27,6 +27,7 @@ const char * const nettype_str[]={
 	"inductor"
 };
 
+static const int MAX_ITERATION = 30;
 static const int BUFSIZE=256;
 // types of nets
 static const int NUM_NETTYPE=sizeof(nettype_str)/sizeof(char*);
@@ -51,7 +52,7 @@ static const double VAr = 100.;
 static const double Bf = 100.;
 static const double Br = 4.;
 static const double Tf = 2E-11;
-static const double DAMPEN = 2*Vt;
+static const double DAMPEN = 0.1000000001;//2*Vt;
 static const double PI = 3.1415926535897932384626433832;
 
 //#define abs(a) ((a)>0?(a):-(a))

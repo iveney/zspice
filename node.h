@@ -34,7 +34,9 @@ class Nodelist{
 public:
 	Nodelist();
 	bool insert_node(const Node & node);
-	hash_map<string, int> name2idx;
+	// given node name, find its index in nodelist
+	hash_map<string, int> name2idx; 
+	// given an index, find its node name in nodelist
 	hash_map<int, string> idx2name;
 	friend ostream & operator <<(ostream & s, Nodelist & nlist);
 	Node & operator [] (string name);

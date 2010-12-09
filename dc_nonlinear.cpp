@@ -90,7 +90,8 @@ void stamp_BJT_DC(Netlist & netlist, Nodelist & nodelist,
 		string clct = net.nbr[0];
 		string base = net.nbr[1];
 		string emit = net.emit;
-		//cout<<"BJT c="<<clct<<" b="<<base<<" e="<<emit<<endl;
+		//if( net.name == "Q12" )
+			//cout<<"BJT c="<<clct<<" b="<<base<<" e="<<emit<<endl;
 
 		// find the index of c,b,e
 		int c = nodelist.name2idx[clct];
@@ -111,6 +112,7 @@ void stamp_BJT_DC(Netlist & netlist, Nodelist & nodelist,
 			Vbc = -Vbc;
 			Vbe = -Vbe;
 		}
+		//if( net.name == "Q12") 
 		//cout<<"Vbc="<<Vbc<<" Vbe="<<Vbe<<endl;
 
 		// get Ic, Ib from last iteration
@@ -142,6 +144,12 @@ void stamp_BJT_DC(Netlist & netlist, Nodelist & nodelist,
 		double Scb = hc1 + hc2,  Scc = -hc2,       Sce = -hc1;
 		double Sbb = hb1 + hb2,  Sbc = -hb2,       Sbe = -hb1;
 		double Seb = -(Sbb+Scb), Sec = -(Sbc+Scc), See = -(Sbe+Sce);
+		if( net.name== "Q1" ){
+			printf("stamping %s\n",net.name.c_str());
+			printf("%e %e %e\n", Scb, Scc, Sce);
+			printf("%e %e %e\n", Sbb, Sbc, Sbe);
+			printf("%e %e %e\n\n", Seb, Sec, See);
+		}
 
 		t.push(c, b, Scb); t.push(c, c, Scc); t.push(c, e, Sce);
 		t.push(b, b, Sbb); t.push(b, c, Sbc); t.push(b, e, Sbe);
@@ -212,7 +220,7 @@ bool stamp_nonlinear(Netlist & netlist, Nodelist & nodelist,
 double voltage_diff(double * Vnew, double * Vold, int n){
 	double r=0.0,tmp;
 	for(int i=0;i<n;i++) {
-	//	cout<<i<<" : "<<Vold[i]<<" | "<<Vnew[i]<<endl;
+		//cout<<i<<" : "<<Vold[i]<<" | "<<Vnew[i]<<endl;
 		tmp = Vnew[i] - Vold[i];
 		r+=tmp*tmp;
 	}
@@ -289,22 +297,22 @@ double NR_iteration(Netlist & netlist, Nodelist & nodelist,
 		// linearize the non-linear device, stamp and solve
 		dc_core(netlist,nodelist,v,J,size);
 
+		// copy new value of voltages to Vnew
+		memcpy(Vnew, v, sizeof(double)*nodelist.size());
+
 		// update new value of voltages
 		update_node_voltages(nodelist, v);
-		
-		// copy new value of voltages to Vnew
-		copy_voltages(nodelist, Vnew);
 
 		// update new value of currents (Ib, Ic) for next iteration
 		update_BJT_currents(netlist, nodelist);
 
+		//nodelist.output_node_voltages();
 		diff = voltage_diff(Vnew,Vold,nodelist.size());
 		if( output == true ){
 			cout<<"iteration: "<<++counter
 			    <<", difference = "<<diff<<endl;
 		}
-		//nodelist.output_node_voltages();
-	}while(diff>EPSILON);
+	}while(diff>EPSILON && counter < MAX_ITERATION);
 	
 	delete [] Vold;
 	delete [] Vnew;

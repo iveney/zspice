@@ -63,7 +63,7 @@ int main(int argc, char *argv[]){
 		break;
 	case AC: // AC analysis
 		cout<<"** AC analysis **"<<endl;
-		output_netlist_info(netlist,nodelist);
+		//output_netlist_info(netlist,nodelist);
 		ac_analysis(netlist,nodelist);
 		break;
 	case TRAN:

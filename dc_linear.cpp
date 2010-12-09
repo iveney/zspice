@@ -99,18 +99,14 @@ void update_node_voltages(Nodelist & nodelist, double *v){
 	for(int i=1;i<nodelist.size();i++){
 		Node & nd = nodelist.nodelist[i];
 		int id = nodelist.name2idx[nd.name];
-		/*
-		if( abs(nd.v - v[id]) > DAMPEN ){
-			if( nd.v - v[id] > 0 )
-				nd.v -= DAMPEN;
+		double diff = v[id]-nd.v;
+		if( abs(diff) > DAMPEN ){
+			if( diff > 0 )
+				diff = DAMPEN;
 			else 
-				nd.v += DAMPEN;
+				diff = -DAMPEN;
 		}
-		else{
-			nd.v = v[id];
-		}
-		*/
-		nd.v = v[id];
+		nd.v += diff;
 	}
 }
 
@@ -313,8 +309,6 @@ bool stamp_vsrc(Netlist & netlist, Nodelist & nodelist,
 	// stamp voltage source, NOTE the counter
 	foreach_net_in(netlist, VSRC, net){
 		// we need to identify the analysis type
-		//if(atype == AC && net.vtype == AC)
-			//cout<<"stamping vin2="<<net.value<<endl;
 		double value = net.value;
 		if(net.vtype == AC && atype == DC ||
 		   net.vtype == DC && atype == AC) {
@@ -331,7 +325,7 @@ bool stamp_vsrc(Netlist & netlist, Nodelist & nodelist,
 		t.push(ct,k,1.);
 		t.push(l,ct,-1.);
 		t.push(ct,l,-1.);
-		//cout<<"stamping v="<<net.value<<" to "<<ct<<endl;
+		//cout<<"stamping "<<net.name<<"="<<value<<" to "<<ct<<endl;
 		J[ct] += value;  // Vkl
 		++ct;
 	}
