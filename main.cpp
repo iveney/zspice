@@ -15,7 +15,7 @@
 //   * first create the file
 
 #include <iostream>
-#include <vector>
+#include <set>
 #include <string>
 #include "util.h"
 #include "net.h"
@@ -30,7 +30,12 @@ ANALYSIS_TYPE g_atype = DC; // default to DC
 char * g_filename = NULL;
 string g_basename;
 double g_vin=-1.0;
-vector<string> g_output_node;
+vector<string> g_plot_gain_node;
+vector<string> g_plot_phase_node;
+vector<string> g_plot_vol_node;
+double g_init_f=0;
+double g_end_f=0;
+double g_step_f=0;
 
 void output_netlist_info(Netlist & netlist, Nodelist & nodelist){
 	cout<<endl;

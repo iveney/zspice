@@ -10,6 +10,7 @@
 //
 #include <cmath>
 #include <vector>
+#include <set>
 #include <iomanip>
 #include <fstream>
 #include <complex>
@@ -23,29 +24,29 @@ using namespace std;
 
 extern string g_basename;
 extern double g_vin;
-extern vector<string> g_output_node;
+extern vector<string> g_plot_gain_node;
+extern vector<string> g_plot_phase_node;
+extern vector<string> g_plot_vol_node;
+extern double g_init_f;
+extern double g_end_f;
+extern double g_step_f;
 
 double compute_Cc(double Vc, POLARITY pol){
 	double Cc;
-
-	if(Vc < Fc * Vj){
+	if(Vc < Fc * Vj) 
 		Cc = Cjcs*pow(1-Vc/Vj,-Mj);
-	}
-	else{ // Vc >= Fc * Vj
+	else 
 		Cc = Cjcs*(Mj*Vc/Vj + 1.0 - Fc*(1+Mj))/pow(1-Fc,1+Mj);
-	}
 	return Cc;
 }
 
 double compute_Cbe(double Vbe, double Vbc, POLARITY pol){
 	double Cbe =   Tf*Is*exp(Vbe/Vt)*(1-Vbc/VAf-Vbe/VAr)/Vt
 		    - Tf*Is*(exp(Vbe/Vt)-1)/VAr;
-	if(Vbe < Fc * Vj ){
+	if(Vbe < Fc * Vj ) 
 		Cbe += Cjbe*pow(1-Vbe/Vj,-Mj);
-	}
-	else{
+	else 
 		Cbe += Cjbe*(Mj*Vbe/Vj + 1.0 - Fc*(1+Mj))/pow(1-Fc,1+Mj);
-	}
 	return Cbe;
 }
 
@@ -55,13 +56,63 @@ double compute_Cbe2(double Vbe, double Vbc, POLARITY pol){
 
 double compute_Cbc(double Vbe, double Vbc, POLARITY pol){
 	double Cbc = Tr*Is*exp(Vbc/Vt)/Vt;
-	if(Vbc < Fc * Vj){
+	if(Vbc < Fc * Vj)
 		Cbc += Cjbc*pow(1-Vbc/Vj,-Mj);
-	}
-	else{
+	else
 		Cbc += Cjbc*(Mj*Vbc/Vj + 1.0 - Fc*(1+Mj))/pow(1-Fc,1+Mj);
-	}
 	return Cbc;
+}
+
+// open files to plot
+void open_plot_files(Nodelist & nodelist, 
+		     vector<FILE *> & fgain,
+		     vector<FILE *> & fphase){
+	string name;
+	// open plot gain files
+	for(size_t i=0;i<g_plot_gain_node.size();i++){
+		name = g_plot_gain_node[i];
+		string of = g_basename + "_" + name + "_g.dat";
+		cout<<"Node \""<<name<<"\" magnitude plot : "<<of<<endl;
+		FILE * ofs=fopen(of.c_str(),"w");
+		fgain.push_back(ofs);
+	}
+	// open plot gain files
+	for(size_t i=0;i<g_plot_phase_node.size();i++){
+		name = g_plot_phase_node[i];
+		string of = g_basename + "_" + name + "_p.dat";
+		cout<<"Node \""<<name<<"\" phase plot : "<<of<<endl;
+		FILE* ofs=fopen(of.c_str(),"w");
+		fphase.push_back(ofs);
+	}
+}
+
+void close_plot_files(vector<FILE *> & fgain,
+		      vector<FILE *> & fphase){
+	for(size_t i=0;i<fgain.size();i++) fclose(fgain[i]);
+	for(size_t i=0;i<fphase.size();i++) fclose(fphase[i]);
+}
+
+void plot_gains(vector<FILE *> & fgain, Nodelist & nodelist,
+		double f, double * vx, double * vz){
+	for(size_t i=0;i<fgain.size();i++){
+		string name = g_plot_gain_node[i];
+		int id = nodelist.name2idx[name];
+		complex<double> vout(vx[id],vz[id]);
+		double s = abs(vout)/g_vin;
+		double gain = 20*log10(s);
+		fprintf(fgain[i], "%.9lf %.9lf\n", f, gain);
+	}
+}
+
+void plot_phase(vector<FILE *> & fphase, Nodelist & nodelist,
+		double f, double * vx, double * vz){
+	for(size_t i=0;i<fphase.size();i++){
+		string name = g_plot_phase_node[i];
+		int id = nodelist.name2idx[name];
+		complex<double> vout(vx[id],vz[id]);
+		double phase = arg(vout)*180.0/PI;
+		fprintf(fphase[i], "%.9lf %.9lf\n", f, phase);
+	}
 }
 
 void compute_BJT_cap(Net & net, Nodelist & nodelist){
@@ -87,13 +138,6 @@ void compute_BJT_cap(Net & net, Nodelist & nodelist){
 	double Cbe = compute_Cbe(Vbe, Vbc, net.polarity);
 	double Cbe2 = compute_Cbe2(Vbe, Vbc, net.polarity);
 	double Cbc = compute_Cbc(Vbe, Vbc, net.polarity);
-	/*
-	cout<<net.name<<": "<<endl;
-	cout<<"Qc="<<Cc<<endl;
-	cout<<"Qbe="<<Cbe<<endl;
-	cout<<"Qbe2="<<Cbe2<<endl;
-	cout<<"Qbc="<<Cbc<<endl;
-	*/
 
 	net.B[0] =   Cbe  + Cbe2 + Cbc;
 	net.B[1] = -(Cbe2 + Cbc);
@@ -106,13 +150,6 @@ void compute_BJT_cap(Net & net, Nodelist & nodelist){
 	net.E[0] = -(Cbe  + Cbe2);
 	net.E[1] =   Cbe2;
 	net.E[2] =   Cbe;
-
-	/*
-	cout<<net.name<<endl;
-	for(int i=0;i<3;i++){
-		cout<<net.B[i]<<" "<<net.C[i]<<" "<<net.E[i]<<endl;
-	}
-	*/
 }
 
 // after obtaining the DC operating point, compute capacitance of BJT
@@ -205,7 +242,7 @@ void ac_analysis(Netlist & netlist, Nodelist & nodelist){
 	// now we got Vb, Vc, Ve for each BJT
 	compute_caps(netlist, nodelist);
 
-	// initialize sth.
+	// initialize the matrix
 	Triplet t, t_copy;
 	int size = nodelist.size();
 	size += netlist.netset[VSRC].size();
@@ -233,38 +270,14 @@ void ac_analysis(Netlist & netlist, Nodelist & nodelist){
 	// J anyway (i.e., Jx will be cleared later)
 	stamp_BJT_DC(netlist, nodelist, t_copy, Jx);
 
-	string out_name = g_output_node[0];
-	int id = nodelist.name2idx[out_name];
-	string of1_name = g_basename+"_"+out_name+"_g.dat";
-	string of2_name = g_basename+"_"+out_name+"_p.dat";
-	ofstream of1(of1_name.c_str(),ios::out);
-	ofstream of2(of2_name.c_str(),ios::out);
-	if( !of1.is_open() || !of2.is_open() )
-		report_exit("Opening file error!\n");
-
-	/*
-	for(int i=0;i<t_copy.size();i++){
-		cout<<t_copy.Ti[i]<<","<<t_copy.Tj[i]<<"="
-			<<t_copy.Tx[i]<<","<<t_copy.Tz[i]<<endl;
-	}
-	*/
-
-	/*
-	for(int i=0;i<size;i++)
-		cout<<i<<" "<<Jx_copy[i]<<" "<<Jz[i]<<endl;
-	cout<<"vin="<<vin<<endl;
-	Net & nv = netlist["vin2"];
-	cout<<nodelist.name2idx[nv.nbr[0]]
-	<<" "<<nodelist.name2idx[nv.nbr[1]]<<endl;
-	*/
+	vector<FILE *> fgain;
+	vector<FILE *> fphase;
+	open_plot_files(nodelist, fgain, fphase);
 
 	// set a frequency and stamp the matrix
-	int step = 100;
-	double init = 10E3, final = 100E6;
-	double inc = pow(10.0,1.0/step);
-	//double inc = (final-init)/step;
-	for(double f=init;f<=final;f*=inc){
-	//for(double f=init;f<=final;f+=inc){
+	//double init = 10E3, final = 100E6;
+	double inc = pow(10.0,1.0/g_step_f);
+	for(double f=g_init_f;f<=g_end_f;f*=inc){
 		t = t_copy;
 		memcpy((void*)Jx,(void*)Jx_copy,sizeof(double)*size);
 		memset((void*)Jz, 0, sizeof(double)*size);
@@ -281,21 +294,13 @@ void ac_analysis(Netlist & netlist, Nodelist & nodelist){
 		solve_ac(t, vx, vz, Jx, Jz, size);
 		
 		// now we got solutions, compute gain and phase
-		complex<double> vout(vx[id],vz[id]);
-		double s = abs(vout)/g_vin;
-		double gain = 20*log10(s);
-		double phase = arg(vout)*180.0/PI;
-		//cout<<"freq="<<f<<" sol="<<vout<<" s="<<s<<endl;
-		of1<<scientific<<f<<" "<<gain<<endl;
-		of2<<scientific<<f<<" "<<phase<<endl;
+		plot_gains(fgain, nodelist, f, vx, vz);
+		plot_phase(fphase, nodelist, f, vx, vz);
 	}
 	delete [] vx;
 	delete [] vz;
 	delete [] Jx;
 	delete [] Jz;
 	delete [] Jx_copy;
-	cout<<"Figures are output to "<<of1_name<<" (magnitude) and "
-	    <<of2_name<<" (phase)"<<endl;
-	of1.close();
-	of2.close();
+	close_plot_files(fgain,fphase);
 }
