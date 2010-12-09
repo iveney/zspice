@@ -62,12 +62,14 @@ void read_initial_values(ifstream & ifs, Netlist & netlist, Nodelist & nodelist)
 		ifs>>d;
 		switch(d){
 		case 'v':
+		case 'V':
 			read_name_value_pair(ifs,name,guess);
 			idx = nodelist.name2idx[name];
 			nodelist.nodelist[idx].v = guess; // set the value!
 			//cout<<"nodeset: v "<<name<<" "<<guess<<endl;
 			break;
 		case 'i':
+		case 'I':
 			read_name_value_pair(ifs,name,guess);
 			netlist[name].current = guess;
 			//cout<<"net: "<<name<<" "<<guess<<endl;
@@ -174,11 +176,13 @@ void read_netlist(char * filename, Netlist & netlist, Nodelist & nodelist){
 		nodelist.insert_node(Node(node2));
 		switch(c){
 			case 'r': // resistor
+			case 'R':
 				ifs>>v;
 				netlist[name]=Net(RSTR, name, node1, node2, v); 
 				netlist.netset[RSTR].insert(name);
 				break;
 			case 'v': // independent voltage source
+			case 'V':
 				vtype = input_voltage(ifs,v,off,amp,freq);
 				netlist[name]=Net(VSRC,name, node1, node2, v); 
 				netlist[name].set_voltage(vtype,v,off,amp,freq);
@@ -186,11 +190,13 @@ void read_netlist(char * filename, Netlist & netlist, Nodelist & nodelist){
 				if(vtype == AC) g_vin = v; // mark the vin value!
 				break;
 			case 'i': // current source
+			case 'I':
 				ifs>>v;
 				netlist[name]=Net(CSRC, name, node1, node2, v); 
 				netlist.netset[CSRC].insert(name);
 				break;
 			case 'g': // vccs
+			case 'G':
 				ifs>>ctrl1>>ctrl2>>v;
 				netlist[name]=Net(VCCS, name, node1, node2, 
 						ctrl1, ctrl2, v);
@@ -199,6 +205,7 @@ void read_netlist(char * filename, Netlist & netlist, Nodelist & nodelist){
 				nodelist.insert_node(Node(ctrl2));
 				break;
 			case 'e': // vcvs
+			case 'E':
 				ifs>>ctrl1>>ctrl2;
 				vtype = input_voltage(ifs,v,off,amp,freq);
 				netlist[name]=Net(VCVS, name, node1, node2, 
@@ -209,6 +216,7 @@ void read_netlist(char * filename, Netlist & netlist, Nodelist & nodelist){
 				nodelist.insert_node(Node(ctrl2));
 				break;
 			case 'h': // ccvs
+			case 'H':
 				ifs>>vyyy;
 				vtype = input_voltage(ifs,v,off,amp,freq);
 				netlist[name]=Net(CCVS, name, node1, node2, vyyy, v);
@@ -216,15 +224,18 @@ void read_netlist(char * filename, Netlist & netlist, Nodelist & nodelist){
 				netlist.netset[CCVS].insert(name);
 				break;
 			case 'f': // cccs
+			case 'F':
 				ifs>>vyyy>>v;
 				netlist[name]=Net(CCCS, name, node1, node2, vyyy, v);
 				netlist.netset[CCCS].insert(name);
 				break;
 			case 'd': // diode
+			case 'D':
 				netlist[name]=Net(DIODE, name, node1, node2, v);
 				netlist.netset[DIODE].insert(name);
 				break;
 			case 'q': // bjt
+			case 'Q':
 				ifs>>emit>>polarity ;
 				p = (polarity == "pnp"? PNP: NPN);
 				netlist[name]=Net(BJT, name, node1, node2, emit, p); 
@@ -233,11 +244,13 @@ void read_netlist(char * filename, Netlist & netlist, Nodelist & nodelist){
 				nodelist[emit].insert_net(name);
 				break;
 			case 'c': // capacitor
+			case 'C':
 				ifs>>v;
 				netlist[name]=Net(CAPCT, name, node1, node2, v); 
 				netlist.netset[CAPCT].insert(name);
 				break;
 			case 'l': // inductor
+			case 'L':
 				ifs>>v;
 				netlist[name]=Net(INDCT, name, node1, node2, v); 
 				netlist.netset[INDCT].insert(name);
