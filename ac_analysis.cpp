@@ -100,7 +100,7 @@ void plot_gains(vector<FILE *> & fgain, Nodelist & nodelist,
 		complex<double> vout(vx[id],vz[id]);
 		double s = abs(vout)/g_vin;
 		double gain = 20*log10(s);
-		cout<<"f="<<f<<", "<<name<<"="<<vout<<" ,s="<<s<<endl;
+		//cout<<"f="<<f<<", "<<name<<"="<<vout<<" ,s="<<s<<endl;
 		fprintf(fgain[i], "%.9lf %.9lf\n", f, gain);
 	}
 }
@@ -133,12 +133,6 @@ void compute_BJT_cap(Net & net, Nodelist & nodelist){
 		Vbc = -Vbc;
 		Vbe = -Vbe;
 	}
-	/*
-	if( net.name == "Q1" ){
-		cout<<"Vbc="<<Vbc
-		    <<"Vbe="<<Vbe<<endl;
-	}
-	*/
 
 	// compute 
 	double Cc  = compute_Cc(Vc, net.polarity);
@@ -244,7 +238,7 @@ void solve_ac(Triplet & t, double * vx, double * vz,
 // perform ac analysis
 void ac_analysis(Netlist & netlist, Nodelist & nodelist){
 	// first perform dc analysis to get the DC operating point
-	dc_analysis(netlist,nodelist,true);
+	dc_analysis(netlist,nodelist,false);
 
 	// now we got Vb, Vc, Ve for each BJT
 	compute_caps(netlist, nodelist);

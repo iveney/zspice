@@ -75,7 +75,8 @@ void Nodelist::output_node_voltages(){
 ostream & operator <<(ostream & s, Nodelist & nlist){
 	vector<Node>::iterator it;
 	for(it=nlist.nodelist.begin();it!=nlist.nodelist.end();it++){
-		s<<*it<<endl;
+		s<<"("<<nlist.name2idx[(*it).name]
+			<<") "<<*it<<endl;
 	}
 	return s;
 }

@@ -57,12 +57,12 @@ int main(int argc, char *argv[]){
 
 	switch(g_atype){
 	case DC: // DC analysis
-		cout<<"** DC analysis **"<<endl;
+		cout<<"** DC analysis **"<<endl<<endl;
 		output_netlist_info(netlist,nodelist);
 		dc_analysis(netlist,nodelist,true);
 		break;
 	case AC: // AC analysis
-		cout<<"** AC analysis **"<<endl;
+		cout<<"** AC analysis **"<<endl<<endl;
 		//output_netlist_info(netlist,nodelist);
 		ac_analysis(netlist,nodelist);
 		break;

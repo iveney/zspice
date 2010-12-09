@@ -6,7 +6,10 @@
 // ----------------------------------------------------------------//
 // - Zigang Xiao - Fri Oct 29 16:43:17 CDT 2010
 //   * created file
+#include <iostream>
+#include <iomanip>
 #include "triplet.h"
+using namespace std;
 
 // Y[0][0] is always 1, hence add this when initializing
 Triplet::Triplet(){
@@ -16,12 +19,26 @@ Triplet::Triplet(){
 	Tz.push_back(0.0);
 }
 
+void Triplet::output(){
+	int w = 15;
+	for(int i=0;i<size();i++){
+		cout<<"["<<setw(2)<<Ti[i]<<","<<setw(2)<<Tj[i]
+		    <<"] = "<<scientific
+		    <<setw(w)<<Tx[i]<<","<<setw(w)<<Tz[i]<<endl;
+	}
+}
+
 // stupidly merge elements at the same position
 void Triplet::merge(){
 	for(int k=0;k<size();k++){
 		for(int l=k+1;l<size();l++){
 			if( Ti[k] == Ti[l] && Tj[k] == Tj[l] ){
-				Tx[k]+=Tx[l];
+				if( Tj[k]==5 && Tj[l] == 5){
+					cout<<"merge ";
+					cout<<k<<" "<<l<<endl;
+				}
+				Tx[k] += Tx[l];
+				Tz[k] += Tz[l];
 				Ti.erase(Ti.begin()+l);
 				Tj.erase(Tj.begin()+l);
 				Tx.erase(Tx.begin()+l);

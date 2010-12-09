@@ -29,11 +29,11 @@ void stamp_capacitor(Netlist & netlist, Nodelist & nodelist,
 	foreach_net_in(netlist, CAPCT, net){
 		int i = nodelist.name2idx[net.nbr[0]];
 		int j = nodelist.name2idx[net.nbr[1]];
-		double Geq = 2*PI*f*net.value; // jwC
-		t.push(i,i, 0, Geq);
-		t.push(j,j, 0, Geq);
-		t.push(i,j, 0, -Geq);
-		t.push(j,i, 0, -Geq);
+		double Geq = 2.0 * PI * f * net.value; // jwC
+		t.push(i,i, 0.0,  Geq);
+		t.push(j,j, 0.0,  Geq);
+		t.push(i,j, 0.0, -Geq);
+		t.push(j,i, 0.0, -Geq);
 	}
 }
 
@@ -43,7 +43,7 @@ void stamp_inductor(Netlist & netlist, Nodelist & nodelist,
 	// in DC analysis, SHORT circuit
 	if( atype == DC ) return; 
 	Net net;
-	foreach_net_in(netlist, CAPCT, net){
+	foreach_net_in(netlist, INDCT, net){
 		int i = nodelist.name2idx[net.nbr[0]];
 		int j = nodelist.name2idx[net.nbr[1]];
 		double Geq = 1/(2*PI*f*net.value); // 1/jwL
@@ -144,12 +144,14 @@ void stamp_BJT_DC(Netlist & netlist, Nodelist & nodelist,
 		double Scb = hc1 + hc2,  Scc = -hc2,       Sce = -hc1;
 		double Sbb = hb1 + hb2,  Sbc = -hb2,       Sbe = -hb1;
 		double Seb = -(Sbb+Scb), Sec = -(Sbc+Scc), See = -(Sbe+Sce);
+		/*
 		if( net.name== "Q1" ){
 			printf("stamping %s\n",net.name.c_str());
 			printf("%e %e %e\n", Scb, Scc, Sce);
 			printf("%e %e %e\n", Sbb, Sbc, Sbe);
 			printf("%e %e %e\n\n", Seb, Sec, See);
 		}
+		*/
 
 		t.push(c, b, Scb); t.push(c, c, Scc); t.push(c, e, Sce);
 		t.push(b, b, Sbb); t.push(b, c, Sbc); t.push(b, e, Sbe);

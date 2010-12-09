@@ -22,11 +22,11 @@ public:
 	void merge();
 	void push(int i,int j,double x,double z=.0);
 	int size();
+	void output();
+
 	vector<int> Ti;
 	vector<int> Tj;
 	vector<double> Tx;
-
-	// newly added: for complex number
 	vector<double> Tz;
 };
 
