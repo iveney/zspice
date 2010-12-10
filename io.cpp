@@ -209,6 +209,8 @@ void read_netlist(char * filename, Netlist & netlist, Nodelist & nodelist){
 				netlist[name]=Net(VSRC,name, node1, node2, v); 
 				netlist[name].set_voltage(vtype,v,off,amp,freq);
 				netlist.netset[VSRC].insert(name);
+				// set the initial node voltage
+				nodelist[node1].v = v;
 				if(vtype == AC) g_vin = v; //mark the vin value
 				break;
 			case 'i': // current source

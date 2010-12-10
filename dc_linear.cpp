@@ -120,11 +120,8 @@ void output_result(Netlist & netlist, Nodelist & nodelist, double *v, int n){
 	for(i=1; i<nodelist.size(); i++){ // do not output ground=0
 		Node & nd = nodelist.nodelist[i];
 		int id = nodelist.name2idx[nd.name];
-#ifndef PHASE1OUTPUT
-		cout<<nd.name<<": "<<scientific<<right<<v[id]<<endl;
-#else
-		cout<<"voltage at node "<<nd.name<<" = "<<scientific<<v[id]<<endl;
-#endif
+		cout<<"voltage at node "<<nd.name<<" = "
+		    <<scientific<<v[id]<<endl;
 	}
 
 	// output branch currents of Voltage source, VCVS and CCVS
@@ -132,33 +129,18 @@ void output_result(Netlist & netlist, Nodelist & nodelist, double *v, int n){
 	const int set_types[] = {VSRC, VCVS, CCVS};
 	int nn= sizeof(set_types)/sizeof(int);
 	for(i=0;i<nn;i++){
-#ifndef PHASE1OUTPUT
-		cout<<endl<<"** branch current of "
-			<<nettype_str[set_types[i]]<<" **"<<endl;
-#endif
 		foreach_net_in(netlist, set_types[i], net){
 			int id = net2int[net.name];
-#ifndef PHASE1OUTPUT	
-			cout<<net.name<<": "<<scientific<<right<<v[id]<<endl;
-#else
 			cout<<"current throught source "<<net.name<<" = "
 				<<scientific<<v[id]<<endl;
-#endif
 		}
 	}
 
 	// for CCCS, it is controlled by some vyyy, then just compute it
-#ifndef PHASE1OUTPUT
-	cout<<endl<<"** branch current of cccs **"<<endl;
-#endif
 	foreach_net_in(netlist, CCCS, net){
 		int id = net2int[net.vyyy];
-#ifndef PHASE1OUTPUT
-		cout<<net.name<<": "<<scientific<<right<<net.value*v[id]<<endl;
-#else
 		cout<<"current throught source "<<net.name<<" = "
 			<<scientific<<net.value*v[id]<<endl;
-#endif
 	}
 	cout<<endl;
 }

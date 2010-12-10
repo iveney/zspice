@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       157,          7]
-NotebookDataLength[     14756,        489]
-NotebookOptionsPosition[     13366,        441]
-NotebookOutlinePosition[     13720,        457]
-CellTagsIndexPosition[     13677,        454]
+NotebookDataLength[     15807,        530]
+NotebookOptionsPosition[     14084,        470]
+NotebookOutlinePosition[     14438,        486]
+CellTagsIndexPosition[     14395,        483]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -437,6 +437,35 @@ Cell[BoxData[
    RowBox[{"-", "mj"}]]}]], "Output",
  CellChangeTimes->{
   3.500736074309988*^9, {3.500744047438158*^9, 3.500744049728985*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData["\[CapitalPi]"], "Input",
+ CellChangeTimes->{{3.500778322545527*^9, 3.500778323526896*^9}}],
+
+Cell[BoxData["\[CapitalPi]"], "Output",
+ CellChangeTimes->{3.500778324724203*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Evaluate", "[", "\[Pi]", "]"}]], "Input",
+ CellChangeTimes->{{3.500778327261154*^9, 3.500778337503127*^9}}],
+
+Cell[BoxData["\[Pi]"], "Output",
+ CellChangeTimes->{3.500778338440057*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"\[Pi]", "*", "1.0"}]], "Input",
+ CellChangeTimes->{{3.500778340229082*^9, 3.500778345374345*^9}}],
+
+Cell[BoxData["3.141592653589793`"], "Output",
+ CellChangeTimes->{3.500778345913381*^9}]
 }, Open  ]]
 },
 WindowSize->{964, 632},
@@ -490,6 +519,18 @@ Cell[12444, 406, 413, 13, 63, "Output"]
 Cell[CellGroupData[{
 Cell[12894, 424, 190, 4, 27, "Input"],
 Cell[13087, 430, 263, 8, 50, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[13387, 443, 104, 1, 27, "Input"],
+Cell[13494, 446, 81, 1, 27, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[13612, 452, 131, 2, 27, "Input"],
+Cell[13746, 456, 74, 1, 27, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[13857, 462, 121, 2, 27, "Input"],
+Cell[13981, 466, 87, 1, 27, "Output"]
 }, Open  ]]
 }
 ]
