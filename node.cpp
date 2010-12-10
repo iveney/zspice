@@ -25,7 +25,7 @@ void Node::insert_net(const string & netname){
 // output a node
 ostream & operator <<(ostream & s, Node & node){
 	s<<std::left<<setw(3)<<node.name<<std::right<<": [ ";
-	vector<string>::iterator it;
+	VecStr::iterator it;
 	for(it=node.nets.begin(); it!=node.nets.end(); it++)
 		s<<*it<<" ";
 	cout<<"]";

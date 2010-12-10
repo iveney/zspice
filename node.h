@@ -16,6 +16,7 @@
 #include <ext/hash_map>
 #include <iostream>
 #include "net.h"
+#include "global.h"
 using namespace std;
 using namespace __gnu_cxx;
 
@@ -26,7 +27,7 @@ public:
 	void insert_net(const string & netname);
 	friend ostream & operator <<(ostream & s, Node & node);
 	string name;
-	vector<string> nets;
+	VecStr nets;
 	double v; // voltage
 };
 

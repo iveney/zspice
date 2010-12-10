@@ -24,9 +24,9 @@ using namespace std;
 
 extern string g_basename;
 extern double g_vin;
-extern vector<string> g_plot_gain_node;
-extern vector<string> g_plot_phase_node;
-extern vector<string> g_plot_vol_node;
+extern VecStr g_plot_gain_node;
+extern VecStr g_plot_phase_node;
+extern VecStr g_plot_vol_node;
 extern double g_init_f;
 extern double g_end_f;
 extern double g_step_f;

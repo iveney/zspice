@@ -23,6 +23,7 @@
 #include "io.h"
 #include "dc_linear.h"
 #include "ac_analysis.h"
+#include "tran_analysis.h"
 #include "main.h"
 using namespace std;
 
@@ -30,12 +31,15 @@ ANALYSIS_TYPE g_atype = DC; // default to DC
 char * g_filename = NULL;
 string g_basename;
 double g_vin=-1.0;
-vector<string> g_plot_gain_node;
-vector<string> g_plot_phase_node;
-vector<string> g_plot_vol_node;
+VecStr g_plot_gain_node;
+VecStr g_plot_phase_node;
+VecStr g_plot_vol_node;
+VecStr g_plot_tran_node;
 double g_init_f=0;
 double g_end_f=0;
 double g_step_f=0;
+double g_step_tran=0; 
+double g_end_tran =0;
 
 void output_netlist_info(Netlist & netlist, Nodelist & nodelist){
 	cout<<endl;
@@ -68,6 +72,7 @@ int main(int argc, char *argv[]){
 		break;
 	case TRAN:
 		cout<<"** Transient analysis **"<<endl;
+		transient_analysis(netlist,nodelist);
 		break;
 	default:
 		cout<<"Unknown type. ";

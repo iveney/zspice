@@ -22,12 +22,15 @@ using namespace std;
 
 extern ANALYSIS_TYPE g_atype;
 extern double g_vin;
-extern vector<string> g_plot_gain_node;
-extern vector<string> g_plot_phase_node;
-extern vector<string> g_plot_vol_node;
+extern VecStr g_plot_gain_node;
+extern VecStr g_plot_phase_node;
+extern VecStr g_plot_vol_node;
+extern VecStr g_plot_tran_node;
 extern double g_init_f;
 extern double g_end_f;
 extern double g_step_f;
+extern double g_step_tran;
+extern double g_end_tran;
 
 // improved version of reading value pairs
 // read the initial (guess) values of voltage
@@ -74,7 +77,6 @@ void read_initial_values(string line,
 void read_output_node(string line){
 	char * l = new char[line.size()+1];
 	strcpy(l, line.c_str());
-	//for(size_t i=0;i<line.size();i++) cout<<i<<":"<<int(l[i])<<endl;
 	const char * sep = "() \r\n";
 	char * name;
        	name = strtok(l, sep);    // ac
@@ -91,6 +93,26 @@ void read_output_node(string line){
 		}
 		else report_exit("Unknown plot type!\n");
 	}
+	delete [] l;
+}
+
+void read_tran_output_node(string line){
+	char * l = new char[line.size()+1];
+	strcpy(l, line.c_str());
+	const char * sep = "() \r\n";
+	char * name;
+       	name = strtok(l, sep);    // tran
+	while( name != NULL ){
+		name = strtok(NULL, sep); // reads a `v'
+		if( name == NULL ) break;
+		if( strcmp(name, "v") == 0 ){
+			name = strtok(NULL, sep);
+			g_plot_tran_node.push_back(string(name)); 
+		}
+		else 
+			report_exit("Unknown transient plot type!\n");
+	}
+
 	delete [] l;
 }
 
@@ -113,6 +135,23 @@ void read_plot_params(string line){
 	g_end_f = 100E6;
 	delete [] l;
 }
+
+// NOTE: this part is hard coded now
+void read_tran_params(string line){
+	char * l = new char[line.size()+1];
+	strcpy(l, line.c_str());
+	const char * sep = " ";
+	char * value;
+	value = strtok(l, sep);    // step
+	g_step_tran = atoi(value);
+	value = strtok(NULL, sep); // end
+	g_end_tran = atoi(value);
+
+	g_step_tran = 0.1E-6;
+	g_end_tran = 200E-6;
+	delete [] l;
+}
+
 // read a ac/dc value from input string
 VOL_TYPE input_voltage(ifstream & ifs, double & value, double & off,
 		double &amp, double & freq){
@@ -151,18 +190,39 @@ void read_netlist(char * filename, Netlist & netlist, Nodelist & nodelist){
 	while( ifs>>name ){
 		line_counter++;
 		// check declarative command
-		if( name == ".end" ) break;
-		if( name == ".op" ) continue;
-		if( name == ".ac" ){
-			g_atype = AC;
-			getline(ifs, line);
-			read_plot_params(line);
-			continue;
-		}
-		if( name == ".plot" ){// perform AC analysis
-			g_atype = AC;
-			getline(ifs, line);
-			read_output_node(line);
+		if( name[0] == '.' || name[0] == '+' ){
+			if( name == ".end" ) break;
+			else if( name == ".op" ) continue;
+			else if( name == ".ac" ){   // set AC plot parameters
+				g_atype = AC;
+				getline(ifs, line);
+				read_plot_params(line);
+			} 
+			else if ( name == ".plot" ){// perform AC analysis
+				g_atype = AC;
+				getline(ifs, line);
+				read_output_node(line);
+			}
+			else if ( name == ".print" ){// transient analysis
+				g_atype = TRAN;
+				// TODO
+				getline(ifs, line);
+				read_tran_output_node(line);
+			}
+			else if ( name == ".TRAN" ){// set TRAN parameters
+				// TODO
+				getline(ifs, line);
+				read_tran_params(line);
+			}
+			else if( name == ".nodeset" || 
+				 name == "+" ){
+				// set the init volts to the nodes, current to src
+				getline(ifs,line);
+				read_initial_values(line, netlist, nodelist);
+			}
+			else{
+				report_exit("Unrecognized option!\n");
+			}
 			continue;
 		}
 
@@ -177,13 +237,7 @@ void read_netlist(char * filename, Netlist & netlist, Nodelist & nodelist){
 			continue;
 		}
 
-		// check if it is initial guess
-		if( name == ".nodeset" || name == "+" ){
-			// set the initial voltage to the nodes, current to src
-			getline(ifs,line);
-			read_initial_values(line, netlist, nodelist);
-			continue;
-		}
+		
 
 		// start to read netlist
 		string node1, node2, ctrl1, ctrl2, vyyy, emit, polarity;

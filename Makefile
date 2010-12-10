@@ -1,11 +1,11 @@
 CC=g++
 SRC=util.cpp net.cpp io.cpp node.cpp triplet.cpp
 HDR=$(SRC:.cpp=.h)
-OBJ=$(SRC:.cpp=.o) dc_linear.o dc_nonlinear.o ac_analysis.o
+OBJ=$(SRC:.cpp=.o) dc_linear.o dc_nonlinear.o ac_analysis.o tran_analysis.o
 BIN=zspice
 DBG=debug
 CFLAGS=
-OPT=-Wall -g -DPHASE1OUTPUT
+OPT=-Wall -g 
 SPARSE=SuiteSparse
 LIBS=$(SPARSE)/UMFPACK/Lib/libumfpack.a \
      $(SPARSE)/AMD/Lib/libamd.a \
@@ -25,7 +25,7 @@ MYLIBS=./libs/*.a
 MYINC=-I./headers
 CSCOPEFILES=cscope.files cscope.out cscope.po.out
 
-main: $(OBJ) main.o tags
+main: $(OBJ) main.o tags global.h
 	@echo "Making zspice..."
 	$(CC) $(OPT) $(CFLAGS) $(INC) -o $(BIN) $(OBJ) $(MYLIBS) main.o 
 
@@ -42,7 +42,7 @@ test: test.cpp
 	$(CC) -c $(OPT) $(CFLAGS) $(INC) test.cpp
 	$(CC) $(OPT) $(CFLAGS) $(INC) -o test $(MYLIBS) $(OBJ) test.o
 
-%.o: %.cpp  %.h
+%.o: %.cpp  %.h global.h
 	$(CC) -c $< $(OPT) -o $@
 
 dc_linear.o: dc_linear.cpp dc_linear.h
@@ -53,6 +53,9 @@ dc_nonlinear.o: dc_nonlinear.h dc_nonlinear.cpp
 
 ac_analysis.o: ac_analysis.h ac_analysis.cpp
 	$(CC) -c $(OPT) $(CFLAGS) $(INC) ac_analysis.cpp
+
+tran_analysis.o: tran_analysis.h tran_analysis.cpp
+	$(CC) -c $(OPT) $(CFLAGS) $(INC) tran_analysis.cpp
 
 copy_libs: $(LIBS) $(AMD_HDR) $(UMFPACK_HDR) $(SPARSE_HDR)
 	mkdir -p ./headers

@@ -10,6 +10,11 @@
 #ifndef __GLOBAL_H__
 #define __GLOBAL_H__
 
+#include <vector>
+#include <string>
+using namespace std;
+typedef vector<string> VecStr;
+
 enum NODETYPE{RSTR, VSRC, CSRC, VCCS, VCVS, CCVS, CCCS, DIODE, 
 	BJT, CAPCT, INDCT, UNDEF}; // the last type is undef
 enum POLARITY{NPN, PNP};
