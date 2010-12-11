@@ -147,6 +147,7 @@ void read_tran_params(string line){
 	value = strtok(NULL, sep); // end
 	g_end_tran = atoi(value);
 
+	//g_step_tran = 0.1E-6; not working!
 	g_step_tran = 0.1E-6;
 	g_end_tran = 200E-6;
 	delete [] l;

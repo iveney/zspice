@@ -41,6 +41,24 @@ public:
 	double compute_Ic(double Vc, double Vb, double Ve);
 	double compute_Ib(double Vc, double Vb, double Ve);
 
+	double compute_Cc(double Vc);
+	double compute_Cbe(double Vbe, double Vbc);
+	double compute_Cbe2(double Vbe, double Vbc);
+	double compute_Cbc(double Vbc);
+
+	double compute_dCc(double Vc);
+	double compute_dCbe(double Vbe, double Vbc);
+	double compute_dCbe2(double Vbe, double Vbc);
+	double compute_dCbc(double Vbc);
+
+	void compute_Cc_eq(double Vc, double Vtn_c, 
+			double &CIeq, double & CGeq);
+	void compute_Cbe_eq(double Vbe, double Vbc,
+			double Vtn_be, double Vtn_bc,
+			double & BEIeq, double & BEGeq1, double & BEGeq2);
+	void compute_Cbc_eq(double Vbc, double Vtn_bc, 
+			double &BCIeq, double &BCGeq);
+
 	NODETYPE type;
 	string name;
 	string nbr[2];     // as of BJT, they denotes collector and base

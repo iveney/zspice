@@ -32,7 +32,8 @@ bool stamp_vccs(Netlist & netlist, Nodelist & nodelist,
 		Triplet & t, double * J, ANALYSIS_TYPE atype);
 
 bool stamp_vsrc(Netlist & netlist, Nodelist & nodelist,
-		Triplet & t, double * J, ANALYSIS_TYPE atype, int & ct);
+		Triplet & t, double * J, ANALYSIS_TYPE atype, int & ct, 
+		double time=0.0);
 
 bool stamp_csrc(Netlist & netlist, Nodelist & nodelist,
 		Triplet & t, double * J, ANALYSIS_TYPE atype);

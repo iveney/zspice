@@ -13,10 +13,11 @@
 //
 #include <cmath>
 #include <ext/hash_map>
+#include "global.h"
 #include "dc_nonlinear.h"
 #include "node.h"
 #include "net.h"
-#include "global.h"
+#include "util.h"
 using namespace __gnu_cxx;
 
 extern hash_map<string,int> net2int;
@@ -144,14 +145,12 @@ void stamp_BJT_DC(Netlist & netlist, Nodelist & nodelist,
 		double Scb = hc1 + hc2,  Scc = -hc2,       Sce = -hc1;
 		double Sbb = hb1 + hb2,  Sbc = -hb2,       Sbe = -hb1;
 		double Seb = -(Sbb+Scb), Sec = -(Sbc+Scc), See = -(Sbe+Sce);
-		/*
 		if( net.name== "Q1" ){
 			printf("stamping %s\n",net.name.c_str());
-			printf("%e %e %e\n", Scb, Scc, Sce);
-			printf("%e %e %e\n", Sbb, Sbc, Sbe);
-			printf("%e %e %e\n\n", Seb, Sec, See);
+			printf("%25.18e %25.18e %25.18e\n", Scb, Scc, Sce);
+			printf("%25.18e %25.18e %25.18e\n", Sbb, Sbc, Sbe);
+			printf("%25.18e %25.18e %25.18e\n\n", Seb, Sec, See);
 		}
-		*/
 
 		t.push(c, b, Scb); t.push(c, c, Scc); t.push(c, e, Sce);
 		t.push(b, b, Sbb); t.push(b, c, Sbc); t.push(b, e, Sbe);
@@ -175,35 +174,6 @@ void stamp_BJT_DC(Netlist & netlist, Nodelist & nodelist,
 	}
 }
 
-void stamp_BJT_AC(Netlist & netlist, Nodelist & nodelist,
-		Triplet & t, double f){
-	// no imaginary part?
-	Net net;
-	double w = 2*PI*f;
-	foreach_net_in(netlist, BJT, net){
-		string clct = net.nbr[0];
-		string base = net.nbr[1];
-		string emit = net.emit;
-
-		// find the index of c,b,e
-		int c = nodelist.name2idx[clct];
-		int b = nodelist.name2idx[base];
-		int e = nodelist.name2idx[emit];
-
-		t.push(b,b,0,net.B[0] * w);
-		t.push(b,c,0,net.B[1] * w);
-		t.push(b,e,0,net.B[2] * w);
-
-		t.push(c,b,0,net.C[0] * w);
-		t.push(c,c,0,net.C[1] * w);
-		t.push(c,e,0,net.C[2] * w);
-
-		t.push(e,b,0,net.E[0] * w);
-		t.push(e,c,0,net.E[1] * w);
-		t.push(e,e,0,net.E[2] * w);
-	}
-}
-
 // stamp the non-linear devices
 // NOTE: some terms rely on the value of last time
 bool stamp_nonlinear(Netlist & netlist, Nodelist & nodelist, 
@@ -222,7 +192,7 @@ bool stamp_nonlinear(Netlist & netlist, Nodelist & nodelist,
 double voltage_diff(double * Vnew, double * Vold, int n){
 	double r=0.0,tmp;
 	for(int i=0;i<n;i++) {
-		//cout<<i<<" : "<<Vold[i]<<" | "<<Vnew[i]<<endl;
+		printf("%d : %25.17e %25.17e\n", i, Vold[i], Vnew[i]);
 		tmp = Vnew[i] - Vold[i];
 		r+=tmp*tmp;
 	}
@@ -314,7 +284,10 @@ double NR_iteration(Netlist & netlist, Nodelist & nodelist,
 			cout<<"iteration: "<<++counter
 			    <<", difference = "<<diff<<endl;
 		}
-	}while(diff>EPSILON && counter < MAX_ITERATION);
+	}while(diff > EPSILON && counter < MAX_ITERATION);
+
+	if( diff > EPSILON && counter >= MAX_ITERATION )
+		report_exit("Exceeding max iteration time, not converging!\n");
 	
 	delete [] Vold;
 	delete [] Vnew;

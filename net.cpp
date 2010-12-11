@@ -13,9 +13,12 @@
 #include <set>
 #include <iomanip>
 #include <cassert>
+#include <cmath>
 #include "net.h"
 using namespace std;
 using namespace __gnu_cxx;
+
+extern double g_step_tran;
 
 // initialize the type to be UNDEF
 Net::Net():type(UNDEF){
@@ -93,6 +96,112 @@ double Net::compute_Ib(double Vc, double Vb, double Ve){
 	Ib += hb[3];
 //	cout<<" to "<<Ib<<endl;
 	return Ib;
+}
+
+double Net::compute_Cc(double Vc){
+	double Cc;
+	if(Vc < Fc * Vj) 
+		Cc = Cjcs*pow(1-Vc/Vj,-Mj);
+	else 
+		Cc = Cjcs*(Mj*Vc/Vj + 1.0 - Fc*(1+Mj))/pow(1-Fc,1+Mj);
+	return Cc;
+}
+
+double Net::compute_Cbe(double Vbe, double Vbc){
+	double Cbe =   Tf*Is*exp(Vbe/Vt)*(1-Vbc/VAf-Vbe/VAr)/Vt
+		    - Tf*Is*(exp(Vbe/Vt)-1)/VAr;
+	if(Vbe < Fc * Vj ) 
+		Cbe += Cjbe*pow(1-Vbe/Vj,-Mj);
+	else 
+		Cbe += Cjbe*(Mj*Vbe/Vj + 1.0 - Fc*(1+Mj))/pow(1-Fc,1+Mj);
+	return Cbe;
+}
+
+double Net::compute_Cbe2(double Vbe, double Vbc){
+	return -Tf*Is*(exp(Vbe/Vt)-1)/VAf;
+}
+
+double Net::compute_Cbc(double Vbc){
+	double Cbc = Tr*Is*exp(Vbc/Vt)/Vt;
+	if(Vbc < Fc * Vj)
+		Cbc += Cjbc*pow(1-Vbc/Vj,-Mj);
+	else
+		Cbc += Cjbc*(Mj*Vbc/Vj + 1.0 - Fc*(1+Mj))/pow(1-Fc,1+Mj);
+	return Cbc;
+}
+
+double Net::compute_dCc(double Vc){
+	double q;
+	if( Vc < Fc * Vj )
+		q = Mj * Cjcs * pow(1-Vc/Vj, -Mj-1);
+	else
+		q = Mj * Cjcs / Vj / pow(1-Fc, 1+Mj);
+	return q;
+}
+
+double Net::compute_dCbe(double Vbe, double Vbc){
+	double q = - Tf * Is * exp(Vbe/Vt) / VAr / Vt
+		   + Tf * Is * exp(Vbe/Vt) * (1- Vbc/VAf - Vbe/VAr)/Vt/Vt
+		   - Tf * Is * exp(Vbe/Vt) / Vt / VAr;
+	if( Vbe < Fc * Vj)
+		q += Mj * Cjbe * pow(1 - Vbe/Vj, -Mj-1) / Vj;
+	else
+		q += Mj * Cjbe / Vj / pow(1-Fc,1+Mj);
+	return q;
+}
+
+double Net::compute_dCbe2(double Vbe, double Vbc){
+	return - Tf * Is * exp(Vbe/Vt) / VAf / Vt;
+}
+
+double Net::compute_dCbc(double Vbc){
+	double q = Tr * Is * exp(Vbc/Vt) / Vt / Vt;
+	if( Vbc < Fc * Vj )
+		q += Mj * Cjbc * pow(1-Vbc/Vj, -Mj-1);
+	else
+		q += Mj * Cjbc / Vj / pow(1-Fc, 1+Mj);
+	return q;
+}
+
+void Net::compute_Cc_eq(double Vc, double Vtn_c, 
+		double &CIeq, double & CGeq){
+	double Cc, dCc;
+	Cc = compute_Cc(Vc);
+	dCc = compute_dCc(Vc);
+//	printf("name = %s, Cc = %e dCc = %e\n", name.c_str(), Cc, dCc);
+//	printf("Vc=%e timeVc=%e\n", Vc, Vtn_c);
+	CIeq = - Vtn_c / g_step_tran * (Cc - dCc * Vc)
+	       - Vc * Vc / g_step_tran * dCc;
+	CGeq = - Vtn_c / g_step_tran * dCc
+	       + 1 / g_step_tran * (dCc * Vc + Cc);
+//	printf("step = %e\n",g_step_tran);
+//	printf("name = %s, CIeq = %e CGeq = %e\n", name.c_str(), CIeq, CGeq);
+}
+
+void Net::compute_Cbe_eq(double Vbe, double Vbc,
+		double Vtn_be, double Vtn_bc,
+		double & BEIeq, double & BEGeq1, double & BEGeq2){
+	double Cbe1, dCbe1, dCbe2;
+	Cbe1 = compute_Cbe(Vbe, Vbc);
+	dCbe1 = compute_dCbe(Vbe, Vbc);
+	dCbe2 = compute_dCbe2(Vbe, Vbc);
+	BEIeq = - Vtn_be / g_step_tran * (Cbe1 + dCbe1 * Vbe + dCbe2 * Vbc)
+		- Vbe * Vbe / g_step_tran * dCbe1 - Vbe * Vbc / g_step_tran * dCbe2;
+	BEGeq1 = - Vtn_be / g_step_tran * dCbe1
+		 + 1 / g_step_tran * (dCbe1 * Vbe + Cbe1);
+	BEGeq2 = - Vtn_be / g_step_tran * dCbe2 
+		 + Vbe / g_step_tran * dCbe2;
+}
+
+void Net::compute_Cbc_eq(double Vbc, double Vtn_bc, 
+		double &BCIeq, double &BCGeq){
+	double Cbc, dCbc;
+	Cbc = compute_Cbc(Vbc);
+	dCbc = compute_dCbc(Vbc);
+	BCIeq = - Vtn_bc / g_step_tran * (Cbc - dCbc * Vbc)
+		- Vbc * Vbc / g_step_tran * dCbc;
+	BCGeq = - Vtn_bc / g_step_tran * dCbc
+		+ 1 / g_step_tran * (dCbc * Vbc + Cbc);
 }
 
 // opeartor [ ] overload

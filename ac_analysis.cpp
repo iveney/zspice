@@ -31,6 +31,7 @@ extern double g_init_f;
 extern double g_end_f;
 extern double g_step_f;
 
+/*
 double compute_Cc(double Vc, POLARITY pol){
 	double Cc;
 	if(Vc < Fc * Vj) 
@@ -62,9 +63,10 @@ double compute_Cbc(double Vbe, double Vbc, POLARITY pol){
 		Cbc += Cjbc*(Mj*Vbc/Vj + 1.0 - Fc*(1+Mj))/pow(1-Fc,1+Mj);
 	return Cbc;
 }
+*/
 
 // open files to plot
-void open_plot_files(Nodelist & nodelist, 
+void open_AC_plot_files(Nodelist & nodelist, 
 		     vector<FILE *> & fgain,
 		     vector<FILE *> & fphase){
 	string name;
@@ -86,7 +88,7 @@ void open_plot_files(Nodelist & nodelist,
 	}
 }
 
-void close_plot_files(vector<FILE *> & fgain,
+void close_AC_plot_files(vector<FILE *> & fgain,
 		      vector<FILE *> & fphase){
 	for(size_t i=0;i<fgain.size();i++) fclose(fgain[i]);
 	for(size_t i=0;i<fphase.size();i++) fclose(fphase[i]);
@@ -135,10 +137,10 @@ void compute_BJT_cap(Net & net, Nodelist & nodelist){
 	}
 
 	// compute 
-	double Cc  = compute_Cc(Vc, net.polarity);
-	double Cbe = compute_Cbe(Vbe, Vbc, net.polarity);
-	double Cbe2 = compute_Cbe2(Vbe, Vbc, net.polarity);
-	double Cbc = compute_Cbc(Vbe, Vbc, net.polarity);
+	double Cc  = net.compute_Cc(Vc);
+	double Cbe = net.compute_Cbe(Vbe, Vbc);
+	double Cbe2 = net.compute_Cbe2(Vbe, Vbc);
+	double Cbc = net.compute_Cbc(Vbc);
 
 	net.B[0] =   Cbe  + Cbe2 + Cbc;
 	net.B[1] = -(Cbe2 + Cbc);
@@ -235,6 +237,37 @@ void solve_ac(Triplet & t, double * vx, double * vz,
 	delete [] Tz;
 }
 
+void stamp_BJT_AC(Netlist & netlist, Nodelist & nodelist,
+		Triplet & t, double f){
+	// no imaginary part?
+	Net net;
+	double w = 2*PI*f;
+	foreach_net_in(netlist, BJT, net){
+		string clct = net.nbr[0];
+		string base = net.nbr[1];
+		string emit = net.emit;
+
+		// find the index of c,b,e
+		int c = nodelist.name2idx[clct];
+		int b = nodelist.name2idx[base];
+		int e = nodelist.name2idx[emit];
+
+		t.push(b,b,0,net.B[0] * w);
+		t.push(b,c,0,net.B[1] * w);
+		t.push(b,e,0,net.B[2] * w);
+
+		t.push(c,b,0,net.C[0] * w);
+		t.push(c,c,0,net.C[1] * w);
+		t.push(c,e,0,net.C[2] * w);
+
+		t.push(e,b,0,net.E[0] * w);
+		t.push(e,c,0,net.E[1] * w);
+		t.push(e,e,0,net.E[2] * w);
+	}
+}
+
+
+
 // perform ac analysis
 void ac_analysis(Netlist & netlist, Nodelist & nodelist){
 	// first perform dc analysis to get the DC operating point
@@ -273,7 +306,7 @@ void ac_analysis(Netlist & netlist, Nodelist & nodelist){
 
 	vector<FILE *> fgain;
 	vector<FILE *> fphase;
-	open_plot_files(nodelist, fgain, fphase);
+	open_AC_plot_files(nodelist, fgain, fphase);
 
 	// set a frequency and stamp the matrix
 	double inc = pow(10.0,1.0/g_step_f);
@@ -303,5 +336,5 @@ void ac_analysis(Netlist & netlist, Nodelist & nodelist){
 	delete [] Jx;
 	delete [] Jz;
 	delete [] Jx_copy;
-	close_plot_files(fgain,fphase);
+	close_AC_plot_files(fgain,fphase);
 }

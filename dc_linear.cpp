@@ -286,17 +286,21 @@ bool stamp_vccs(Netlist & netlist, Nodelist & nodelist,
 
 bool stamp_vsrc(Netlist & netlist, Nodelist & nodelist,
 		Triplet & t, double * J, 
-		ANALYSIS_TYPE atype, int & ct){
+		ANALYSIS_TYPE atype, int & ct, double time){
 	Net net;
 	// stamp voltage source, NOTE the counter
 	foreach_net_in(netlist, VSRC, net){
 		// we need to identify the analysis type
 		double value = net.value;
-		if(net.vtype == AC && atype == DC ||
-		   net.vtype == DC && atype == AC) {
+		if(atype == DC && net.vtype == AC ||
+		   atype == AC && net.vtype == DC ) {
 			//    AC voltage source in DC analysis 
 			// or DC voltage source in AC analysis 
 			value = 0.0;
+		}
+		else if (atype == TRAN && net.vtype == SIN){
+			value = net.amplitude * 
+				sin(2.0*PI*net.freq*time) + net.offset;
 		}
 		net2int[net.name] = ct;
 		int k = nodelist.name2idx[net.nbr[0]];
@@ -313,7 +317,6 @@ bool stamp_vsrc(Netlist & netlist, Nodelist & nodelist,
 	}
 	return true;
 }
-
 
 bool stamp_cccs(Netlist & netlist, Nodelist & nodelist,
 		Triplet & t, double * J, ANALYSIS_TYPE atype){
