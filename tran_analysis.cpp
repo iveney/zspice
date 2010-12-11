@@ -180,16 +180,23 @@ void solve_transient(Netlist & netlist, Nodelist & nodelist, double time){
 		stamp_vsrc(netlist, nodelist, t, J, TRAN, ct, time);
 
 		stamp_BJT_DC(netlist, nodelist, t, J);
+		/*
 		J[0] = 0;
 		cout<<" === before === "<<endl;
 		for(int i=0;i<size;i++)
 			printf("%d: %15.8e\n", i, J[i]);
+			*/
 		stamp_BJT_TRAN(netlist, nodelist, time, Vnew, Vtn, t, J);
-		cout<<" === after === "<<endl;
 		J[0] = 0;
+
+		t.merge();t.merge();
+		t.output();
+		/*
+		cout<<" === after === "<<endl;
 		for(int i=0;i<size;i++)
 			printf("%d: %15.8e\n", i, J[i]);
 		cout<<endl;
+		*/
 		//exit(1);
 		solve_dc(t, v, J, size);
 
@@ -198,9 +205,9 @@ void solve_transient(Netlist & netlist, Nodelist & nodelist, double time){
 		nodelist.output_node_voltages();
 		diff = voltage_diff(Vnew,Vold,size);
 		cout<<"Iteration "<<counter<<" diff="<<diff<<endl;
-	}while(diff > EPSILON && counter < MAX_ITERATION);
+	}while(diff > EPSILON && counter < 4);
 
-	if( diff > EPSILON && counter >= MAX_ITERATION )
+	if( diff > EPSILON && counter >= 4)
 		report_exit("Exceeding max iteration time, not converging!\n");
 
 	delete [] v;
@@ -214,7 +221,7 @@ void transient_analysis(Netlist & netlist,Nodelist &nodelist){
 	
 	vector<FILE *> fplot;
 	open_tran_plot_files(nodelist,fplot);
-	//g_end_tran = g_step_tran;
+	g_end_tran = g_step_tran;
 	for(double time = g_step_tran; time <= g_end_tran; time+=g_step_tran){
 		cout<<"time="<<time<<endl;
 		solve_transient(netlist, nodelist, time);

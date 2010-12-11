@@ -192,7 +192,7 @@ bool stamp_nonlinear(Netlist & netlist, Nodelist & nodelist,
 double voltage_diff(double * Vnew, double * Vold, int n){
 	double r=0.0,tmp;
 	for(int i=0;i<n;i++) {
-		printf("%d : %25.17e %25.17e\n", i, Vold[i], Vnew[i]);
+//		printf("%d : %25.17e %25.17e\n", i, Vold[i], Vnew[i]);
 		tmp = Vnew[i] - Vold[i];
 		r+=tmp*tmp;
 	}

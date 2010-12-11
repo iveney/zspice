@@ -22,9 +22,7 @@ Triplet::Triplet(){
 void Triplet::output(){
 	int w = 15;
 	for(int i=0;i<size();i++){
-		cout<<"["<<setw(2)<<Ti[i]<<","<<setw(2)<<Tj[i]
-		    <<"] = "<<scientific
-		    <<setw(w)<<Tx[i]<<","<<setw(w)<<Tz[i]<<endl;
+		printf("[%d, %d] %25.15lf\n", Ti[i], Tj[i], Tx[i]);
 	}
 }
 

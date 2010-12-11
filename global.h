@@ -37,7 +37,8 @@ static const int BUFSIZE=256;
 // types of nets
 static const int NUM_NETTYPE=sizeof(nettype_str)/sizeof(char*);
 // tolerable difference
-static const double EPSILON = 1E-5;
+//static const double EPSILON = 1E-5;
+static const double EPSILON = 1E-10;
 
 // constants for non-linear devices
 static const double Vt = 0.02585126075417;
