@@ -1,0 +1,11 @@
+
+v1 a 0 10
+rb c 0 3000
+rc b 0 20
+q1 b c a pnp
+
+.nodeset v(a)=10 v(b)=6.1 v(c)=9.2
+
+.op
+
+.end

@@ -1,0 +1,27 @@
+** Transient analysis **
+
+** Net information **
+resistor       : [ RC1 RC2 RE ]
+voltage source : [ VCC VEE VS ]
+current source : [ ]
+vccs           : [ ]
+vcvs           : [ ]
+ccvs           : [ ]
+cccs           : [ ]
+diode          : [ ]
+bjt            : [ Q1 Q2 ]
+capacitor      : [ ]
+inductor       : [ ]
+
+** Node information **
+(0) 0  : [ VS VCC VEE Q2 ]
+(1) 1  : [ VS Q1 ]
+(2) 11 : [ VCC RC1 RC2 ]
+(3) 12 : [ VEE RE ]
+(4) out1: [ Q1 RC1 ]
+(5) 5  : [ Q1 Q2 RE ]
+(6) out2: [ Q2 RC2 ]
+
+Node "out1" transient plot : amp_tran1_out1_t.dat
+Node "out2" transient plot : amp_tran1_out2_t.dat
+ ** Transient analysis begins ** 

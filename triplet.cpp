@@ -20,7 +20,6 @@ Triplet::Triplet(){
 }
 
 void Triplet::output(){
-	int w = 15;
 	for(int i=0;i<size();i++){
 		printf("[%d, %d] %25.15lf\n", Ti[i], Tj[i], Tx[i]);
 	}
