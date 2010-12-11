@@ -145,12 +145,14 @@ void stamp_BJT_DC(Netlist & netlist, Nodelist & nodelist,
 		double Scb = hc1 + hc2,  Scc = -hc2,       Sce = -hc1;
 		double Sbb = hb1 + hb2,  Sbc = -hb2,       Sbe = -hb1;
 		double Seb = -(Sbb+Scb), Sec = -(Sbc+Scc), See = -(Sbe+Sce);
+		/*
 		if( net.name== "Q1" ){
 			printf("stamping %s\n",net.name.c_str());
 			printf("%25.18e %25.18e %25.18e\n", Scb, Scc, Sce);
 			printf("%25.18e %25.18e %25.18e\n", Sbb, Sbc, Sbe);
 			printf("%25.18e %25.18e %25.18e\n\n", Seb, Sec, See);
 		}
+		*/
 
 		t.push(c, b, Scb); t.push(c, c, Scc); t.push(c, e, Sce);
 		t.push(b, b, Sbb); t.push(b, c, Sbc); t.push(b, e, Sbe);

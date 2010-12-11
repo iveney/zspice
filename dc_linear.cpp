@@ -182,19 +182,6 @@ void solve_dc(Triplet & t, double * v, double * J, int n){
 		report_exit("umfpack_zi_triplet_to_col failed\n") ;
 	}
 
-	/*
-	   cout<<"nz, n ="<<nz<<" "<<n<<endl;
-	   for(int i=0;i<n;i++)
-	   cout<<"J["<<i<<"]="<<J[i]<<endl;
-
-	   for(int i=0;i<n_col+1;i++)
-	   cout<<"Ap["<<i<<"]="<<Ap[i]<<endl;
-
-	   for(int i=0;i<nz;i++)
-	   cout<<"Ai["<<setw(2)<<i<<"]="<<setw(2)<<Ai[i]
-	   <<" Ax["<<setw(2)<<i<<"]="<<setw(2)<<Ax[i]<<endl;
-	   */
-
 	double *null = (double *) NULL;
 	void *Symbolic, *Numeric;
 	status = umfpack_di_symbolic(n, n, Ap, Ai, Ax, &Symbolic, Control, null) ; 

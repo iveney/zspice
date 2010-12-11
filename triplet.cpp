@@ -31,10 +31,12 @@ void Triplet::merge(){
 	for(int k=0;k<size();k++){
 		for(int l=k+1;l<size();l++){
 			if( Ti[k] == Ti[l] && Tj[k] == Tj[l] ){
+				/*
 				if( Tj[k]==5 && Tj[l] == 5){
 					cout<<"merge ";
 					cout<<k<<" "<<l<<endl;
 				}
+				*/
 				Tx[k] += Tx[l];
 				Tz[k] += Tz[l];
 				Ti.erase(Ti.begin()+l);
@@ -51,6 +53,8 @@ void Triplet::push(int i, int j, double x, double z){
 	// NOTE: cross-out the zero-th row and column
 	// 	 do not stamp them
 	if( i == 0 || j == 0 ) return; 
+	//if( i == 1 && j == 1 )
+	//	printf("Pushing to [1, 1] by: %25.15lf\n", x);
 	Ti.push_back(i);
 	Tj.push_back(j);
 	Tx.push_back(x);

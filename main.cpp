@@ -72,6 +72,7 @@ int main(int argc, char *argv[]){
 		break;
 	case TRAN:
 		cout<<"** Transient analysis **"<<endl;
+		output_netlist_info(netlist,nodelist);
 		transient_analysis(netlist,nodelist);
 		break;
 	default:

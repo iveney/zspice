@@ -141,7 +141,7 @@ double Net::compute_dCc(double Vc){
 
 double Net::compute_dCbe(double Vbe, double Vbc){
 	double q = - Tf * Is * exp(Vbe/Vt) / VAr / Vt
-		   + Tf * Is * exp(Vbe/Vt) * (1- Vbc/VAf - Vbe/VAr)/Vt/Vt
+		   + Tf * Is * exp(Vbe/Vt) * (1- Vbc/VAf - Vbe/VAr) / Vt / Vt
 		   - Tf * Is * exp(Vbe/Vt) / Vt / VAr;
 	if( Vbe < Fc * Vj)
 		q += Mj * Cjbe * pow(1 - Vbe/Vj, -Mj-1) / Vj;
@@ -157,7 +157,7 @@ double Net::compute_dCbe2(double Vbe, double Vbc){
 double Net::compute_dCbc(double Vbc){
 	double q = Tr * Is * exp(Vbc/Vt) / Vt / Vt;
 	if( Vbc < Fc * Vj )
-		q += Mj * Cjbc * pow(1-Vbc/Vj, -Mj-1);
+		q += Mj * Cjbc * pow(1-Vbc/Vj, -Mj-1) / Vj;
 	else
 		q += Mj * Cjbc / Vj / pow(1-Fc, 1+Mj);
 	return q;
@@ -168,14 +168,13 @@ void Net::compute_Cc_eq(double Vc, double Vtn_c,
 	double Cc, dCc;
 	Cc = compute_Cc(Vc);
 	dCc = compute_dCc(Vc);
-//	printf("name = %s, Cc = %e dCc = %e\n", name.c_str(), Cc, dCc);
-//	printf("Vc=%e timeVc=%e\n", Vc, Vtn_c);
+	//printf("name = %s, Cc = %25.15e dCc = %25.15e\n", name.c_str(), Cc, dCc);
+	//printf("Vc=%25.15e timeVc=%25.15e\n", Vc, Vtn_c);
 	CIeq = - Vtn_c / g_step_tran * (Cc - dCc * Vc)
 	       - Vc * Vc / g_step_tran * dCc;
 	CGeq = - Vtn_c / g_step_tran * dCc
 	       + 1 / g_step_tran * (dCc * Vc + Cc);
-//	printf("step = %e\n",g_step_tran);
-//	printf("name = %s, CIeq = %e CGeq = %e\n", name.c_str(), CIeq, CGeq);
+	//printf("name = %s, CIeq = %25.15e CGeq = %25.15e\n", name.c_str(), CIeq, CGeq);
 }
 
 void Net::compute_Cbe_eq(double Vbe, double Vbc,
@@ -185,6 +184,7 @@ void Net::compute_Cbe_eq(double Vbe, double Vbc,
 	Cbe1 = compute_Cbe(Vbe, Vbc);
 	dCbe1 = compute_dCbe(Vbe, Vbc);
 	dCbe2 = compute_dCbe2(Vbe, Vbc);
+	//printf("Cbe1 = %25.15e\n dcbe1=%25.15e\n dcbe2=%25.15e\n", Cbe1, dCbe1, dCbe2);
 	BEIeq = - Vtn_be / g_step_tran * (Cbe1 + dCbe1 * Vbe + dCbe2 * Vbc)
 		- Vbe * Vbe / g_step_tran * dCbe1 - Vbe * Vbc / g_step_tran * dCbe2;
 	BEGeq1 = - Vtn_be / g_step_tran * dCbe1
@@ -202,6 +202,8 @@ void Net::compute_Cbc_eq(double Vbc, double Vtn_bc,
 		- Vbc * Vbc / g_step_tran * dCbc;
 	BCGeq = - Vtn_bc / g_step_tran * dCbc
 		+ 1 / g_step_tran * (dCbc * Vbc + Cbc);
+	//printf("Cbc = %25.15e\ndCbc=%25.15e\n", Cbc, dCbc);
+	//printf("BCIeq = %25.15e\nBCGeq=%25.15e\n", BCIeq, BCGeq);
 }
 
 // opeartor [ ] overload

@@ -84,7 +84,17 @@ void stamp_BJT_TRAN(Netlist & netlist, Nodelist & nodelist,
 		net.compute_Cc_eq(Vc, Vtn_c, CIeq, CGeq);
 		net.compute_Cbe_eq(Vbe, Vbc, Vtn_be, Vtn_bc, BEIeq, BEGeq1, BEGeq2);
 		net.compute_Cbc_eq(Vbc, Vtn_bc, BCIeq, BCGeq);
-
+		/*
+		printf("Stamping transient %s\n", net.name.c_str());
+	printf("\
+	    CIeq  = %25.15e\n\
+	    CGeq  = %25.15e\n\
+	    BEIeq = %25.15e\n\
+	    BEGeq1= %25.15e\n\
+	    BEGeq2= %25.15e\n\
+	    BCIeq = %25.15e\n\
+	    BCGeq = %25.15e\n", CIeq, CGeq, BEIeq, BEGeq1, BEGeq2, BCIeq, BCGeq);
+	    */
 		double Sbb = BEGeq1 + BEGeq2 + BCGeq, 
 		       Sbc = -BEGeq2 - BCGeq,
 		       Sbe = BEGeq1,
@@ -95,42 +105,38 @@ void stamp_BJT_TRAN(Netlist & netlist, Nodelist & nodelist,
 		       Sec = BEGeq2,
 		       See = BEGeq1;
 
-		/*
-		t.push(b, b, Sbb); t.push(b, c, Sbc); t.push(b, e, Sbe);
-		t.push(c, b, Scb); t.push(c, c, Scc); t.push(c, e, Sce);
-		t.push(e, b, Seb); t.push(e, c, Sec); t.push(e, e, See);
-		*/
-
 		double o[]={Scb, Scc, Sce,
-			      Sbb, Sbc, Sbe,
-			      Seb, Sec, See};
+			    Sbb, Sbc, Sbe,
+			    Seb, Sec, See};
 
+		/*
 		for(int i=0;i<9;i++){
 			o[i] *= 1E-12;
 		}
+		*/
 
-		t.push(b, b, o[3]); t.push(b, c, o[4]); t.push(b, e, o[5]);
 		t.push(c, b, o[0]); t.push(c, c, o[1]); t.push(c, e, o[2]);
+		t.push(b, b, o[3]); t.push(b, c, o[4]); t.push(b, e, o[5]);
 		t.push(e, b, o[6]); t.push(e, c, o[7]); t.push(e, e, o[8]);
-		//printf("\nStamping %s\n", net.name.c_str());
+		/*
+		printf("\nStamping %s\n", net.name.c_str());
 		//printf("Vc = %lf, Vbe = %lf Vbc = %lf\n", Vc, Vbe, Vbc);
 		//printf("Vc = %lf, Vbe = %lf Vbc = %lf\n", Vtn_c, Vtn_be, Vtn_bc);
-		/*
 		for(int i=0;i<9;i++){
 			if(i%3==0 && i>0) printf("\n");
 			printf("%15.8e ", o[i]);
 		}
 		cout<<endl;
 		*/
-		
-		J[b] += (- BEIeq - BCIeq)*1E-12;
-		J[c] += (- CIeq + BCIeq)*1E-12;
-		J[e] += BEIeq*1E-12;
-		/*
-		J[b] += (- BEIeq - BCIeq);
-		J[c] += (- CIeq + BCIeq);
-		J[e] += BEIeq;
-		*/
+
+		double Ic = (- CIeq + BCIeq);
+		double Ib = (- BEIeq - BCIeq);
+		double Ie = BEIeq;
+		//printf("Ic=%25.15e\nIb=%25.15e\nIe=%25.15e\n", Ic,Ib,Ie);
+		//printf("Jc=%25.15e\nJb=%25.15e\nJe=%25.15e\n", J[c],J[b],J[e]);
+		J[b] += Ib;
+		J[c] += Ic;
+		J[e] += Ie;
 	}
 }
 
@@ -146,7 +152,7 @@ void get_node_voltages(Nodelist & nodelist, double * Vsol, double *vs){
 void solve_transient(Netlist & netlist, Nodelist & nodelist, double time){
 	// first perform dc analysis to get the DC operating point
 	// this is the initial value of V^k_(t_n+1), i.e., V^0_(t_n+1) = V(tn)
-	dc_analysis(netlist,nodelist,true);
+	dc_analysis(netlist,nodelist,false);
 
 	int size = nodelist.size();
 	size += netlist.netset[VSRC].size();
@@ -166,6 +172,7 @@ void solve_transient(Netlist & netlist, Nodelist & nodelist, double time){
 	memset((void*)Vnew, 0, sizeof(double)*size);
 	memset((void*)Vtn, 0, sizeof(double)*size);
 
+	update_BJT_currents(netlist, nodelist);
 	copy_voltages(nodelist, Vtn); // save Vtn
 	int counter = 0;
 	double diff = 0.0;
@@ -175,6 +182,7 @@ void solve_transient(Netlist & netlist, Nodelist & nodelist, double time){
 
 		Triplet t;
 		memset((void*)J, 0, sizeof(double)*size);
+		memset((void*)v, 0, sizeof(double)*size);
 		stamp_resistor(netlist, nodelist, t);
 		int ct = nodelist.size();
 		stamp_vsrc(netlist, nodelist, t, J, TRAN, ct, time);
@@ -186,28 +194,28 @@ void solve_transient(Netlist & netlist, Nodelist & nodelist, double time){
 		for(int i=0;i<size;i++)
 			printf("%d: %15.8e\n", i, J[i]);
 			*/
-		stamp_BJT_TRAN(netlist, nodelist, time, Vnew, Vtn, t, J);
+		stamp_BJT_TRAN(netlist, nodelist, time, Vold, Vtn, t, J);
 		J[0] = 0;
 
+		/*
 		t.merge();t.merge();
 		t.output();
-		/*
 		cout<<" === after === "<<endl;
 		for(int i=0;i<size;i++)
-			printf("%d: %15.8e\n", i, J[i]);
+			printf("%d: %25.15e\n", i, J[i]);
 		cout<<endl;
 		*/
-		//exit(1);
 		solve_dc(t, v, J, size);
 
 		get_node_voltages(nodelist, v, Vnew); 
 		update_node_voltages(nodelist, v); // update V^k_t(n+1)
-		nodelist.output_node_voltages();
+		update_BJT_currents(netlist, nodelist);
+		//nodelist.output_node_voltages();
 		diff = voltage_diff(Vnew,Vold,size);
-		cout<<"Iteration "<<counter<<" diff="<<diff<<endl;
-	}while(diff > EPSILON && counter < 4);
+//		cout<<"Iteration "<<counter<<" diff="<<diff<<endl;
+	}while(diff > EPSILON && counter < MAX_ITERATION);
 
-	if( diff > EPSILON && counter >= 4)
+	if( diff > EPSILON && counter >= MAX_ITERATION)
 		report_exit("Exceeding max iteration time, not converging!\n");
 
 	delete [] v;
@@ -218,12 +226,12 @@ void solve_transient(Netlist & netlist, Nodelist & nodelist, double time){
 }
 
 void transient_analysis(Netlist & netlist,Nodelist &nodelist){
-	
+	cout<<" ** Transient analysis begins ** "<<endl;
 	vector<FILE *> fplot;
 	open_tran_plot_files(nodelist,fplot);
-	g_end_tran = g_step_tran;
+	//g_end_tran = g_step_tran;
 	for(double time = g_step_tran; time <= g_end_tran; time+=g_step_tran){
-		cout<<"time="<<time<<endl;
+		//cout<<"time="<<time<<endl;
 		solve_transient(netlist, nodelist, time);
 		plot_transient(fplot, nodelist, time);
 	}

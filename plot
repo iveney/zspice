@@ -8,10 +8,19 @@ fi
 ptype=""
 if [[ "$1" == *_g* ]];then
 	ptype=Gain
+	scale=logscale
+	xlabel="Frequency (Hertz)"
 	ylabel="Volts Mag (dB)"
 elif [[ "$1" == *_p* ]];then
 	ptype=Phase
+	scale=logscale
+	xlabel="Frequency (Hertz)"
 	ylabel="Volts Phase (degree)"
+elif [[ "$1" == *_t* ]];then
+	ptype=Transient
+	scale=nolog
+	xlabel="Time (s)"
+	ylabel="Voltage (V)"
 else
 	ptype=Unknown
 fi
@@ -19,7 +28,7 @@ fi
 gnuplot << EOF
 reset
 
-set logscale x
+set $scale x
 set ylabel "$ylabel"
 set xlabel "$xlabel"
 set title "Output node of ${1%%_*} netlist"
