@@ -5,6 +5,7 @@ if [ "$#" -lt 1 ];then
 	exit
 fi
 
+
 ptype=""
 if [[ "$1" == *_g* ]];then
 	ptype=Gain
@@ -22,12 +23,15 @@ elif [[ "$1" == *_t* ]];then
 	xlabel="Time (s)"
 	ylabel="Voltage (V)"
 else
+	scale=nolog
 	ptype=Unknown
 fi
 
 gnuplot << EOF
 reset
 
+set terminal postscript enhanced color
+set output '| ps2pdf - ${1%%.*}.pdf'
 set $scale x
 set ylabel "$ylabel"
 set xlabel "$xlabel"

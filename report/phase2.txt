@@ -1,0 +1,36 @@
+Diode:
+
+Iteration begins:
+iteration: 1, difference = 3.287877e-03
+iteration: 2, difference = 1.884439e-04
+iteration: 3, difference = 6.766938e-07
+iteration: 4, difference = 8.683831e-12
+Total number of iterations: 4
+
+Result:
+voltage at       0 = 0.000000e+00
+voltage at       1 = 2.000000e+00
+voltage at       2 = 7.030988e-01
+current throught source v1 = -6.484506e-04
+
+BJT:
+
+Iteration begins:
+iteration: 1, difference = 9.000161e-01
+iteration: 2, difference = 6.440751e-04
+iteration: 3, difference = 8.155846e-06
+iteration: 4, difference = 1.286492e-09
+iteration: 5, difference = 9.566619e-16
+Total number of iterations: 5
+
+Result:
+voltage at       0 = 0.000000e+00
+voltage at  supply = 5.000000e+00
+voltage at   cbias = 4.286034e+00
+voltage at     out = 9.198898e-02
+voltage at       b = 7.161394e-01
+voltage at  input2 = 9.000000e-01
+voltage at  input1 = 9.000000e-01
+current throught source vcc = -2.021662e-03
+current throught source vin = -1.838606e-05
+current throught source vin2 = -1.838606e-05
