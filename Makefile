@@ -25,9 +25,10 @@ MYLIBS=./libs/*.a
 MYINC=-I./headers
 CSCOPEFILES=cscope.files cscope.out cscope.po.out
 
-main: $(OBJ) main.o tags global.h
+main: $(OBJ) main.o global.h 
 	@echo "Making zspice..."
 	$(CC) $(OPT) $(CFLAGS) $(INC) -o $(BIN) $(OBJ) $(MYLIBS) main.o 
+	@make tags
 
 all: main debug test
 	@echo "Making all..."
@@ -66,7 +67,6 @@ copy_libs: $(LIBS) $(AMD_HDR) $(UMFPACK_HDR) $(SPARSE_HDR)
 	for i in $(LIBS); do \
 		cp $$i ./libs; \
 	done
-
 
 tags: $(SRC) $(HDR) main.cpp main.h
 	@echo "Generating tags..."
