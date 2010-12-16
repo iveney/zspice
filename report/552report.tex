@@ -1,7 +1,20 @@
-\documentclass[12pt]{article}
-\usepackage{times}
+\documentclass{article}
+\usepackage[left=1.2in,right=1.2in, top=1.2in, bottom=1.2in]{geometry}
+%\usepackage{times}
+\usepackage[fleqn]{amsmath}
+\usepackage{kbordermatrix}
+\usepackage[retainorgcmds]{IEEEtrantools}
 \usepackage{titling}
 \usepackage{graphicx}
+
+\usepackage[charter]{mathdesign}
+\def\sfdefault{fvs}
+\def\ttdefault{fvm}
+\SetMathAlphabet{\mathsf}{bold}{\encodingdefault}{\sfdefault}{b}{\updefault}
+\SetMathAlphabet{\mathtt}{bold}{\encodingdefault}{\ttdefault}{b}{\updefault}
+\SetMathAlphabet{\mathsf}{normal}{\encodingdefault}{\sfdefault}{\mddefault}{\updefault}
+\SetMathAlphabet{\mathtt}{normal}{\encodingdefault}{\ttdefault}{\mddefault}{\updefault}
+\usepackage{microtype}
 
 % modify the font size of title, author and date
 \pretitle{\begin{center}\bf \Large} \posttitle{\par\end{center}}
@@ -15,8 +28,8 @@
 
 % ====================================================================
 
-\title{ECE 552: Computational Techniques for \\Circuit Analysis - Fall 2010\\
-Project Report}
+\title{ECE 552: Computational Techniques for Circuit Analysis - Fall 2010\\
+\LARGE Project Report}
 \author{Zigang Xiao}
 \date{\today}
 \begin{document}
@@ -29,10 +42,10 @@ It can read SPICE like input netlist and perform three types of
 analysis, namely I)~DC analysis, II)~AC analysis and III)~Transient analysis.
 
 \subsection{Description of Algorithms}
-The program accepts an input netlist file and outputs node voltages and branche
+The program accepts an input netlist file and outputs node voltages and branch
 currents.  The information of nets, nodes and initial guess values will be read
 from the input file accordingly.  Moreover, control parameters such as
-begining, ending frequency and step size of AC analysis, finishing time and
+beginning, ending frequency and step size of AC analysis, finishing time and
 time step of transient analysis and the name of node that needs to be plot will
 be saved. The program determines which kind of analysis to be performed
 according to the input, and perform the analysis.  Following are the details
@@ -42,12 +55,12 @@ for three types of analysis.
 Among the three types of analysis, DC analysis is the most important one since 
 it will be used to determine the DC operating point for both AC analysis and
 transient analysis.
-If the nets are all linear devices, a MNA matrix will be built and solved.
-If there are non-linear devices, they will be lineared and 
-Newton-Raphson iteration will be applied to iteratively solve for the node
-voltages. To overcome convergence issue, damped Newton-Raphson iteration is implemented.
-Note that capacitors and inductors are treated as open-circuited and short-circuited
-in DC analysis.
+If the nets are all linear devices, a MNA matrix will be built and solved.  If
+there are non-linear devices, they will be linearized and Newton-Raphson
+iteration will be applied to iteratively solve for the node voltages. To
+overcome convergence issue, damped Newton-Raphson iteration is implemented.
+Note that capacitors and inductors are treated as open-circuited and
+short-circuited in DC analysis.
 
 \subsubsection{AC Analysis}
 In AC analysis, the DC operating point of the circuits will be obtained first, 
@@ -96,10 +109,404 @@ The matrix right hand side (RHS) will be set to 0 before solving.
 
 % ====================================================================
 \section{Equations used in Analysis}
-\subsection{DC Analysis}
-\subsection{AC Analysis}
-\subsection{Transient Analysis}
+This section details the equations derived for each type of analysis.
 
+\newcommand{\blline}[1]{\noindent $\bullet$ #1}
+\newcommand{\ud}{\,\mathrm{d}}
+\newcommand{\NR}{Newton-Raphson}
+\newcommand{\Geq}{G^{k-1}_{eq}}
+\newcommand{\Ieq}{I^{k-1}_{eq}}
+\subsection{DC Analysis Equations for Diode}
+$\bullet$ $k^{th}$ iteration of Newton-Raphson method:
+\begin{eqnarray*}
+  I_D  =  I(V_D) & = & I_s \cdot (\exp(\frac{V_D}{V_T}) -1 ) \\
+  \frac{\ud I(V_D) }{\ud V_D} & = & \frac{I_S}{V_T} \cdot \exp(\frac{V_D}{V_T})\\
+  I^D_k = f(V^D_k) & \approx &f(V^{k-1}_D) + (V^k_D - V^{k-1}_D) \cdot f'(V^{k-1}_D)\\
+  & = & f(V^{k-1}_D) + (V^k_D - V^{k-1}_D) \cdot (\frac{I_S}{V_T} \cdot \exp(\frac{V^{k-1}_D}{V_T}))\\
+  & = & \overbrace{\frac{I_S}{V_T} \exp(\frac{V^{k-1}_D}{V_T})}^{\Geq} V^k_D
+  + \overbrace{I_S (\exp (\frac{V^{k-1}_D}{V_T}) - 1) 
+  - V^{k-1}_D \cdot (\frac{I_S}{V_T}\exp(\frac{V^{k-1}_D}{V_T}))}^{\Ieq}
+\end{eqnarray*}
+
+\noindent $\bullet$ DC analysis matrix stamping:
+\begin{equation*}
+  \kbordermatrix{
+     & i     & j\\
+   i & \Geq  & -\Geq \\
+   j & -\Geq &  \Geq }
+  \times
+  \begin{bmatrix}
+    V^k_i \\
+    V^k_j 
+  \end{bmatrix}  = 
+  \begin{bmatrix}
+    -\Ieq\\
+    \Ieq
+  \end{bmatrix}
+\end{equation*}
+
+% --------------------------------------------------------------------
+\subsection{DC Analysis Equations for BJT}
+Since the equations for NPN BJT are already given in the document of
+Phase II, only the equations for PNP BJT are given here.
+
+\noindent $\bullet$ $k^{th}$ iteration of Newton-Raphson method:
+\newcommand{\Vfrac}[2]{\frac{V_{#1}}{V_{#2}}}
+\newcommand{\Vkm}[1]{V^{k-1}_{#1}}
+\newcommand{\IsV}[1]{\frac{I_S}{V_{#1}}}
+\newcommand{\hb}[1]{h^{k-1}_{B#1}}
+\newcommand{\hc}[1]{h^{k-1}_{C#1}}
+\begin{eqnarray*}
+  I_c(V_{BE},V_{BC}) & = & - I_S \left[\left(1+\Vfrac{BC}{A_f}+\Vfrac{BE}{A_r}\right)
+	  \left(\exp\left(-\Vfrac{BE}{V_T}\right)-\exp\left(-\Vfrac{BC}{V_T}\right)\right) - 
+	  \frac{1}{\beta_r}\left(\exp\left(-\Vfrac{BC}{V_T}\right)\right)-1 \right]\\
+    \frac{\partial I_C(\Vkm{BE}, \Vkm{BC})}{\partial V_{BE}} & = & 
+	  \IsV{T} \left(1 + \frac{\Vkm{BC}}{V_{A_f}} + \frac{\Vkm{BE}}{V_{A_r}}\right) 
+	  \exp\left(-\frac{\Vkm{BE}}{V_T}\right) 
+	  - \frac{I_S}{V_{A_r}} \left(\exp\left(\frac{\Vkm{BE}}{V_T}\right) - 
+	  \exp\left(\frac{\Vkm{BC}}{V_T}\right)\right)\\
+	  & = & \hc{1} \\
+  \frac{\partial I_C(\Vkm{BE}, \Vkm{BC})}{\partial V_{BC}} & = & 
+  -\frac{I_s}{V_T}\left(\exp \left(-\frac{V_{\text{BE}}^{k-1}}{V_T}\right)-\exp
+  \left(-\frac{V_{\text{BC}}^{k-1}}{V_T}\right)\right)
+  -\frac{I_s}{V_T}\left(1+\frac{V_{\text{BE}}^{k-1}}{V_{A_f}} + 
+  \frac{V_{\text{BC}}^{k-1}}{V_{A_r}}\right)\exp
+  \left(-\frac{V_{\text{BC}}^{k-1}}{V_T}\right)\\
+  & & -\frac{I_s}{\beta _rV_T}\exp
+  \left(-\frac{V_{\text{BC}}^{k-1}}{V_T}\right)=h_{\text{C2}}^{k-1} \\
+  I_C\left(V_{\text{BE}}^k,V_{\text{BC}}^k\right) & = & 
+  I_C\left(V_{\text{BE}}^{k-1},V_{\text{BC}}^{k-1}\right) + 
+  h_{\text{C1}}^{k-1}\left(V_{\text{BE}}^k-V_{\text{BE}}^{k-1}\right) + 
+  h_{\text{C2}}^{k-1}\left(V_{\text{BC}}^k-V_{\text{BC}}^{k-1}\right)\\
+  & = & \left(h_{\text{C1}}^{k-1}+h_{\text{C2}}^{k-1}\right)V_B^k-h_{\text{C2}}^{k-1}V_C^k-h_{\text{C1}}^{k-1}V_E^k+\overbrace{I_C\left(V_{\text{BE}}^{k-1},V_{\text{BC}}^{k-1}\right)-h_{\text{C1}}^{k-1}V_{\text{BE}}^{k-1}-h_{\text{C2}}^{k-1}V_{\text{BC}}^{k-1}}^{h_{\text{C3}}^{k-1}}\\
+  I_B\left(V_{\text{BE}},V_{\text{BC}}\right) & = & -I_S\left[\frac{1}{\beta _f}\left(\exp \left(-\frac{V_{\text{BE}}}{V_T}\right)-1\right)+\frac{1}{\beta _r}\left(\exp \left(-\frac{V_{\text{BC}}}{V_T}\right)-1\right)\right]\\
+  \frac{\partial I_B\left(V_{\text{BE}}^{k-1},V_{\text{BC}}^{k-1}\right)}{\partial V_{\text{BE}}} & = &
+  \frac{I_s}{\beta _fV_T}\exp \left(-\frac{V_{\text{BE}}^{k-1}}{V_T}\right)=h_{\text{B1}}^{k-1}\\
+  \frac{\partial I_B\left(V_{\text{BE}}^{k-1},V_{\text{BC}}^{k-1}\right)}{\partial V_{\text{BC}}} & = &
+  \frac{I_s}{\beta _rV_T}\exp \left(-\frac{V_{\text{BC}}^{k-1}}{V_T}\right)=h_{\text{B2}}^{k-1}\\
+  I_B\left(V_{\text{BE}}^k,V_{\text{BC}}^k\right) & = &
+  I_B\left(V_{\text{BE}}^{k-1},V_{\text{BC}}^{k-1}\right)+h_{\text{B1}}^{k-1}\left(V_{\text{BE}}^k-V_{\text{BE}}^{k-1}\right)+h_{\text{B2}}^{k-1}\left(V_{\text{BC}}^k-V_{\text{BC}}^{k-1}\right)\\
+  & = & \left(h_{\text{B1}}^{k-1}+h_{\text{B2}}^{k-1}\right)V_B^k-h_{\text{B2}}^{k-1}V_C^k-h_{\text{B1}}^{k-1}V_E^k+\overbrace{I_B\left(V_{\text{BE}}^{k-1},V_{\text{BC}}^{k-1}\right)-h_{\text{B1}}^{k-1}V_{\text{BE}}^{k-1}-h_{\text{B2}}^{k-1}V_{\text{BC}}^{k-1}}^{h_{\text{B3}}^{k-1}}\\
+  I_E\left(V_{\text{BE}}^k,V_{\text{BC}}^k\right) & = &
+  I_C\left(V_{\text{BE}}^k,V_{\text{BC}}^k\right)+I_B\left(V_{\text{BE}}^k,V_{\text{BC}}^k\right)\\
+  & = & \left(h_{\text{C1}}^{k-1}+h_{\text{C2}}^{k-1}+h_{\text{B1}}^{k-1}+h_{\text{B2}}^{k-1}\right)V_B^k-\left(h_{\text{B2}}^{k-1}+h_{\text{C2}}^{k-1}\right)V_C^k-\left(h_{\text{B1}}^{k-1}+h_{\text{C1}}^{k-1}\right)V_E^k+h_{\text{C3}}^{k-1}+h_{\text{B3}}^{k-1}
+\end{eqnarray*}
+
+\noindent $\bullet$ DC analysis matrix stamping:
+\begin{equation*}
+  \kbordermatrix{
+    & B & C & E\\
+  B & \hb{1} + \hb{2} & -\hb{2} & - \hb{1}\\
+  C & \hc{1} + \hc{2} & -\hc{2} & - \hc{1}\\
+  E & -(\hb{1} + \hb{2} + \hc{1} + \hc{2} ) & \hb{2} + \hc{2} & \hb{1}+\hc{1}\\
+   }\times
+  \begin{bmatrix}
+    V^k_B\\ V^k_C \\ V^k_E
+  \end{bmatrix}=
+  \begin{bmatrix}
+    -\hb{3}\\ -\hc{3}\\ \hb{3} + \hc{3}
+  \end{bmatrix}
+\end{equation*}
+
+% --------------------------------------------------------------------
+\subsection{AC Analysis}
+\subsubsection{NPN}
+\blline{Capacitor $C_c$}\\
+\begin{math}
+C_c\left(V_c\right)=\frac{dQ\left(V_c\right)}{dV_c}=\begin{cases}
+ C_{\text{jcs}}\left(1-\frac{V_c}{V_j}\right){}^{-m_j} & V_c<f_cV_j \\
+ C_{\text{jcs}}\frac{1-f_c\left(1+m_j\right)+m_j\frac{V_c}{V_j}}
+ {\left(1-f_c\right){}^{1+m_j}} & V_c\geq f_cV_j
+\end{cases}\\
+\frac{dC_c\left(V_c\right)}{dV_c}=\begin{cases}
+ \frac{\text{}_{m_jC_{\text{jcs}}}}{V_j}\left(1-\frac{V_c}{V_j}\right){}^{-m_{j-1}} & V_c<f_cV_j \\
+ \frac{\text{}_{m_jC_{\text{jcs}}}}{V_j\left(1-f_c\right){}^{1+m_j}} & V_c\geq f_cV_j
+\end{cases}\\
+\end{math}
+
+\blline{Capacitor $C_{BE}$}\\
+\begin{eqnarray*}
+  C_{\text{BE}}\left(V_{\text{BE}},V_{\text{BC}}\right) = 
+  \frac{dQ\left(V_{\text{BE}}\right)}{dV_{\text{BE}}} & = & 
+  -\frac{\tau _fI_S}{V_{\text{Ar}}}
+  \left[\exp \left(\frac{V_{\text{BE}}}{V_T}\right)-1\right]
+  +\frac{\tau _fI_S}{V_T}\exp \left(\frac{V_{\text{BE}}}{V_T}\right)
+  \left(1-\frac{V_{\text{BC}}}{V_{\text{Af}}}-\frac{V_{\text{BE}}}{V_{\text{Ar}}}\right)\\
+  & & +\begin{cases}
+ C_{\text{jbe}}\left(1-\frac{V_{\text{BE}}}{V_j}\right){}^{-m_j} & V_{\text{BE}}<f_cV_j \\
+ C_{\text{jbe}}\frac{1-f_c\left(1+m_j\right)+m_j\frac{V_{\text{BE}}}{V_j}}
+ {\left(1-f_c\right){}^{1+m_j}} & V_{\text{BE}}\geq f_cV_j
+\end{cases}\\
+C_{\text{BE2}}\left(V_{\text{BE}},V_{\text{BC}}\right) 
+= \frac{dQ\left(V_{\text{BE}}\right)}{dV_{\text{BC}}} &= &
+-\frac{\tau _fI_S}{V_{\text{Af}}}\left[\exp \left(\frac{V_{\text{BE}}}{V_T}\right)-1\right]\\
+\frac{\partial C_{\text{BE}}\left(V_{\text{BE}},V_{\text{BC}}\right)}{\partial V_{\text{BE}}} & = &
+-\frac{2\tau _fI_S}{V_{\text{Ar}}V_T}\exp \left(\frac{V_{\text{BE}}}{V_T}\right)
++ \frac{\tau _fI_S}{\left(V_T\right){}^2}\exp \left(\frac{V_{\text{BE}}}{V_T}\right)
+\left(1-\frac{V_{\text{BC}}}{V_{\text{Af}}}-\frac{V_{\text{BE}}}{V_{\text{Ar}}}\right)\\
+& & +\begin{cases}
+ \frac{\text{}_{m_jC_{\text{jbe}}}}{V_j}\left(1-\frac{V_{\text{BE}}}{V_j}\right){}^{-m_{j-1}} & V_{\text{BE}}<f_cV_j \\
+ \frac{\text{}_{m_jC_{\text{jbe}}}}{V_j\left(1-f_c\right){}^{1+m_j}} & V_{\text{BE}}\geq f_cV_j
+\end{cases}\\
+\frac{\partial C_{\text{BE}}\left(V_{\text{BE}},V_{\text{BC}}\right)}{\partial V_{\text{BC}}} & = &
+-\frac{\tau _fI_S}{V_{\text{Ar}}V_T}\exp \left(\frac{V_{\text{BE}}}{V_T}\right)
+\end{eqnarray*}
+
+\blline{Capacitor $C_{BC}$}
+\begin{eqnarray*}
+C_{\text{BC}}\left(V_{\text{BC}}\right)=
+\frac{dQ\left(V_{\text{BC}}\right)}{dV_{\text{BC}}} & = &
+\frac{\tau _fI_S}{V_T}\exp \left(\frac{V_{\text{BC}}}{V_T}\right)+\begin{cases}
+ C_{\text{jbc}}\left(1-\frac{V_{\text{BC}}}{V_j}\right){}^{-m_j} & V_{\text{BC}}<f_cV_j \\
+ C_{\text{jbc}}\frac{1-f_c\left(1+m_j\right)+m_j\frac{V_{\text{BC}}}{V_j}}{\left(1-f_c\right){}^{1+m_j}} & V_{\text{BC}}\geq f_cV_j
+\end{cases}\\
+\frac{dC_{\text{BC}}\left(V_{\text{BC}}\right)}{dV_{\text{BC}}} & = &
+\frac{\tau _fI_S}{\left(V_T\right){}^2}\exp \left(\frac{V_{\text{BC}}}{V_T}\right)+\begin{cases}
+ \frac{\text{}_{m_jC_{\text{jbc}}}}{V_j}\left(1-\frac{V_{\text{BC}}}{V_j}\right){}^{-m_{j-1}} & V_{\text{BC}}<f_cV_j \\
+ \frac{\text{}_{m_jC_{\text{jbc}}}}{V_j\left(1-f_c\right){}^{1+m_j}} & V_{\text{BC}}\geq f_cV_j
+\end{cases}
+\end{eqnarray*}
+
+\subsubsection{PNP}
+\blline{Capacitor $C_{C}$}
+\begin{eqnarray*}
+Q\left(V_C\right) & = &\begin{cases}
+  -C_{\text{jcs}}\frac{V_j}{1-m_j}\left[1-\left(1+\frac{V_c}{V_j}\right){}^{1-m_j}\right] & V_c>-f_cV_j \\
+ C_{\text{jcs}}V_c\frac{1-f_c\left(1+m_j\right)-m_j\frac{V_c}{2V_j}}
+ {\left(1-f_c\right){}^{1+m_j}}-C_{\text{jcs}}V_j\left[\frac{1-\left(1-f_c\right){}^{1-m_j}}{1-m_j}-f_c\frac{1-f_c\left(1+\frac{m_j}{2}\right)}{\left(1-f_c\right){}^{1+m_j}}\right] & V_c\leq -f_cV_j
+\end{cases}\\
+C_c\left(V_c\right)=\frac{dQ\left(V_c\right)}{dV_c}&=&\begin{cases}
+ C_{\text{jcs}}\left(1+\frac{V_c}{V_j}\right){}^{-m_j} & V_c>-f_cV_j \\
+ C_{\text{jcs}}\frac{1-f_c\left(1+m_j\right)-m_j\frac{V_c}{V_j}}{\left(1-f_c\right){}^{1+m_j}} & V_c\leq -f_cV_j
+\end{cases}\\
+\frac{dC_c\left(V_c\right)}{dV_c}&=&\begin{cases}
+ -\frac{\text{}_{m_jC_{\text{jcs}}}}{V_j}\left(1+\frac{V_c}{V_j}\right){}^{-m_{j-1}} & V_c>-f_cV_j \\
+ -\frac{\text{}_{m_jC_{\text{jcs}}}}{V_j\left(1-f_c\right)^{1+m_j}} & V_c\leq -f_cV_j
+\end{cases}
+\end{eqnarray*}
+
+\blline{Capacitor $C_{BE}$}
+\begin{eqnarray*}
+Q\left(V_{\text{BE}}\right) &= &
+-\tau _fI_S\left[\exp \left(\frac{V_{\text{BE}}}{V_T}\right)-1\right]\left(1+\frac{V_{\text{BC}}}{V_{\text{Af}}}+\frac{V_{\text{BE}}}{V_{\text{Ar}}}\right)\\
+&& +\begin{cases}
+ -C_{\text{jbe}}\frac{V_j}{1-m_j}\left[1-\left(1+\frac{V_{\text{BE}}}{V_j}\right){}^{1-m_j}\right] & V_{\text{BE}}>-f_cV_j \\
+ C_{\text{jbe}}V_{\text{BE}}\frac{1-f_c\left(1+m_j\right)-m_j\frac{V_{\text{BE}}}{2V_j}}{\left(1-f_c\right){}^{1+m_j}}-C_{\text{jbe}}V_j\left[\frac{1-\left(1-f_c\right){}^{1-m_j}}{1-m_j}-f_c\frac{1-f_c\left(1+\frac{m_j}{2}\right)}{\left(1-f_c\right){}^{1+m_j}}\right] & V_{\text{BE}}\leq -f_cV_j\\
+\end{cases}\\
+\end{eqnarray*}
+\begin{eqnarray*}
+ C_{\text{BE}}\left(V_{\text{BE}},V_{\text{BC}}\right)& = &
+ \frac{dQ\left(V_{\text{BE}}\right)}{dV_{\text{BE}}}=
+ -\frac{\tau _fI_S}{V_{\text{Ar}}}\left[\exp \left(-\frac{V_{\text{BE}}}{V_T}\right)-1\right]+\frac{\tau _fI_S}{V_T}\exp \left(-\frac{V_{\text{BE}}}{V_T}\right)\left(1+\frac{V_{\text{BC}}}{V_{\text{Af}}}+\frac{V_{\text{BE}}}{V_{\text{Ar}}}\right)\\
+ && +\begin{cases}
+ C_{\text{jbe}}\left(1+\frac{V_{\text{BE}}}{V_j}\right){}^{-m_j} & V_{\text{BE}}>-f_cV_j \\
+ C_{\text{jbe}}\frac{1-f_c\left(1+m_j\right)=m_j\frac{V_{\text{BE}}}{V_j}}{\left(1-f_c\right){}^{1+m_j}} & V_{\text{BE}}\leq -f_cV_j
+\end{cases}\\
+\end{eqnarray*}
+\begin{equation*}
+C_{\text{BE2}}\left(V_{\text{BE}},V_{\text{BC}}\right)=
+\frac{dQ\left(V_{\text{BE}}\right)}{dV_{\text{BC}}}=-\frac{\tau _fI_S}{V_{\text{Af}}}\left[\exp \left(-\frac{V_{\text{BE}}}{V_T}\right)-1\right]
+\end{equation*}
+\begin{eqnarray*}
+\frac{\partial C_{\text{BE}}\left(V_{\text{BE}},V_{\text{BC}}\right)}{\partial V_{\text{BE}}} & = &
+\frac{2\tau _fI_S}{V_{\text{Ar}}V_T}\exp \left(-\frac{V_{\text{BE}}}{V_T}\right)-\frac{\tau _fI_S}{\left(V_T\right){}^2}\exp \left(-\frac{V_{\text{BE}}}{V_T}\right)\left(1+\frac{V_{\text{BC}}}{V_{\text{Af}}}+\frac{V_{\text{BE}}}{V_{\text{Ar}}}\right)\\
+&& -\begin{cases}
+ \frac{\text{}_{m_jC_{\text{jbe}}}}{V_j}\left(1+\frac{V_{\text{BE}}}{V_j}\right){}^{-m_{j-1}} & V_{\text{BE}}>-f_cV_j \\
+ \frac{\text{}_{m_jC_{\text{jbe}}}}{V_j\left(1-f_c\right){}^{1+m_j}} & V_{\text{BE}}\leq -f_cV_j
+\end{cases}\\
+\end{eqnarray*}
+\begin{math}
+\frac{\partial C_{\text{BE}}\left(V_{\text{BE}},V_{\text{BC}}\right)}{\partial V_{\text{BC}}}=
+\frac{\tau _fI_S}{V_{\text{Ar}}V_T}\exp \left(-\frac{V_{\text{BE}}}{V_T}\right)
+\end{math}\\
+
+\blline{Capacitor $C_{BC}$}
+\begin{eqnarray*}
+Q\left(V_{\text{BC}}\right) & = &
+-\tau _fI_S\left[\exp \left(-\frac{V_{\text{BC}}}{V_T}\right)-1\right]\\
+&&
++\begin{cases}
+ -C_{\text{jbc}}\frac{V_j}{1-m_j}\left[1-\left(1+\frac{V_{\text{BC}}}{V_j}\right){}^{1-m_j}\right] & V_{\text{BC}}>-f_cV_j \\
+ C_{\text{jbc}}V_{\text{BC}}\frac{1-f_c\left(1+m_j\right)-m_j\frac{V_{\text{BC}}}{2V_j}}{\left(1-f_c\right){}^{1+m_j}}-C_{\text{jbc}}V_j\left[\frac{1-\left(1-f_c\right){}^{1-m_j}}{1-m_j}-f_c\frac{1-f_c\left(1+\frac{m_j}{2}\right)}{\left(1-f_c\right){}^{1+m_j}}\right] & V_{\text{BC}}\leq -f_cV_j
+\end{cases}\\
+\end{eqnarray*}
+\begin{eqnarray*}
+C_{\text{BC}}\left(V_{\text{BC}}\right)=
+\frac{dQ\left(V_{\text{BC}}\right)}{dV_{\text{BC}}}&=&
+\frac{\tau _fI_S}{V_T}\exp \left(-\frac{V_{\text{BC}}}{V_T}\right)+\begin{cases}
+ C_{\text{jbc}}\left(1+\frac{V_{\text{BC}}}{V_j}\right){}^{-m_j} & V_{\text{BC}}<f_cV_j \\
+ C_{\text{jbc}}\frac{1-f_c\left(1+m_j\right)-m_j\frac{V_{\text{BC}}}{V_j}}{\left(1-f_c\right){}^{1+m_j}} & V_{\text{BC}}\geq f_cV_j
+\end{cases}
+\end{eqnarray*}
+\begin{eqnarray*}
+\frac{dC_{\text{BC}}\left(V_{\text{BC}}\right)}{dV_{\text{BC}}}&=&-\frac{\tau _fI_S}{\left(V_T\right){}^2}\exp \left(-\frac{V_{\text{BC}}}{V_T}\right)-\begin{cases}
+ \frac{\text{}_{m_jC_{\text{jbc}}}}{V_j}\left(1+\frac{V_{\text{BC}}}{V_j}\right){}^{-m_{j-1}} & V_{\text{BC}}>-f_cV_j \\
+ \frac{\text{}_{m_jC_{\text{jbc}}}}{V_j\left(1-f_c\right){}^{1+m_j}} & V_{\text{BC}}\leq -f_cV_j
+\end{cases}
+\end{eqnarray*}
+
+\newcommand{\BE}{C_{BE}(V_{BE},V_{BC})}
+\newcommand{\BEE}{C_{BE2}(V_{BE},V_{BC})}
+\newcommand{\BC}{C_{BC}(V_{BC})}
+\newcommand{\C}{C_{C}(V_{C})}
+\newcommand{\fq}{\times 2 \pi f}
+\blline{Matrix Stamp:}
+{\small
+\begin{eqnarray*}
+  \kbordermatrix{
+     & B & C & E\\
+   B &(\BE+\BEE+\BC)\fq & -(\BEE+\BC)\fq & -\BE \fq\\
+   C & -\BC \fq  & (\C+\BC)\fq & 0 \\
+   E &-(\BE+\BE2)\fq & \BEE \fq & \BE\fq
+   }
+\end{eqnarray*}
+}
+% --------------------------------------------------------------------
+\subsection{Transient Analysis: $I_{eq}$ and  $G_{eq}$ for capacitors in BJT}
+\blline{Capacitor $C_c$}:\\
+\begin{equation*}
+I_{\text{Ceq}}=-\frac{C_c\left(V_c\left(t_{n+1}\right)\right)}{\text{$\Delta $t}}V_c\left(t_n\right)
+\end{equation*}
+\begin{equation*}
+G_{\text{Ceq}}=\frac{C_c\left(V_c\left(t_{n+1}\right)\right)}{\text{$\Delta $t}}
+\end{equation*}
+
+$k^{th}$ iteration of \NR method from $t_n$ to $t_{n+1}$:
+\begin{eqnarray*}
+I_{C_{\text{eq}}}^{I,k}&=&-\frac{C_c\left(V_C^k\left(t_{n+1}\right)\right)}{\text{$\Delta $t}}V_c\left(t_n\right)
+\\ &\approx&
+-\frac{V_c\left(t_n\right)}{\text{$\Delta $t}}C_c\left(V_C^{k-1}\left(t_{n+1}\right)\right)-\frac{V_c\left(t_n\right)}{\text{$\Delta $t}}\frac{\text{dC}_c\left(V_C^{k-1}\left(t_{n+1}\right)\right)}{\text{dV}_c}\left(V_C^k\left(t_{n+1}\right)-V_C^{k-1}\left(t_{n+1}\right)\right)
+\\&=&
+\overbrace{-\frac{V_c\left(t_n\right)}{\text{$\Delta $t}}\left\{C_c\left(V_C^{k-1}\left(t_{n+1}\right)\right)-\frac{\text{dC}_c\left(V_C^{k-1}\left(t_{n+1}\right)\right)}{\text{dV}_c}V_C^k\left(t_{n+1}\right)\right\}}^{I_{C_{\text{eq}}}^{I,k-1}}
+-\overbrace{\frac{V_c\left(t_n\right)}{\text{$\Delta $t}}\frac{\text{dC}_c\left(V_C^{k-1}\left(t_{n+1}\right)\right)}{\text{dV}_c}}^{G_{C_{\text{eq}}}^{I,k-1}}V_C^k\left(t_{n+1}\right)
+\end{eqnarray*}
+\begin{eqnarray*}
+I_{C_{\text{eq}}}^{G,k}&=&G_{C_{\text{eq}}}^kV_C^k\left(t_{n+1}\right)
+\\&=&\frac{C_c\left(V_C^k\left(t_{n+1}\right)\right)}{\text{$\Delta $t}}V_C^k\left(t_{n+1}\right)
+\\&=&
+\frac{C_c\left(V_C^{k-1}\left(t_{n+1}\right)\right)}{\text{$\Delta $t}}V_C^{k-1}\left(t_{n+1}\right)
+\\&&
++\frac{1}{\text{$\Delta $t}}\left(\frac{\text{dC}_c\left(V_C^{k-1}\left(t_{n+1}\right)\right)}{\text{dV}_c}V_C^{k-1}\left(t_{n+1}\right)+C_c\left(V_C^{k-1}\left(t_{n+1}\right)\right)\right)\left(V_C^k\left(t_{n+1}\right)-V_C^{k-1}\left(t_{n+1}\right)\right)
+\\&=&
+\overbrace{-\frac{\left(V_C^{k-1}\left(t_{n+1}\right)\right){}^2}{\text{$\Delta $t}}\frac{\text{dC}_c\left(V_C^{k-1}\left(t_{n+1}\right)\right)}{\text{dV}_c}}^{I_{C_{\text{eq}}}^{G,k-1}}
+\\&&
++\overbrace{\frac{1}{\text{$\Delta $t}}\left(\frac{\text{dC}_c\left(V_C^{k-1}\left(t_{n+1}\right)\right)}{\text{dV}_c}V_C^{k-1}\left(t_{n+1}\right)+C_c\left(V_C^{k-1}\left(t_{n+1}\right)\right)\right)}^{G_{C_{\text{eq}}}^{G,k-1}}V_C^k\left(t_{n+1}\right)
+\end{eqnarray*}
+
+Let $I_{C_{\text{eq}}}^{k-1}=I_{C_{\text{eq}}}^{I,k-1}+I_{C_{\text{eq}}}^{G,k-1}$,
+$G_{C_{\text{eq}}}^{k-1}=G_{C_{\text{eq}}}^{I,k-1}+G_{C_{\text{eq}}}^{G,k-1}$.\\
+
+\blline{Capacitor $C_{BE}$}:\\
+\begin{equation*}
+I_{\text{BEeq}}=-\frac{C_{\text{BE}}\left(V_{\text{BE}}\left(t_{n+1}\right),V_{\text{BC}}\left(t_{n+1}\right)\right)}{\text{$\Delta $t}}V_{\text{BE}}\left(t_n\right)
+\end{equation*}
+\begin{equation*}
+G_{\text{BEeq}}=\frac{C_{\text{BE}}\left(V_{\text{BE}}\left(t_{n+1}\right),V_{\text{BC}}\left(t_{n+1}\right)\right)}{\text{$\Delta $t}}
+\end{equation*}
+
+$k^{th}$ iteration of \NR method from $t_n$ to $t_{n+1}$:
+\begin{eqnarray*}
+I_{\text{BE}_{\text{eq}}}^{I,k}&=&-\frac{C_{\text{BE}}\left(V_{\text{BE}}^k\left(t_{n+1}\right),V_{\text{BC}}^k\left(t_{n+1}\right)\right)}{\text{$\Delta $t}}V_{\text{BE}}\left(t_n\right)\\
+&\approx& \textstyle
+-\frac{V_{\text{BE}}\left(t_n\right)}{\text{$\Delta $t}}C_{\text{BE}}\left(V_{\text{BE}}^{k-1}\left(t_{n+1}\right),V_{\text{BC}}^{k-1}\left(t_{n+1}\right)\right)-\frac{V_{\text{BE}}\left(t_n\right)}{\text{$\Delta $t}}\frac{\partial C_{\text{BE}}\left(V_{\text{BE}}^{k-1}\left(t_{n+1}\right),V_{\text{BC}}^{k-1}\left(t_{n+1}\right)\right)}{\partial V_{\text{BE}}}\left(V_{\text{BE}}^k\left(t_{n+1}\right)-V_{\text{BE}}^{k-1}\left(t_{n+1}\right)\right)\\
+&&
+\textstyle
+-\frac{V_{\text{BE}}\left(t_n\right)}{\text{$\Delta $t}}\frac{\partial C_{\text{BE}}\left(V_{\text{BE}}^{k-1}\left(t_{n+1}\right),V_{\text{BC}}^{k-1}\left(t_{n+1}\right)\right)}{\partial V_{\text{BC}}}\left(V_{\text{BC}}^k\left(t_{n+1}\right)-V_{\text{BC}}^{k-1}\left(t_{n+1}\right)\right)\\
+&=&
+\overbrace{
+\scriptstyle -\frac{V_{\text{BE}}\left(t_n\right)}{\text{$\Delta $t}}\left\{C_{\text{BE}}\left(V_{\text{BE}}^{k-1}\left(t_{n+1}\right),V_{\text{BC}}^{k-1}\left(t_{n+1}\right)\right)+\frac{\partial C_{\text{BE}}\left(V_{\text{BE}}^{k-1}\left(t_{n+1}\right),V_{\text{BC}}^{k-1}\left(t_{n+1}\right)\right)}{\partial V_{\text{BE}}}V_{\text{BE}}^{k-1}\left(t_{n+1}\right)+\frac{\partial C_{\text{BE}}\left(V_{\text{BE}}^{k-1}\left(t_{n+1}\right),V_{\text{BC}}^{k-1}\left(t_{n+1}\right)\right)}{\partial V_{\text{BC}}}V_{\text{BC}}^{k-1}\left(t_{n+1}\right)\right\}}^{I_{\text{BE}_{\text{eq}}}^{I,k-1}}\\
+&&
+\overbrace{-\frac{V_{\text{BE}}\left(t_n\right)}{\text{$\Delta $t}}\frac{\partial C_{\text{BE}}\left(V_{\text{BE}}^{k-1}\left(t_{n+1}\right),V_{\text{BC}}^{k-1}\left(t_{n+1}\right)\right)}{\partial V_{\text{BE}}}}^{G_{\text{BE}_{\text{eq}}}^{I_{\text{BE}},k-1}}V_{\text{BE}}^k\left(t_{n+1}\right)\\
+&&
+\overbrace{-\frac{V_{\text{BE}}\left(t_n\right)}{\text{$\Delta $t}}\frac{\partial C_{\text{BE}}\left(V_{\text{BE}}^{k-1}\left(t_{n+1}\right),V_{\text{BC}}^{k-1}\left(t_{n+1}\right)\right)}{\partial V_{\text{BC}}}}^{G_{\text{BE}_{\text{eq}}}^{I_{\text{BC}},k-1}}V_{\text{BC}}^k\left(t_{n+1}\right)
+\end{eqnarray*}
+
+\begin{eqnarray*}
+I_{\text{BE}_{\text{eq}}}^{G,k}&=&G_{\text{BE}_{\text{eq}}}^kV_{\text{BE}}^k\left(t_{n+1}\right)\\
+&=&
+\frac{C_{\text{BE}}\left(V_{\text{BE}}^k\left(t_{n+1}\right),V_{\text{BC}}^k\left(t_{n+1}\right)\right)}{\text{$\Delta $t}}V_{\text{BE}}^k\left(t_{n+1}\right)\\
+&\approx&
+\frac{C_{\text{BE}}\left(V_{\text{BE}}^{k-1}\left(t_{n+1}\right),V_{\text{BC}}^{k-1}\left(t_{n+1}\right)\right)}{\text{$\Delta $t}}V_{\text{BE}}^{k-1}\left(t_{n+1}\right)\\
+&&
+\textstyle
++\frac{1}{\text{$\Delta $t}}\left(\frac{\partial C_{\text{BE}}\left(V_{\text{BE}}^{k-1}\left(t_{n+1}\right),V_{\text{BC}}^{k-1}\left(t_{n+1}\right)\right)}{\partial V_{\text{BE}}}V_{\text{BE}}^{k-1}\left(t_{n+1}\right)+C_{\text{BE}}\left(V_{\text{BE}}^{k-1}\left(t_{n+1}\right),V_{\text{BC}}^{k-1}\left(t_{n+1}\right)\right)\right)\left(V_{\text{BE}}^k\left(t_{n+1}\right)-V_{\text{BE}}^{k-1}\left(t_{n+1}\right)\right)\\
+&&
++\frac{V_{\text{BE}}^{k-1}\left(t_{n+1}\right)}{\text{$\Delta $t}}\frac{\partial C_{\text{BE}}\left(V_{\text{BE}}^{k-1}\left(t_{n+1}\right),V_{\text{BC}}^{k-1}\left(t_{n+1}\right)\right)}{\partial V_{\text{BC}}}\left(V_{\text{BC}}^k\left(t_{n+1}\right)-V_{\text{BC}}^{k-1}\left(t_{n+1}\right)\right)\\
+&=&
+\overbrace{\textstyle -\frac{\left(V_{\text{BE}}^{k-1}\left(t_{n+1}\right)\right){}^2}{\text{$\Delta $t}}\frac{\partial C_{\text{BE}}\left(V_{\text{BE}}^{k-1}\left(t_{n+1}\right),V_{\text{BC}}^{k-1}\left(t_{n+1}\right)\right)}{\partial V_{\text{BE}}}-\frac{V_{\text{BE}}^{k-1}\left(t_{n+1}\right)V_{\text{BC}}^{k-1}\left(t_{n+1}\right)}{\text{$\Delta $t}}\frac{\partial C_{\text{BE}}\left(V_{\text{BE}}^{k-1}\left(t_{n+1}\right),V_{\text{BC}}^{k-1}\left(t_{n+1}\right)\right)}{\partial V_{\text{BC}}}}^{I_{\text{BE}_{\text{eq}}}^{G,k-1}}\\
+&&
+\overbrace{+\frac{1}{\text{$\Delta $t}}\left(\frac{\partial C_{\text{BE}}\left(V_{\text{BE}}^{k-1}\left(t_{n+1}\right),V_{\text{BC}}^{k-1}\left(t_{n+1}\right)\right)}{\partial V_{\text{BE}}}V_{\text{BE}}^{k-1}\left(t_{n+1}\right)+C_{\text{BE}}\left(V_{\text{BE}}^{k-1}\left(t_{n+1}\right),V_{\text{BC}}^{k-1}\left(t_{n+1}\right)\right)\right)}^{G_{\text{BE}_{\text{eq}}}^{G_{\text{BE}},k-1}}V_{\text{BE}}^k\left(t_{n+1}\right)\\
+&&+\overbrace{\frac{V_{\text{BE}}^{k-1}\left(t_{n+1}\right)}{\text{$\Delta $t}}\frac{\partial C_{\text{BE}}\left(V_{\text{BE}}^{k-1}\left(t_{n+1}\right),V_{\text{BC}}^{k-1}\left(t_{n+1}\right)\right)}{\partial V_{\text{BC}}}}^{G_{\text{BE}_{\text{eq}}}^{G_{\text{BC}},k-1}}V_{\text{BC}}^k\left(t_{n+1}\right)
+\end{eqnarray*}
+
+Let $I_{BE_{\text{eq}}}^{k-1}=I_{BE_{\text{eq}}}^{I,k-1}+I_{BE_{\text{eq}}}^{G,k-1}$,
+$G_{BE_{\text{eq}}}^{BE,k-1}=G_{BE_{\text{eq}}}^{I_{BE},k-1}+G_{BE_{\text{eq}}}^{G_{BE},k-1}$,
+$G_{BE_{\text{eq}}}^{BC,k-1}=G_{BE_{\text{eq}}}^{I_{BC},k-1}+G_{BE_{\text{eq}}}^{G_{BC},k-1}$.\\
+
+\blline{Capacitor $C_{BC}$}:\\
+$k^{th}$ iteration of \NR method from $t_n$ to $t_{n+1}$:
+
+\begin{equation*}
+  I_{\text{BCeq}}=-\frac{C_{\text{BC}}\left(V_{\text{BC}}\left(t_{n+1}\right)\right)}{\text{$\Delta $t}}V_{\text{BC}}\left(t_n\right)i
+\end{equation*}
+\begin{equation*}
+  G_{\text{BCeq}}=\frac{C_{\text{BC}}\left(V_{\text{BC}}\left(t_{n+1}\right)\right)}{\text{$\Delta $t}}
+\end{equation*}
+
+\begin{eqnarray*}
+I_{\text{BC}_{\text{eq}}}^{I,k}&=&-\frac{C_{\text{BC}}\left(V_{\text{BC}}\left(t_{n+1}\right)\right)}{\text{$\Delta $t}}V_{\text{BC}}\left(t_n\right)
+\\&\approx&
+-\frac{V_{\text{BC}}\left(t_n\right)}{\text{$\Delta $t}}C_{\text{BC}}\left(V_{\text{BC}}^{k-1}\left(t_{n+1}\right)\right)-\frac{V_{\text{BC}}\left(t_n\right)}{\text{$\Delta $t}}\frac{\text{dC}_{\text{BC}}\left(V_{\text{BC}}^{k-1}\left(t_{n+1}\right)\right)}{\text{dV}_{\text{BC}}}\left(V_{\text{BC}}^k\left(t_{n+1}\right)-V_{\text{BC}}^{k-1}\left(t_{n+1}\right)\right)
+\\&=&
+\overbrace{-\frac{V_{\text{BC}}\left(t_n\right)}{\text{$\Delta $t}}\left\{C_{\text{BC}}\left(V_{\text{BC}}^{k-1}\left(t_{n+1}\right)\right)-\frac{\text{dC}_{\text{BC}}\left(V_{\text{BC}}^{k-1}\left(t_{n+1}\right)\right)}{\text{dV}_{\text{BC}}}V_{\text{BC}}^k\left(t_{n+1}\right)\right\}}^{I_{\text{BC}_{\text{eq}}}^{I,k-1}}
+\\&&
+-\overbrace{\frac{V_{\text{BC}}\left(t_n\right)}{\text{$\Delta $t}}\frac{\text{dC}_{\text{BC}}\left(V_{\text{BC}}^{k-1}\left(t_{n+1}\right)\right)}{\text{dV}_{\text{BC}}}}^{G_{\text{BC}_{\text{eq}}}^{I,k-1}}V_{\text{BC}}^k\left(t_{n+1}\right)
+\end{eqnarray*}
+
+\begin{eqnarray*}
+I_{\text{BC}_{\text{eq}}}^{G,k}&=&G_{\text{BC}_{\text{eq}}}^kV_{\text{BC}}^k\left(t_{n+1}\right)
+\\&=&
+\frac{C_{\text{BC}}\left(V_{\text{BC}}^{k-1}\left(t_{n+1}\right)\right)}{\text{$\Delta $t}}\left(V_{\text{BC}}^k\left(t_{n+1}\right)\right)V_{\text{BC}}^k\left(t_{n+1}\right)
+\\&\approx&
+\frac{C_{\text{BC}}\left(V_{\text{BC}}^{k-1}\left(t_{n+1}\right)\right)}{\text{$\Delta $t}}\left(V_{\text{BC}}^{k-1}\left(t_{n+1}\right)\right)V_{\text{BC}}^{k-1}\left(t_{n+1}\right)
+\\&&+\frac{1}{\text{$\Delta $t}}\left(\frac{\text{dC}_{\text{BC}}\left(V_{\text{BC}}^{k-1}\left(t_{n+1}\right)\right)}{\text{dV}_{\text{BC}}}V_{\text{BC}}^{k-1}\left(t_{n+1}\right)+C_{\text{BC}}\left(V_{\text{BC}}^{k-1}\left(t_{n+1}\right)\right)V_{\text{BC}}^{k-1}\left(t_{n+1}\right)\right)\left(V_{\text{BC}}^k\left(t_{n+1}\right)-V_{\text{BC}}^{k-1}\left(t_{n+1}\right)\right)
+\\&=&
+\overbrace{-\frac{\left(V_{\text{BC}}^{k-1}\left(t_{n+1}\right)\right){}^2}{\text{$\Delta $t}}\frac{\text{dC}_{\text{BC}}\left(V_{\text{BC}}^{k-1}\left(t_{n+1}\right)\right)}{\text{dV}_{\text{BC}}}}^{I_{\text{BC}_{\text{eq}}}^{G,k-1}}
+\\&&
++\overbrace{\frac{1}{\text{$\Delta $t}}\left(\frac{\text{dC}_{\text{BC}}\left(V_{\text{BC}}^{k-1}\left(t_{n+1}\right)\right)}{\text{dV}_{\text{BC}}}V_{\text{BC}}^{k-1}\left(t_{n+1}\right)+C_{\text{BC}}\left(V_{\text{BC}}^{k-1}\left(t_{n+1}\right)\right)\right)}^{G_{\text{BC}_{\text{eq}}}^{G,k-1}}V_{\text{BC}}^k\left(t_{n+1}\right)
+\end{eqnarray*}
+
+Let $I_{BC_{\text{eq}}}^{k-1}=I_{BC_{\text{eq}}}^{I,k-1}+I_{BC_{\text{eq}}}^{G,k-1}$,
+$G_{BC_{\text{eq}}}^{k-1}=G_{BC_{\text{eq}}}^{I,k-1}+G_{BC_{\text{eq}}}^{G,k-1}$.\\
+
+\blline{Matrix Stamping:}\\
+$k^{th}$ iteration of \NR method from $t_n$ to $t_{n+1}$:
+\renewcommand{\BEE}{G^{BE,k-1}_{BE_{eq}}}
+\newcommand{\BEC}{G^{BC,k-1}_{BE_{eq}}}
+\renewcommand{\BC}{G^{k-1}_{BC_{eq}}}
+\renewcommand{\C}{G^{k-1}_{C_{eq}}}
+\newcommand{\IBE}{I^{k-1}_{BE_{eq}}}
+\newcommand{\IBC}{I^{k-1}_{BC_{eq}}}
+\newcommand{\IC}{I^{k-1}_{C_{eq}}}
+\newcommand{\Vt}[1]{V^k_{#1}(t_{n+1})}
+\begin{equation*}
+ \kbordermatrix{
+ &      B          &     C     &     E \\
+B& \BEE+\BEC+\BC   & -\BEC-\BC & -\BEE \\
+C& -\BC            & \C+\BC    &     0 \\
+E& -\BEE-\BEC      & \BEC      &  \BEE
+ } \times
+ \begin{bmatrix}
+  \Vt{B}\\
+  \Vt{C}\\
+  \Vt{E}
+ \end{bmatrix}=
+ \begin{bmatrix}
+   -\IBE-\IBC\\
+   -\IC+\IBC\\
+   \IBE
+ \end{bmatrix}
+\end{equation*}
 % ====================================================================
 
 \section{Experimental Results}
@@ -158,13 +565,11 @@ Figure~\ref{fig:tran} shows the result of amp\_tran1.txt.
   \label{fig:tran}
 \end{figure}
 
-
-
+\bibliography{552report}
 \begin{table}[h]
   \centering
 \begin{tabular}{|p{\linewidth}|}
 \hline
-\scriptsize
 \begin{verbatim}
 * representative
 voltage at node a = 1.000000e+00
@@ -218,7 +623,6 @@ Error: dependent voltage source [v3] of ccvs [h1] not present!
   \centering
 \begin{tabular}{|p{\linewidth}|}
 \hline
-\scriptsize
 \begin{verbatim}
 * Diode:
 
@@ -262,8 +666,4 @@ current throught source vin2 = -1.838606e-05
   \caption{Phase II output.}
   \label{tab:phase2}
 \end{table}
-
-
-
-\bibliography{552report}
 \end{document}

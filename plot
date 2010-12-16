@@ -1,7 +1,10 @@
 #!/bin/bash
+# utility script to draw the output by zspice via gnuplot
+# if `pdf' is used in the second option, the output will be redirected to 
+# a pdf file.
 
 if [ "$#" -lt 1 ];then
-	echo "Usage: ./plot filename"
+	echo "Usage: ./plot filename [output type]"
 	exit
 fi
 
@@ -27,11 +30,18 @@ else
 	ptype=Unknown
 fi
 
+TERM=aqua
+OUTPUT=
+if [[ "$2" == "pdf" ]];then
+	TERM="postscript enhanced color"
+	OUTPUT="'| ps2pdf - ${1%%.*}.pdf'"
+fi
+
 gnuplot << EOF
 reset
 
-set terminal postscript enhanced color
-set output '| ps2pdf - ${1%%.*}.pdf'
+set terminal $TERM
+set output $OUTPUT
 set $scale x
 set ylabel "$ylabel"
 set xlabel "$xlabel"

@@ -140,9 +140,8 @@ double Net::compute_dCc(double Vc){
 }
 
 double Net::compute_dCbe(double Vbe, double Vbc){
-	double q = - Tf * Is * exp(Vbe/Vt) / VAr / Vt
-		   + Tf * Is * exp(Vbe/Vt) * (1- Vbc/VAf - Vbe/VAr) / Vt / Vt
-		   - Tf * Is * exp(Vbe/Vt) / Vt / VAr;
+	double q = - 2 * Tf * Is * exp(Vbe/Vt) / VAr / Vt
+		   + Tf * Is * exp(Vbe/Vt) * (1- Vbc/VAf - Vbe/VAr) / Vt / Vt;
 	if( Vbe < Fc * Vj)
 		q += Mj * Cjbe * pow(1 - Vbe/Vj, -Mj-1) / Vj;
 	else

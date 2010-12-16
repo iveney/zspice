@@ -1,0 +1,1563 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 8.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       157,          7]
+NotebookDataLength[     47122,       1554]
+NotebookOptionsPosition[     46862,       1540]
+NotebookOutlinePosition[     47219,       1556]
+CellTagsIndexPosition[     47176,       1553]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[BoxData[{
+ RowBox[{"NPN", ":", "\[IndentingNewLine]", 
+  RowBox[{"Capacitor", " ", 
+   SubscriptBox["C", "c"]}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   SubscriptBox["C", "c"], 
+   RowBox[{"(", 
+    SubscriptBox["V", "c"], ")"}]}], "=", 
+  RowBox[{
+   FractionBox[
+    RowBox[{
+     RowBox[{"\[DifferentialD]", "Q"}], 
+     RowBox[{"(", 
+      SubscriptBox["V", "c"], ")"}]}], 
+    RowBox[{"\[DifferentialD]", 
+     SubscriptBox["V", "c"]}]], "=", 
+   RowBox[{"\[Piecewise]", GridBox[{
+      {
+       RowBox[{
+        SubscriptBox["C", "jcs"], 
+        SuperscriptBox[
+         RowBox[{"(", 
+          RowBox[{"1", "-", 
+           FractionBox[
+            SubscriptBox["V", "c"], 
+            SubscriptBox["V", "j"]]}], ")"}], 
+         RowBox[{"-", 
+          SubscriptBox["m", "j"]}]]}], 
+       RowBox[{
+        SubscriptBox["V", "c"], "<", 
+        RowBox[{
+         SubscriptBox["f", "c"], 
+         SubscriptBox["V", "j"]}]}]},
+      {
+       RowBox[{
+        SubscriptBox["C", "jcs"], 
+        FractionBox[
+         RowBox[{"1", "-", 
+          RowBox[{
+           SubscriptBox["f", "c"], 
+           RowBox[{"(", 
+            RowBox[{"1", "+", 
+             SubscriptBox["m", "j"]}], ")"}]}], "+", 
+          RowBox[{
+           SubscriptBox["m", "j"], 
+           FractionBox[
+            SubscriptBox["V", "c"], 
+            SubscriptBox["V", "j"]]}]}], 
+         SuperscriptBox[
+          RowBox[{"(", 
+           RowBox[{"1", "-", 
+            SubscriptBox["f", "c"]}], ")"}], 
+          RowBox[{"1", "+", 
+           SubscriptBox["m", "j"]}]]]}], 
+       RowBox[{
+        SubscriptBox["V", "c"], "\[GreaterEqual]", 
+        RowBox[{
+         SubscriptBox["f", "c"], 
+         SubscriptBox["V", "j"]}]}]}
+     },
+     GridBoxAlignment->{
+      "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+       "RowsIndexed" -> {}},
+     GridBoxItemSize->{
+      "Columns" -> {{Automatic}}, "ColumnsIndexed" -> {}, "Rows" -> {{1.}}, 
+       "RowsIndexed" -> {}},
+     GridBoxSpacings->{"Columns" -> {
+         Offset[0.27999999999999997`], {
+          Offset[0.84]}, 
+         Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+         Offset[0.2], {
+          Offset[0.4]}, 
+         Offset[0.2]}, "RowsIndexed" -> {}}]}]}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  FractionBox[
+   RowBox[{
+    RowBox[{"\[DifferentialD]", 
+     SubscriptBox["C", "c"]}], 
+    RowBox[{"(", 
+     SubscriptBox["V", "c"], ")"}]}], 
+   RowBox[{"\[DifferentialD]", 
+    SubscriptBox["V", "c"]}]], "=", 
+  RowBox[{"\[Piecewise]", GridBox[{
+     {
+      RowBox[{
+       FractionBox[
+        SubscriptBox["", 
+         RowBox[{
+          SubscriptBox["m", "j"], 
+          SubscriptBox["C", "jcs"]}]], 
+        SubscriptBox["V", "j"]], 
+       SuperscriptBox[
+        RowBox[{"(", 
+         RowBox[{"1", "-", 
+          FractionBox[
+           SubscriptBox["V", "c"], 
+           SubscriptBox["V", "j"]]}], ")"}], 
+        RowBox[{"-", 
+         SubscriptBox["m", 
+          RowBox[{"j", "-", "1"}]]}]]}], 
+      RowBox[{
+       SubscriptBox["V", "c"], "<", 
+       RowBox[{
+        SubscriptBox["f", "c"], 
+        SubscriptBox["V", "j"]}]}]},
+     {
+      FractionBox[
+       SubscriptBox["", 
+        RowBox[{
+         SubscriptBox["m", "j"], 
+         SubscriptBox["C", "jcs"]}]], 
+       RowBox[{
+        SubscriptBox["V", "j"], 
+        SuperscriptBox[
+         RowBox[{"(", 
+          RowBox[{"1", "-", 
+           SubscriptBox["f", "c"]}], ")"}], 
+         RowBox[{"1", "+", 
+          SubscriptBox["m", "j"]}]]}]], 
+      RowBox[{
+       SubscriptBox["V", "c"], "\[GreaterEqual]", 
+       RowBox[{
+        SubscriptBox["f", "c"], 
+        SubscriptBox["V", "j"]}]}]}
+    },
+    GridBoxAlignment->{
+     "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+      "RowsIndexed" -> {}},
+    GridBoxItemSize->{
+     "Columns" -> {{Automatic}}, "ColumnsIndexed" -> {}, "Rows" -> {{1.}}, 
+      "RowsIndexed" -> {}},
+    GridBoxSpacings->{"Columns" -> {
+        Offset[0.27999999999999997`], {
+         Offset[0.84]}, 
+        Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+        Offset[0.2], {
+         Offset[0.4]}, 
+        Offset[0.2]}, "RowsIndexed" -> {}}]}]}], "\[IndentingNewLine]", 
+ RowBox[{"Capacitor", " ", 
+  SubscriptBox["C", "BE"]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   SubscriptBox["C", "BE"], 
+   RowBox[{"(", 
+    RowBox[{
+     SubscriptBox["V", "BE"], ",", 
+     SubscriptBox["V", "BC"]}], ")"}]}], "=", 
+  RowBox[{
+   FractionBox[
+    RowBox[{
+     RowBox[{"\[DifferentialD]", "Q"}], 
+     RowBox[{"(", 
+      SubscriptBox["V", "BE"], ")"}]}], 
+    RowBox[{"\[DifferentialD]", 
+     SubscriptBox["V", "BE"]}]], "=", 
+   RowBox[{
+    RowBox[{"-", 
+     RowBox[{
+      FractionBox[
+       RowBox[{
+        SubscriptBox["\[Tau]", "f"], 
+        SubscriptBox["I", "S"]}], 
+       SubscriptBox["V", "Ar"]], "[", 
+      RowBox[{
+       RowBox[{"exp", 
+        RowBox[{"(", 
+         FractionBox[
+          SubscriptBox["V", "BE"], 
+          SubscriptBox["V", "T"]], ")"}]}], "-", "1"}], "]"}]}], "+", 
+    RowBox[{
+     FractionBox[
+      RowBox[{
+       SubscriptBox["\[Tau]", "f"], 
+       SubscriptBox["I", "S"]}], 
+      SubscriptBox["V", "T"]], "exp", 
+     RowBox[{"(", 
+      FractionBox[
+       SubscriptBox["V", "BE"], 
+       SubscriptBox["V", "T"]], ")"}], 
+     RowBox[{"(", 
+      RowBox[{"1", "-", 
+       FractionBox[
+        SubscriptBox["V", "BC"], 
+        SubscriptBox["V", "Af"]], "-", 
+       FractionBox[
+        SubscriptBox["V", "BE"], 
+        SubscriptBox["V", "Ar"]]}], ")"}]}]}]}]}], "\[IndentingNewLine]", 
+ RowBox[{"+", 
+  RowBox[{"\[Piecewise]", GridBox[{
+     {
+      RowBox[{
+       SubscriptBox["C", "jbe"], 
+       SuperscriptBox[
+        RowBox[{"(", 
+         RowBox[{"1", "-", 
+          FractionBox[
+           SubscriptBox["V", "BE"], 
+           SubscriptBox["V", "j"]]}], ")"}], 
+        RowBox[{"-", 
+         SubscriptBox["m", "j"]}]]}], 
+      RowBox[{
+       SubscriptBox["V", "BE"], "<", 
+       RowBox[{
+        SubscriptBox["f", "c"], 
+        SubscriptBox["V", "j"]}]}]},
+     {
+      RowBox[{
+       SubscriptBox["C", "jbe"], 
+       FractionBox[
+        RowBox[{"1", "-", 
+         RowBox[{
+          SubscriptBox["f", "c"], 
+          RowBox[{"(", 
+           RowBox[{"1", "+", 
+            SubscriptBox["m", "j"]}], ")"}]}], "+", 
+         RowBox[{
+          SubscriptBox["m", "j"], 
+          FractionBox[
+           SubscriptBox["V", "BE"], 
+           SubscriptBox["V", "j"]]}]}], 
+        SuperscriptBox[
+         RowBox[{"(", 
+          RowBox[{"1", "-", 
+           SubscriptBox["f", "c"]}], ")"}], 
+         RowBox[{"1", "+", 
+          SubscriptBox["m", "j"]}]]]}], 
+      RowBox[{
+       SubscriptBox["V", "BE"], "\[GreaterEqual]", 
+       RowBox[{
+        SubscriptBox["f", "c"], 
+        SubscriptBox["V", "j"]}]}]}
+    },
+    GridBoxAlignment->{
+     "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+      "RowsIndexed" -> {}},
+    GridBoxItemSize->{
+     "Columns" -> {{Automatic}}, "ColumnsIndexed" -> {}, "Rows" -> {{1.}}, 
+      "RowsIndexed" -> {}},
+    GridBoxSpacings->{"Columns" -> {
+        Offset[0.27999999999999997`], {
+         Offset[0.84]}, 
+        Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+        Offset[0.2], {
+         Offset[0.4]}, 
+        Offset[0.2]}, "RowsIndexed" -> {}}]}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   SubscriptBox["C", "BE2"], 
+   RowBox[{"(", 
+    RowBox[{
+     SubscriptBox["V", "BE"], ",", 
+     SubscriptBox["V", "BC"]}], ")"}]}], "=", 
+  RowBox[{
+   FractionBox[
+    RowBox[{
+     RowBox[{"\[DifferentialD]", "Q"}], 
+     RowBox[{"(", 
+      SubscriptBox["V", "BE"], ")"}]}], 
+    RowBox[{"\[DifferentialD]", 
+     SubscriptBox["V", "BC"]}]], "=", 
+   RowBox[{"-", 
+    RowBox[{
+     FractionBox[
+      RowBox[{
+       SubscriptBox["\[Tau]", "f"], 
+       SubscriptBox["I", "S"]}], 
+      SubscriptBox["V", "Af"]], "[", 
+     RowBox[{
+      RowBox[{"exp", 
+       RowBox[{"(", 
+        FractionBox[
+         SubscriptBox["V", "BE"], 
+         SubscriptBox["V", "T"]], ")"}]}], "-", "1"}], 
+     "]"}]}]}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  FractionBox[
+   RowBox[{
+    RowBox[{"\[PartialD]", 
+     SubscriptBox["C", "BE"]}], 
+    RowBox[{"(", 
+     RowBox[{
+      SubscriptBox["V", "BE"], ",", 
+      SubscriptBox["V", "BC"]}], ")"}]}], 
+   RowBox[{"\[PartialD]", 
+    SubscriptBox["V", "BE"]}]], "=", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"-", 
+     FractionBox[
+      RowBox[{"2", 
+       SubscriptBox["\[Tau]", "f"], 
+       SubscriptBox["I", "S"]}], 
+      RowBox[{
+       SubscriptBox["V", "Ar"], 
+       SubscriptBox["V", "T"]}]]}], "exp", 
+    RowBox[{"(", 
+     FractionBox[
+      SubscriptBox["V", "BE"], 
+      SubscriptBox["V", "T"]], ")"}]}], "+", 
+   RowBox[{
+    FractionBox[
+     RowBox[{
+      SubscriptBox["\[Tau]", "f"], 
+      SubscriptBox["I", "S"]}], 
+     SuperscriptBox[
+      RowBox[{"(", 
+       SubscriptBox["V", "T"], ")"}], "2"]], "exp", 
+    RowBox[{"(", 
+     FractionBox[
+      SubscriptBox["V", "BE"], 
+      SubscriptBox["V", "T"]], ")"}], 
+    RowBox[{"(", 
+     RowBox[{"1", "-", 
+      FractionBox[
+       SubscriptBox["V", "BC"], 
+       SubscriptBox["V", "Af"]], "-", 
+      FractionBox[
+       SubscriptBox["V", "BE"], 
+       SubscriptBox["V", "Ar"]]}], ")"}]}]}]}], "\[IndentingNewLine]", 
+ RowBox[{"+", 
+  RowBox[{"\[Piecewise]", GridBox[{
+     {
+      RowBox[{
+       FractionBox[
+        SubscriptBox["", 
+         RowBox[{
+          SubscriptBox["m", "j"], 
+          SubscriptBox["C", "jbe"]}]], 
+        SubscriptBox["V", "j"]], 
+       SuperscriptBox[
+        RowBox[{"(", 
+         RowBox[{"1", "-", 
+          FractionBox[
+           SubscriptBox["V", "BE"], 
+           SubscriptBox["V", "j"]]}], ")"}], 
+        RowBox[{"-", 
+         SubscriptBox["m", 
+          RowBox[{"j", "-", "1"}]]}]]}], 
+      RowBox[{
+       SubscriptBox["V", "BE"], "<", 
+       RowBox[{
+        SubscriptBox["f", "c"], 
+        SubscriptBox["V", "j"]}]}]},
+     {
+      FractionBox[
+       SubscriptBox["", 
+        RowBox[{
+         SubscriptBox["m", "j"], 
+         SubscriptBox["C", "jbe"]}]], 
+       RowBox[{
+        SubscriptBox["V", "j"], 
+        SuperscriptBox[
+         RowBox[{"(", 
+          RowBox[{"1", "-", 
+           SubscriptBox["f", "c"]}], ")"}], 
+         RowBox[{"1", "+", 
+          SubscriptBox["m", "j"]}]]}]], 
+      RowBox[{
+       SubscriptBox["V", "BE"], "\[GreaterEqual]", 
+       RowBox[{
+        SubscriptBox["f", "c"], 
+        SubscriptBox["V", "j"]}]}]}
+    },
+    GridBoxAlignment->{
+     "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+      "RowsIndexed" -> {}},
+    GridBoxItemSize->{
+     "Columns" -> {{Automatic}}, "ColumnsIndexed" -> {}, "Rows" -> {{1.}}, 
+      "RowsIndexed" -> {}},
+    GridBoxSpacings->{"Columns" -> {
+        Offset[0.27999999999999997`], {
+         Offset[0.84]}, 
+        Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+        Offset[0.2], {
+         Offset[0.4]}, 
+        Offset[0.2]}, "RowsIndexed" -> {}}]}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   FractionBox[
+    RowBox[{
+     RowBox[{"\[PartialD]", 
+      SubscriptBox["C", "BE"]}], 
+     RowBox[{"(", 
+      RowBox[{
+       SubscriptBox["V", "BE"], ",", 
+       SubscriptBox["V", "BC"]}], ")"}]}], 
+    RowBox[{"\[PartialD]", 
+     SubscriptBox["V", "BC"]}]], "=", 
+   RowBox[{
+    RowBox[{"-", 
+     FractionBox[
+      RowBox[{
+       SubscriptBox["\[Tau]", "f"], 
+       SubscriptBox["I", "S"]}], 
+      RowBox[{
+       SubscriptBox["V", "Ar"], 
+       SubscriptBox["V", "T"]}]]}], "exp", 
+    RowBox[{"(", 
+     FractionBox[
+      SubscriptBox["V", "BE"], 
+      SubscriptBox["V", "T"]], ")"}]}]}], 
+  "\[IndentingNewLine]"}], "\[IndentingNewLine]", 
+ RowBox[{"Capacitor", " ", 
+  SubscriptBox["C", "BC"]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   SubscriptBox["C", "BC"], 
+   RowBox[{"(", 
+    SubscriptBox["V", "BC"], ")"}]}], "=", 
+  RowBox[{
+   FractionBox[
+    RowBox[{
+     RowBox[{"\[DifferentialD]", "Q"}], 
+     RowBox[{"(", 
+      SubscriptBox["V", "BC"], ")"}]}], 
+    RowBox[{"\[DifferentialD]", 
+     SubscriptBox["V", "BC"]}]], "=", 
+   RowBox[{
+    RowBox[{
+     FractionBox[
+      RowBox[{
+       SubscriptBox["\[Tau]", "f"], 
+       SubscriptBox["I", "S"]}], 
+      SubscriptBox["V", "T"]], "exp", 
+     RowBox[{"(", 
+      FractionBox[
+       SubscriptBox["V", "BC"], 
+       SubscriptBox["V", "T"]], ")"}]}], "+", 
+    RowBox[{"\[Piecewise]", GridBox[{
+       {
+        RowBox[{
+         SubscriptBox["C", "jbc"], 
+         SuperscriptBox[
+          RowBox[{"(", 
+           RowBox[{"1", "-", 
+            FractionBox[
+             SubscriptBox["V", "BC"], 
+             SubscriptBox["V", "j"]]}], ")"}], 
+          RowBox[{"-", 
+           SubscriptBox["m", "j"]}]]}], 
+        RowBox[{
+         SubscriptBox["V", "BC"], "<", 
+         RowBox[{
+          SubscriptBox["f", "c"], 
+          SubscriptBox["V", "j"]}]}]},
+       {
+        RowBox[{
+         SubscriptBox["C", "jbc"], 
+         FractionBox[
+          RowBox[{"1", "-", 
+           RowBox[{
+            SubscriptBox["f", "c"], 
+            RowBox[{"(", 
+             RowBox[{"1", "+", 
+              SubscriptBox["m", "j"]}], ")"}]}], "+", 
+           RowBox[{
+            SubscriptBox["m", "j"], 
+            FractionBox[
+             SubscriptBox["V", "BC"], 
+             SubscriptBox["V", "j"]]}]}], 
+          SuperscriptBox[
+           RowBox[{"(", 
+            RowBox[{"1", "-", 
+             SubscriptBox["f", "c"]}], ")"}], 
+           RowBox[{"1", "+", 
+            SubscriptBox["m", "j"]}]]]}], 
+        RowBox[{
+         SubscriptBox["V", "BC"], "\[GreaterEqual]", 
+         RowBox[{
+          SubscriptBox["f", "c"], 
+          SubscriptBox["V", "j"]}]}]}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxItemSize->{
+       "Columns" -> {{Automatic}}, "ColumnsIndexed" -> {}, "Rows" -> {{1.}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.84]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.4]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}]}]}]}]}], "\[IndentingNewLine]", 
+
+ RowBox[{
+  RowBox[{
+   FractionBox[
+    RowBox[{
+     RowBox[{"\[DifferentialD]", 
+      SubscriptBox["C", "BC"]}], 
+     RowBox[{"(", 
+      SubscriptBox["V", "BC"], ")"}]}], 
+    RowBox[{"\[DifferentialD]", 
+     SubscriptBox["V", "BC"]}]], "=", 
+   RowBox[{
+    RowBox[{
+     FractionBox[
+      RowBox[{
+       SubscriptBox["\[Tau]", "f"], 
+       SubscriptBox["I", "S"]}], 
+      SuperscriptBox[
+       RowBox[{"(", 
+        SubscriptBox["V", "T"], ")"}], "2"]], "exp", 
+     RowBox[{"(", 
+      FractionBox[
+       SubscriptBox["V", "BC"], 
+       SubscriptBox["V", "T"]], ")"}]}], "+", 
+    RowBox[{"\[Piecewise]", GridBox[{
+       {
+        RowBox[{
+         FractionBox[
+          SubscriptBox["", 
+           RowBox[{
+            SubscriptBox["m", "j"], 
+            SubscriptBox["C", "jbc"]}]], 
+          SubscriptBox["V", "j"]], 
+         SuperscriptBox[
+          RowBox[{"(", 
+           RowBox[{"1", "-", 
+            FractionBox[
+             SubscriptBox["V", "BC"], 
+             SubscriptBox["V", "j"]]}], ")"}], 
+          RowBox[{"-", 
+           SubscriptBox["m", 
+            RowBox[{"j", "-", "1"}]]}]]}], 
+        RowBox[{
+         SubscriptBox["V", "BC"], "<", 
+         RowBox[{
+          SubscriptBox["f", "c"], 
+          SubscriptBox["V", "j"]}]}]},
+       {
+        FractionBox[
+         SubscriptBox["", 
+          RowBox[{
+           SubscriptBox["m", "j"], 
+           SubscriptBox["C", "jbc"]}]], 
+         RowBox[{
+          SubscriptBox["V", "j"], 
+          SuperscriptBox[
+           RowBox[{"(", 
+            RowBox[{"1", "-", 
+             SubscriptBox["f", "c"]}], ")"}], 
+           RowBox[{"1", "+", 
+            SubscriptBox["m", "j"]}]]}]], 
+        RowBox[{
+         SubscriptBox["V", "BC"], "\[GreaterEqual]", 
+         RowBox[{
+          SubscriptBox["f", "c"], 
+          SubscriptBox["V", "j"]}]}]}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxItemSize->{
+       "Columns" -> {{Automatic}}, "ColumnsIndexed" -> {}, "Rows" -> {{1.}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.84]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.4]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}]}]}]}], 
+  "\[IndentingNewLine]"}], "\[IndentingNewLine]", 
+ RowBox[{"PNP", ":", "\[IndentingNewLine]", 
+  SubscriptBox["C", 
+   RowBox[{"C", ":"}]]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"Q", 
+   RowBox[{"(", 
+    SubscriptBox["V", "C"], ")"}]}], "=", 
+  RowBox[{"\[Piecewise]", GridBox[{
+     {
+      RowBox[{
+       RowBox[{"-", 
+        SubscriptBox["C", "jcs"]}], 
+       RowBox[{
+        FractionBox[
+         SubscriptBox["V", "j"], 
+         RowBox[{"1", "-", 
+          SubscriptBox["m", "j"]}]], "[", 
+        RowBox[{"1", "-", 
+         SuperscriptBox[
+          RowBox[{"(", 
+           RowBox[{"1", "+", 
+            FractionBox[
+             SubscriptBox["V", "c"], 
+             SubscriptBox["V", "j"]]}], ")"}], 
+          RowBox[{"1", "-", 
+           SubscriptBox["m", "j"]}]]}], "]"}]}], 
+      RowBox[{
+       SubscriptBox["V", "c"], ">", 
+       RowBox[{
+        RowBox[{"-", 
+         SubscriptBox["f", "c"]}], 
+        SubscriptBox["V", "j"]}]}]},
+     {
+      RowBox[{
+       RowBox[{
+        SubscriptBox["C", "jcs"], 
+        SubscriptBox["V", "c"], 
+        FractionBox[
+         RowBox[{"1", "-", 
+          RowBox[{
+           SubscriptBox["f", "c"], 
+           RowBox[{"(", 
+            RowBox[{"1", "+", 
+             SubscriptBox["m", "j"]}], ")"}]}], "-", 
+          RowBox[{
+           SubscriptBox["m", "j"], 
+           FractionBox[
+            SubscriptBox["V", "c"], 
+            RowBox[{"2", 
+             SubscriptBox["V", "j"]}]]}]}], 
+         SuperscriptBox[
+          RowBox[{"(", 
+           RowBox[{"1", "-", 
+            SubscriptBox["f", "c"]}], ")"}], 
+          RowBox[{"1", "+", 
+           SubscriptBox["m", "j"]}]]]}], "-", 
+       RowBox[{
+        SubscriptBox["C", "jcs"], 
+        RowBox[{
+         SubscriptBox["V", "j"], "[", 
+         RowBox[{
+          FractionBox[
+           RowBox[{"1", "-", 
+            SuperscriptBox[
+             RowBox[{"(", 
+              RowBox[{"1", "-", 
+               SubscriptBox["f", "c"]}], ")"}], 
+             RowBox[{"1", "-", 
+              SubscriptBox["m", "j"]}]]}], 
+           RowBox[{"1", "-", 
+            SubscriptBox["m", "j"]}]], "-", 
+          RowBox[{
+           SubscriptBox["f", "c"], 
+           FractionBox[
+            RowBox[{"1", "-", 
+             RowBox[{
+              SubscriptBox["f", "c"], 
+              RowBox[{"(", 
+               RowBox[{"1", "+", 
+                FractionBox[
+                 SubscriptBox["m", "j"], "2"]}], ")"}]}]}], 
+            SuperscriptBox[
+             RowBox[{"(", 
+              RowBox[{"1", "-", 
+               SubscriptBox["f", "c"]}], ")"}], 
+             RowBox[{"1", "+", 
+              SubscriptBox["m", "j"]}]]]}]}], "]"}]}]}], 
+      RowBox[{
+       SubscriptBox["V", "c"], "\[LessEqual]", 
+       RowBox[{
+        RowBox[{"-", 
+         SubscriptBox["f", "c"]}], 
+        SubscriptBox["V", "j"]}]}]}
+    },
+    GridBoxAlignment->{
+     "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+      "RowsIndexed" -> {}},
+    GridBoxItemSize->{
+     "Columns" -> {{Automatic}}, "ColumnsIndexed" -> {}, "Rows" -> {{1.}}, 
+      "RowsIndexed" -> {}},
+    GridBoxSpacings->{"Columns" -> {
+        Offset[0.27999999999999997`], {
+         Offset[0.84]}, 
+        Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+        Offset[0.2], {
+         Offset[0.4]}, 
+        Offset[0.2]}, "RowsIndexed" -> {}}]}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   SubscriptBox["C", "c"], 
+   RowBox[{"(", 
+    SubscriptBox["V", "c"], ")"}]}], "=", 
+  RowBox[{
+   FractionBox[
+    RowBox[{
+     RowBox[{"\[DifferentialD]", "Q"}], 
+     RowBox[{"(", 
+      SubscriptBox["V", "c"], ")"}]}], 
+    RowBox[{"\[DifferentialD]", 
+     SubscriptBox["V", "c"]}]], "=", 
+   RowBox[{"\[Piecewise]", GridBox[{
+      {
+       RowBox[{
+        SubscriptBox["C", "jcs"], 
+        SuperscriptBox[
+         RowBox[{"(", 
+          RowBox[{"1", "+", 
+           FractionBox[
+            SubscriptBox["V", "c"], 
+            SubscriptBox["V", "j"]]}], ")"}], 
+         RowBox[{"-", 
+          SubscriptBox["m", "j"]}]]}], 
+       RowBox[{
+        SubscriptBox["V", "c"], ">", 
+        RowBox[{
+         RowBox[{"-", 
+          SubscriptBox["f", "c"]}], 
+         SubscriptBox["V", "j"]}]}]},
+      {
+       RowBox[{
+        SubscriptBox["C", "jcs"], 
+        FractionBox[
+         RowBox[{"1", "-", 
+          RowBox[{
+           SubscriptBox["f", "c"], 
+           RowBox[{"(", 
+            RowBox[{"1", "+", 
+             SubscriptBox["m", "j"]}], ")"}]}], "-", 
+          RowBox[{
+           SubscriptBox["m", "j"], 
+           FractionBox[
+            SubscriptBox["V", "c"], 
+            SubscriptBox["V", "j"]]}]}], 
+         SuperscriptBox[
+          RowBox[{"(", 
+           RowBox[{"1", "-", 
+            SubscriptBox["f", "c"]}], ")"}], 
+          RowBox[{"1", "+", 
+           SubscriptBox["m", "j"]}]]]}], 
+       RowBox[{
+        SubscriptBox["V", "c"], "\[LessEqual]", 
+        RowBox[{
+         RowBox[{"-", 
+          SubscriptBox["f", "c"]}], 
+         SubscriptBox["V", "j"]}]}]}
+     },
+     GridBoxAlignment->{
+      "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+       "RowsIndexed" -> {}},
+     GridBoxItemSize->{
+      "Columns" -> {{Automatic}}, "ColumnsIndexed" -> {}, "Rows" -> {{1.}}, 
+       "RowsIndexed" -> {}},
+     GridBoxSpacings->{"Columns" -> {
+         Offset[0.27999999999999997`], {
+          Offset[0.84]}, 
+         Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+         Offset[0.2], {
+          Offset[0.4]}, 
+         Offset[0.2]}, "RowsIndexed" -> {}}]}]}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  FractionBox[
+   RowBox[{
+    RowBox[{"\[DifferentialD]", 
+     SubscriptBox["C", "c"]}], 
+    RowBox[{"(", 
+     SubscriptBox["V", "c"], ")"}]}], 
+   RowBox[{"\[DifferentialD]", 
+    SubscriptBox["V", "c"]}]], "=", 
+  RowBox[{"\[Piecewise]", GridBox[{
+     {
+      RowBox[{
+       RowBox[{"-", 
+        FractionBox[
+         SubscriptBox["", 
+          RowBox[{
+           SubscriptBox["m", "j"], 
+           SubscriptBox["C", "jcs"]}]], 
+         SubscriptBox["V", "j"]]}], 
+       SuperscriptBox[
+        RowBox[{"(", 
+         RowBox[{"1", "+", 
+          FractionBox[
+           SubscriptBox["V", "c"], 
+           SubscriptBox["V", "j"]]}], ")"}], 
+        RowBox[{"-", 
+         SubscriptBox["m", 
+          RowBox[{"j", "-", "1"}]]}]]}], 
+      RowBox[{
+       SubscriptBox["V", "c"], ">", 
+       RowBox[{
+        RowBox[{"-", 
+         SubscriptBox["f", "c"]}], 
+        SubscriptBox["V", "j"]}]}]},
+     {
+      RowBox[{"-", 
+       FractionBox[
+        SubscriptBox["", 
+         RowBox[{
+          SubscriptBox["m", "j"], 
+          SubscriptBox["C", "jcs"]}]], 
+        RowBox[{
+         SubscriptBox["V", "j"], 
+         SuperscriptBox[
+          RowBox[{"(", 
+           RowBox[{"1", "-", 
+            SubscriptBox["f", "c"]}], ")"}], 
+          RowBox[{"1", "+", 
+           SubscriptBox["m", "j"]}]]}]]}], 
+      RowBox[{
+       SubscriptBox["V", "c"], "\[LessEqual]", 
+       RowBox[{
+        RowBox[{"-", 
+         SubscriptBox["f", "c"]}], 
+        SubscriptBox["V", "j"]}]}]}
+    },
+    GridBoxAlignment->{
+     "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+      "RowsIndexed" -> {}},
+    GridBoxItemSize->{
+     "Columns" -> {{Automatic}}, "ColumnsIndexed" -> {}, "Rows" -> {{1.}}, 
+      "RowsIndexed" -> {}},
+    GridBoxSpacings->{"Columns" -> {
+        Offset[0.27999999999999997`], {
+         Offset[0.84]}, 
+        Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+        Offset[0.2], {
+         Offset[0.4]}, 
+        Offset[0.2]}, "RowsIndexed" -> {}}]}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   SubscriptBox["C", "BE"], ":", "\[IndentingNewLine]", 
+   RowBox[{"Q", 
+    RowBox[{"(", 
+     SubscriptBox["V", "BE"], ")"}]}]}], "=", 
+  RowBox[{
+   RowBox[{"-", 
+    SubscriptBox["\[Tau]", "f"]}], 
+   RowBox[{
+    SubscriptBox["I", "S"], "[", 
+    RowBox[{
+     RowBox[{"exp", 
+      RowBox[{"(", 
+       FractionBox[
+        SubscriptBox["V", "BE"], 
+        SubscriptBox["V", "T"]], ")"}]}], "-", "1"}], "]"}], 
+   RowBox[{"(", 
+    RowBox[{"1", "+", 
+     FractionBox[
+      SubscriptBox["V", "BC"], 
+      SubscriptBox["V", "Af"]], "+", 
+     FractionBox[
+      SubscriptBox["V", "BE"], 
+      SubscriptBox["V", "Ar"]]}], ")"}]}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"+", 
+   RowBox[{"\[Piecewise]", GridBox[{
+      {
+       RowBox[{
+        RowBox[{"-", 
+         SubscriptBox["C", "jbe"]}], 
+        RowBox[{
+         FractionBox[
+          SubscriptBox["V", "j"], 
+          RowBox[{"1", "-", 
+           SubscriptBox["m", "j"]}]], "[", 
+         RowBox[{"1", "-", 
+          SuperscriptBox[
+           RowBox[{"(", 
+            RowBox[{"1", "+", 
+             FractionBox[
+              SubscriptBox["V", "BE"], 
+              SubscriptBox["V", "j"]]}], ")"}], 
+           RowBox[{"1", "-", 
+            SubscriptBox["m", "j"]}]]}], "]"}]}], 
+       RowBox[{
+        SubscriptBox["V", "BE"], ">", 
+        RowBox[{
+         RowBox[{"-", 
+          SubscriptBox["f", "c"]}], 
+         SubscriptBox["V", "j"]}]}]},
+      {
+       RowBox[{
+        RowBox[{
+         SubscriptBox["C", "jbe"], 
+         SubscriptBox["V", "BE"], 
+         FractionBox[
+          RowBox[{"1", "-", 
+           RowBox[{
+            SubscriptBox["f", "c"], 
+            RowBox[{"(", 
+             RowBox[{"1", "+", 
+              SubscriptBox["m", "j"]}], ")"}]}], "-", 
+           RowBox[{
+            SubscriptBox["m", "j"], 
+            FractionBox[
+             SubscriptBox["V", "BE"], 
+             RowBox[{"2", 
+              SubscriptBox["V", "j"]}]]}]}], 
+          SuperscriptBox[
+           RowBox[{"(", 
+            RowBox[{"1", "-", 
+             SubscriptBox["f", "c"]}], ")"}], 
+           RowBox[{"1", "+", 
+            SubscriptBox["m", "j"]}]]]}], "-", 
+        RowBox[{
+         SubscriptBox["C", "jbe"], 
+         RowBox[{
+          SubscriptBox["V", "j"], "[", 
+          RowBox[{
+           FractionBox[
+            RowBox[{"1", "-", 
+             SuperscriptBox[
+              RowBox[{"(", 
+               RowBox[{"1", "-", 
+                SubscriptBox["f", "c"]}], ")"}], 
+              RowBox[{"1", "-", 
+               SubscriptBox["m", "j"]}]]}], 
+            RowBox[{"1", "-", 
+             SubscriptBox["m", "j"]}]], "-", 
+           RowBox[{
+            SubscriptBox["f", "c"], 
+            FractionBox[
+             RowBox[{"1", "-", 
+              RowBox[{
+               SubscriptBox["f", "c"], 
+               RowBox[{"(", 
+                RowBox[{"1", "+", 
+                 FractionBox[
+                  SubscriptBox["m", "j"], "2"]}], ")"}]}]}], 
+             SuperscriptBox[
+              RowBox[{"(", 
+               RowBox[{"1", "-", 
+                SubscriptBox["f", "c"]}], ")"}], 
+              RowBox[{"1", "+", 
+               SubscriptBox["m", "j"]}]]]}]}], "]"}]}]}], 
+       RowBox[{
+        SubscriptBox["V", "BE"], "\[LessEqual]", 
+        RowBox[{
+         RowBox[{"-", 
+          SubscriptBox["f", "c"]}], 
+         SubscriptBox["V", "j"]}]}]}
+     },
+     GridBoxAlignment->{
+      "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+       "RowsIndexed" -> {}},
+     GridBoxItemSize->{
+      "Columns" -> {{Automatic}}, "ColumnsIndexed" -> {}, "Rows" -> {{1.}}, 
+       "RowsIndexed" -> {}},
+     GridBoxSpacings->{"Columns" -> {
+         Offset[0.27999999999999997`], {
+          Offset[0.84]}, 
+         Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+         Offset[0.2], {
+          Offset[0.4]}, 
+         Offset[0.2]}, "RowsIndexed" -> {}}]}]}], 
+  "\[IndentingNewLine]"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   SubscriptBox["C", "BE"], 
+   RowBox[{"(", 
+    RowBox[{
+     SubscriptBox["V", "BE"], ",", 
+     SubscriptBox["V", "BC"]}], ")"}]}], "=", 
+  RowBox[{
+   FractionBox[
+    RowBox[{
+     RowBox[{"\[DifferentialD]", "Q"}], 
+     RowBox[{"(", 
+      SubscriptBox["V", "BE"], ")"}]}], 
+    RowBox[{"\[DifferentialD]", 
+     SubscriptBox["V", "BE"]}]], "=", 
+   RowBox[{
+    RowBox[{"-", 
+     RowBox[{
+      FractionBox[
+       RowBox[{
+        SubscriptBox["\[Tau]", "f"], 
+        SubscriptBox["I", "S"]}], 
+       SubscriptBox["V", "Ar"]], "[", 
+      RowBox[{
+       RowBox[{"exp", 
+        RowBox[{"(", 
+         RowBox[{"-", 
+          FractionBox[
+           SubscriptBox["V", "BE"], 
+           SubscriptBox["V", "T"]]}], ")"}]}], "-", "1"}], "]"}]}], "+", 
+    RowBox[{
+     FractionBox[
+      RowBox[{
+       SubscriptBox["\[Tau]", "f"], 
+       SubscriptBox["I", "S"]}], 
+      SubscriptBox["V", "T"]], "exp", 
+     RowBox[{"(", 
+      RowBox[{"-", 
+       FractionBox[
+        SubscriptBox["V", "BE"], 
+        SubscriptBox["V", "T"]]}], ")"}], 
+     RowBox[{"(", 
+      RowBox[{"1", "+", 
+       FractionBox[
+        SubscriptBox["V", "BC"], 
+        SubscriptBox["V", "Af"]], "+", 
+       FractionBox[
+        SubscriptBox["V", "BE"], 
+        SubscriptBox["V", "Ar"]]}], ")"}]}]}]}]}], "\[IndentingNewLine]", 
+ RowBox[{"+", 
+  RowBox[{"\[Piecewise]", GridBox[{
+     {
+      RowBox[{
+       SubscriptBox["C", "jbe"], 
+       SuperscriptBox[
+        RowBox[{"(", 
+         RowBox[{"1", "+", 
+          FractionBox[
+           SubscriptBox["V", "BE"], 
+           SubscriptBox["V", "j"]]}], ")"}], 
+        RowBox[{"-", 
+         SubscriptBox["m", "j"]}]]}], 
+      RowBox[{
+       SubscriptBox["V", "BE"], ">", 
+       RowBox[{
+        RowBox[{"-", 
+         SubscriptBox["f", "c"]}], 
+        SubscriptBox["V", "j"]}]}]},
+     {
+      RowBox[{
+       SubscriptBox["C", "jbe"], 
+       FractionBox[
+        RowBox[{
+         RowBox[{"1", "-", 
+          RowBox[{
+           SubscriptBox["f", "c"], 
+           RowBox[{"(", 
+            RowBox[{"1", "+", 
+             SubscriptBox["m", "j"]}], ")"}]}]}], "=", 
+         RowBox[{
+          SubscriptBox["m", "j"], 
+          FractionBox[
+           SubscriptBox["V", "BE"], 
+           SubscriptBox["V", "j"]]}]}], 
+        SuperscriptBox[
+         RowBox[{"(", 
+          RowBox[{"1", "-", 
+           SubscriptBox["f", "c"]}], ")"}], 
+         RowBox[{"1", "+", 
+          SubscriptBox["m", "j"]}]]]}], 
+      RowBox[{
+       SubscriptBox["V", "BE"], "\[LessEqual]", 
+       RowBox[{
+        RowBox[{"-", 
+         SubscriptBox["f", "c"]}], 
+        SubscriptBox["V", "j"]}]}]}
+    },
+    GridBoxAlignment->{
+     "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+      "RowsIndexed" -> {}},
+    GridBoxItemSize->{
+     "Columns" -> {{Automatic}}, "ColumnsIndexed" -> {}, "Rows" -> {{1.}}, 
+      "RowsIndexed" -> {}},
+    GridBoxSpacings->{"Columns" -> {
+        Offset[0.27999999999999997`], {
+         Offset[0.84]}, 
+        Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+        Offset[0.2], {
+         Offset[0.4]}, 
+        Offset[0.2]}, "RowsIndexed" -> {}}]}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   SubscriptBox["C", "BE2"], 
+   RowBox[{"(", 
+    RowBox[{
+     SubscriptBox["V", "BE"], ",", 
+     SubscriptBox["V", "BC"]}], ")"}]}], "=", 
+  RowBox[{
+   FractionBox[
+    RowBox[{
+     RowBox[{"\[DifferentialD]", "Q"}], 
+     RowBox[{"(", 
+      SubscriptBox["V", "BE"], ")"}]}], 
+    RowBox[{"\[DifferentialD]", 
+     SubscriptBox["V", "BC"]}]], "=", 
+   RowBox[{"-", 
+    RowBox[{
+     FractionBox[
+      RowBox[{
+       SubscriptBox["\[Tau]", "f"], 
+       SubscriptBox["I", "S"]}], 
+      SubscriptBox["V", "Af"]], "[", 
+     RowBox[{
+      RowBox[{"exp", 
+       RowBox[{"(", 
+        RowBox[{"-", 
+         FractionBox[
+          SubscriptBox["V", "BE"], 
+          SubscriptBox["V", "T"]]}], ")"}]}], "-", "1"}], 
+     "]"}]}]}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  FractionBox[
+   RowBox[{
+    RowBox[{"\[PartialD]", 
+     SubscriptBox["C", "BE"]}], 
+    RowBox[{"(", 
+     RowBox[{
+      SubscriptBox["V", "BE"], ",", 
+      SubscriptBox["V", "BC"]}], ")"}]}], 
+   RowBox[{"\[PartialD]", 
+    SubscriptBox["V", "BE"]}]], "=", 
+  RowBox[{
+   RowBox[{
+    FractionBox[
+     RowBox[{"2", 
+      SubscriptBox["\[Tau]", "f"], 
+      SubscriptBox["I", "S"]}], 
+     RowBox[{
+      SubscriptBox["V", "Ar"], 
+      SubscriptBox["V", "T"]}]], "exp", 
+    RowBox[{"(", 
+     RowBox[{"-", 
+      FractionBox[
+       SubscriptBox["V", "BE"], 
+       SubscriptBox["V", "T"]]}], ")"}]}], "-", 
+   RowBox[{
+    FractionBox[
+     RowBox[{
+      SubscriptBox["\[Tau]", "f"], 
+      SubscriptBox["I", "S"]}], 
+     SuperscriptBox[
+      RowBox[{"(", 
+       SubscriptBox["V", "T"], ")"}], "2"]], "exp", 
+    RowBox[{"(", 
+     RowBox[{"-", 
+      FractionBox[
+       SubscriptBox["V", "BE"], 
+       SubscriptBox["V", "T"]]}], ")"}], 
+    RowBox[{"(", 
+     RowBox[{"1", "+", 
+      FractionBox[
+       SubscriptBox["V", "BC"], 
+       SubscriptBox["V", "Af"]], "+", 
+      FractionBox[
+       SubscriptBox["V", "BE"], 
+       SubscriptBox["V", "Ar"]]}], ")"}]}]}]}], "\[IndentingNewLine]", 
+ RowBox[{"-", 
+  RowBox[{"\[Piecewise]", GridBox[{
+     {
+      RowBox[{
+       FractionBox[
+        SubscriptBox["", 
+         RowBox[{
+          SubscriptBox["m", "j"], 
+          SubscriptBox["C", "jbe"]}]], 
+        SubscriptBox["V", "j"]], 
+       SuperscriptBox[
+        RowBox[{"(", 
+         RowBox[{"1", "+", 
+          FractionBox[
+           SubscriptBox["V", "BE"], 
+           SubscriptBox["V", "j"]]}], ")"}], 
+        RowBox[{"-", 
+         SubscriptBox["m", 
+          RowBox[{"j", "-", "1"}]]}]]}], 
+      RowBox[{
+       SubscriptBox["V", "BE"], ">", 
+       RowBox[{
+        RowBox[{"-", 
+         SubscriptBox["f", "c"]}], 
+        SubscriptBox["V", "j"]}]}]},
+     {
+      FractionBox[
+       SubscriptBox["", 
+        RowBox[{
+         SubscriptBox["m", "j"], 
+         SubscriptBox["C", "jbe"]}]], 
+       RowBox[{
+        SubscriptBox["V", "j"], 
+        SuperscriptBox[
+         RowBox[{"(", 
+          RowBox[{"1", "-", 
+           SubscriptBox["f", "c"]}], ")"}], 
+         RowBox[{"1", "+", 
+          SubscriptBox["m", "j"]}]]}]], 
+      RowBox[{
+       SubscriptBox["V", "BE"], "\[LessEqual]", 
+       RowBox[{
+        RowBox[{"-", 
+         SubscriptBox["f", "c"]}], 
+        SubscriptBox["V", "j"]}]}]}
+    },
+    GridBoxAlignment->{
+     "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+      "RowsIndexed" -> {}},
+    GridBoxItemSize->{
+     "Columns" -> {{Automatic}}, "ColumnsIndexed" -> {}, "Rows" -> {{1.}}, 
+      "RowsIndexed" -> {}},
+    GridBoxSpacings->{"Columns" -> {
+        Offset[0.27999999999999997`], {
+         Offset[0.84]}, 
+        Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+        Offset[0.2], {
+         Offset[0.4]}, 
+        Offset[0.2]}, "RowsIndexed" -> {}}]}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  FractionBox[
+   RowBox[{
+    RowBox[{"\[PartialD]", 
+     SubscriptBox["C", "BE"]}], 
+    RowBox[{"(", 
+     RowBox[{
+      SubscriptBox["V", "BE"], ",", 
+      SubscriptBox["V", "BC"]}], ")"}]}], 
+   RowBox[{"\[PartialD]", 
+    SubscriptBox["V", "BC"]}]], "=", 
+  RowBox[{
+   FractionBox[
+    RowBox[{
+     SubscriptBox["\[Tau]", "f"], 
+     SubscriptBox["I", "S"]}], 
+    RowBox[{
+     SubscriptBox["V", "Ar"], 
+     SubscriptBox["V", "T"]}]], "exp", 
+   RowBox[{"(", 
+    RowBox[{"-", 
+     FractionBox[
+      SubscriptBox["V", "BE"], 
+      SubscriptBox["V", "T"]]}], ")"}]}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"Capacitor", " ", 
+   SubscriptBox["C", "BC"]}], 
+  "\[IndentingNewLine]"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"Q", 
+   RowBox[{"(", 
+    SubscriptBox["V", "BC"], ")"}]}], "=", 
+  RowBox[{
+   RowBox[{"-", 
+    SubscriptBox["\[Tau]", "f"]}], 
+   RowBox[{
+    SubscriptBox["I", "S"], "[", 
+    RowBox[{
+     RowBox[{"exp", 
+      RowBox[{"(", 
+       RowBox[{"-", 
+        FractionBox[
+         SubscriptBox["V", "BC"], 
+         SubscriptBox["V", "T"]]}], ")"}]}], "-", "1"}], 
+    "]"}]}]}], "\[IndentingNewLine]", 
+ RowBox[{"+", 
+  RowBox[{"\[Piecewise]", GridBox[{
+     {
+      RowBox[{
+       RowBox[{"-", 
+        SubscriptBox["C", "jbc"]}], 
+       RowBox[{
+        FractionBox[
+         SubscriptBox["V", "j"], 
+         RowBox[{"1", "-", 
+          SubscriptBox["m", "j"]}]], "[", 
+        RowBox[{"1", "-", 
+         SuperscriptBox[
+          RowBox[{"(", 
+           RowBox[{"1", "+", 
+            FractionBox[
+             SubscriptBox["V", "BC"], 
+             SubscriptBox["V", "j"]]}], ")"}], 
+          RowBox[{"1", "-", 
+           SubscriptBox["m", "j"]}]]}], "]"}]}], 
+      RowBox[{
+       SubscriptBox["V", "BC"], ">", 
+       RowBox[{
+        RowBox[{"-", 
+         SubscriptBox["f", "c"]}], 
+        SubscriptBox["V", "j"]}]}]},
+     {
+      RowBox[{
+       RowBox[{
+        SubscriptBox["C", "jbc"], 
+        SubscriptBox["V", "BC"], 
+        FractionBox[
+         RowBox[{"1", "-", 
+          RowBox[{
+           SubscriptBox["f", "c"], 
+           RowBox[{"(", 
+            RowBox[{"1", "+", 
+             SubscriptBox["m", "j"]}], ")"}]}], "-", 
+          RowBox[{
+           SubscriptBox["m", "j"], 
+           FractionBox[
+            SubscriptBox["V", "BC"], 
+            RowBox[{"2", 
+             SubscriptBox["V", "j"]}]]}]}], 
+         SuperscriptBox[
+          RowBox[{"(", 
+           RowBox[{"1", "-", 
+            SubscriptBox["f", "c"]}], ")"}], 
+          RowBox[{"1", "+", 
+           SubscriptBox["m", "j"]}]]]}], "-", 
+       RowBox[{
+        SubscriptBox["C", "jbc"], 
+        RowBox[{
+         SubscriptBox["V", "j"], "[", 
+         RowBox[{
+          FractionBox[
+           RowBox[{"1", "-", 
+            SuperscriptBox[
+             RowBox[{"(", 
+              RowBox[{"1", "-", 
+               SubscriptBox["f", "c"]}], ")"}], 
+             RowBox[{"1", "-", 
+              SubscriptBox["m", "j"]}]]}], 
+           RowBox[{"1", "-", 
+            SubscriptBox["m", "j"]}]], "-", 
+          RowBox[{
+           SubscriptBox["f", "c"], 
+           FractionBox[
+            RowBox[{"1", "-", 
+             RowBox[{
+              SubscriptBox["f", "c"], 
+              RowBox[{"(", 
+               RowBox[{"1", "+", 
+                FractionBox[
+                 SubscriptBox["m", "j"], "2"]}], ")"}]}]}], 
+            SuperscriptBox[
+             RowBox[{"(", 
+              RowBox[{"1", "-", 
+               SubscriptBox["f", "c"]}], ")"}], 
+             RowBox[{"1", "+", 
+              SubscriptBox["m", "j"]}]]]}]}], "]"}]}]}], 
+      RowBox[{
+       SubscriptBox["V", "BC"], "\[LessEqual]", 
+       RowBox[{
+        RowBox[{"-", 
+         SubscriptBox["f", "c"]}], 
+        SubscriptBox["V", "j"]}]}]}
+    },
+    GridBoxAlignment->{
+     "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+      "RowsIndexed" -> {}},
+    GridBoxItemSize->{
+     "Columns" -> {{Automatic}}, "ColumnsIndexed" -> {}, "Rows" -> {{1.}}, 
+      "RowsIndexed" -> {}},
+    GridBoxSpacings->{"Columns" -> {
+        Offset[0.27999999999999997`], {
+         Offset[0.84]}, 
+        Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+        Offset[0.2], {
+         Offset[0.4]}, 
+        Offset[0.2]}, "RowsIndexed" -> {}}]}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   SubscriptBox["C", "BC"], 
+   RowBox[{"(", 
+    SubscriptBox["V", "BC"], ")"}]}], "=", 
+  RowBox[{
+   FractionBox[
+    RowBox[{
+     RowBox[{"\[DifferentialD]", "Q"}], 
+     RowBox[{"(", 
+      SubscriptBox["V", "BC"], ")"}]}], 
+    RowBox[{"\[DifferentialD]", 
+     SubscriptBox["V", "BC"]}]], "=", 
+   RowBox[{
+    RowBox[{
+     FractionBox[
+      RowBox[{
+       SubscriptBox["\[Tau]", "f"], 
+       SubscriptBox["I", "S"]}], 
+      SubscriptBox["V", "T"]], "exp", 
+     RowBox[{"(", 
+      RowBox[{"-", 
+       FractionBox[
+        SubscriptBox["V", "BC"], 
+        SubscriptBox["V", "T"]]}], ")"}]}], "+", 
+    RowBox[{"\[Piecewise]", GridBox[{
+       {
+        RowBox[{
+         SubscriptBox["C", "jbc"], 
+         SuperscriptBox[
+          RowBox[{"(", 
+           RowBox[{"1", "+", 
+            FractionBox[
+             SubscriptBox["V", "BC"], 
+             SubscriptBox["V", "j"]]}], ")"}], 
+          RowBox[{"-", 
+           SubscriptBox["m", "j"]}]]}], 
+        RowBox[{
+         SubscriptBox["V", "BC"], ">", 
+         RowBox[{
+          RowBox[{"-", 
+           SubscriptBox["f", "c"]}], 
+          SubscriptBox["V", "j"]}]}]},
+       {
+        RowBox[{
+         SubscriptBox["C", "jbc"], 
+         FractionBox[
+          RowBox[{"1", "-", 
+           RowBox[{
+            SubscriptBox["f", "c"], 
+            RowBox[{"(", 
+             RowBox[{"1", "+", 
+              SubscriptBox["m", "j"]}], ")"}]}], "-", 
+           RowBox[{
+            SubscriptBox["m", "j"], 
+            FractionBox[
+             SubscriptBox["V", "BC"], 
+             SubscriptBox["V", "j"]]}]}], 
+          SuperscriptBox[
+           RowBox[{"(", 
+            RowBox[{"1", "-", 
+             SubscriptBox["f", "c"]}], ")"}], 
+           RowBox[{"1", "+", 
+            SubscriptBox["m", "j"]}]]]}], 
+        RowBox[{
+         SubscriptBox["V", "BC"], "\[LessEqual]", 
+         RowBox[{
+          RowBox[{"-", 
+           SubscriptBox["f", "c"]}], 
+          SubscriptBox["V", "j"]}]}]}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxItemSize->{
+       "Columns" -> {{Automatic}}, "ColumnsIndexed" -> {}, "Rows" -> {{1.}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.84]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.4]}, 
+          Offset[0.2]}, 
+        "RowsIndexed" -> {}}]}]}]}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  FractionBox[
+   RowBox[{
+    RowBox[{"\[DifferentialD]", 
+     SubscriptBox["C", "BC"]}], 
+    RowBox[{"(", 
+     SubscriptBox["V", "BC"], ")"}]}], 
+   RowBox[{"\[DifferentialD]", 
+    SubscriptBox["V", "BC"]}]], "=", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"-", 
+     FractionBox[
+      RowBox[{
+       SubscriptBox["\[Tau]", "f"], 
+       SubscriptBox["I", "S"]}], 
+      SuperscriptBox[
+       RowBox[{"(", 
+        SubscriptBox["V", "T"], ")"}], "2"]]}], "exp", 
+    RowBox[{"(", 
+     RowBox[{"-", 
+      FractionBox[
+       SubscriptBox["V", "BC"], 
+       SubscriptBox["V", "T"]]}], ")"}]}], "-", 
+   RowBox[{"\[Piecewise]", GridBox[{
+      {
+       RowBox[{
+        FractionBox[
+         SubscriptBox["", 
+          RowBox[{
+           SubscriptBox["m", "j"], 
+           SubscriptBox["C", "jbc"]}]], 
+         SubscriptBox["V", "j"]], 
+        SuperscriptBox[
+         RowBox[{"(", 
+          RowBox[{"1", "+", 
+           FractionBox[
+            SubscriptBox["V", "BC"], 
+            SubscriptBox["V", "j"]]}], ")"}], 
+         RowBox[{"-", 
+          SubscriptBox["m", 
+           RowBox[{"j", "-", "1"}]]}]]}], 
+       RowBox[{
+        SubscriptBox["V", "BC"], ">", 
+        RowBox[{
+         RowBox[{"-", 
+          SubscriptBox["f", "c"]}], 
+         SubscriptBox["V", "j"]}]}]},
+      {
+       FractionBox[
+        SubscriptBox["", 
+         RowBox[{
+          SubscriptBox["m", "j"], 
+          SubscriptBox["C", "jbc"]}]], 
+        RowBox[{
+         SubscriptBox["V", "j"], 
+         SuperscriptBox[
+          RowBox[{"(", 
+           RowBox[{"1", "-", 
+            SubscriptBox["f", "c"]}], ")"}], 
+          RowBox[{"1", "+", 
+           SubscriptBox["m", "j"]}]]}]], 
+       RowBox[{
+        SubscriptBox["V", "BC"], "\[LessEqual]", 
+        RowBox[{
+         RowBox[{"-", 
+          SubscriptBox["f", "c"]}], 
+         SubscriptBox["V", "j"]}]}]}
+     },
+     GridBoxAlignment->{
+      "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+       "RowsIndexed" -> {}},
+     GridBoxItemSize->{
+      "Columns" -> {{Automatic}}, "ColumnsIndexed" -> {}, "Rows" -> {{1.}}, 
+       "RowsIndexed" -> {}},
+     GridBoxSpacings->{"Columns" -> {
+         Offset[0.27999999999999997`], {
+          Offset[0.84]}, 
+         Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+         Offset[0.2], {
+          Offset[0.4]}, 
+         Offset[0.2]}, "RowsIndexed" -> {}}]}]}]}]}], "Input",
+ CellChangeTimes->{{3.5014359734193773`*^9, 3.501436175270904*^9}, {
+   3.501436319570108*^9, 3.5014364105743523`*^9}, {3.5014368682825727`*^9, 
+   3.501437003007928*^9}, {3.50143703665704*^9, 3.501437110937722*^9}, {
+   3.501437201614522*^9, 3.5014372422908363`*^9}, {3.50143731231463*^9, 
+   3.501437347424191*^9}, {3.501437451273983*^9, 3.5014375458047953`*^9}, {
+   3.501437994547509*^9, 3.5014380405190067`*^9}, {3.501438164628286*^9, 
+   3.501438195158888*^9}, {3.501439111685855*^9, 3.501439149026834*^9}, {
+   3.501439179137108*^9, 3.5014391902539263`*^9}, {3.501439222271885*^9, 
+   3.5014392502549057`*^9}, {3.5014393582896547`*^9, 3.501439416236451*^9}, {
+   3.5014396317784443`*^9, 3.501439828644801*^9}, {3.501439939361806*^9, 
+   3.5014399593785677`*^9}, {3.5014400140596657`*^9, 3.501440075312591*^9}, {
+   3.501440196238523*^9, 3.501440373004945*^9}, {3.5014405081248713`*^9, 
+   3.501440541761468*^9}, {3.501440587942955*^9, 3.50144062695177*^9}, 
+   3.501440760065621*^9, {3.501440803085676*^9, 3.5014408700022793`*^9}, {
+   3.501440945476304*^9, 3.5014409499470053`*^9}, {3.5014418760867443`*^9, 
+   3.501441928924879*^9}, {3.501442017630383*^9, 3.5014420670187597`*^9}, {
+   3.5014421158119707`*^9, 3.501442128005907*^9}, {3.50144218630519*^9, 
+   3.501442222601742*^9}}]
+},
+WindowSize->{740, 652},
+WindowMargins->{{Automatic, 125}, {Automatic, 47}},
+FrontEndVersion->"8.0 for Mac OS X x86 (32-bit, 64-bit Kernel) (November 6, \
+2010)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[557, 20, 46301, 1518, 1994, "Input"]
+}
+]
+*)
+
+(* End of internal cache information *)
