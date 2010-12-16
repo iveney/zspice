@@ -8,7 +8,7 @@ CFLAGS=
 OPT=-Wall -g 
 SPARSE=SuiteSparse
 # comment this and uncomment the next line if want to use other lib location 
-LIBS=libs/lib{umfpack,amd,cholmod,colamd,ccolamd,camd,metis,goto2}.a
+MYLIBS=./libs/*.a
 #LIBS=$(SPARSE)/UMFPACK/Lib/libumfpack.a \
      $(SPARSE)/AMD/Lib/libamd.a \
      $(SPARSE)/CHOLMOD/Lib/libcholmod.a \
@@ -23,13 +23,12 @@ SPARSE_HDR=$(SPARSE)/UFconfig
 INC=-I$(AMD_HDR) \
     -I$(UMFPACK_HDR) \
     -I$(SPARSE_HDR)
-MYLIBS=./libs/*.a
 MYINC=-I./headers
 CSCOPEFILES=cscope.files cscope.out cscope.po.out
 
 main: $(OBJ) main.o global.h 
 	@echo "Making zspice..."
-	$(CC) $(OPT) $(CFLAGS) $(INC) -o $(BIN) $(OBJ) $(MYLIBS) main.o 
+	$(CC) $(OPT) $(CFLAGS) $(INC) -lpthread -o $(BIN) $(OBJ) $(MYLIBS) main.o 
 	@make tags
 
 all: main debug test
