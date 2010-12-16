@@ -8,7 +8,6 @@ CFLAGS=
 OPT=-Wall -g 
 SPARSE=SuiteSparse
 # comment this and uncomment the next line if want to use other lib location 
-MYLIBS=./libs/*.a
 #LIBS=$(SPARSE)/UMFPACK/Lib/libumfpack.a \
      $(SPARSE)/AMD/Lib/libamd.a \
      $(SPARSE)/CHOLMOD/Lib/libcholmod.a \
@@ -17,6 +16,15 @@ MYLIBS=./libs/*.a
      $(SPARSE)/CAMD/Lib/libcamd.a \
      $(SPARSE)/metis-4.0/libmetis.a \
      $(SPARSE)/GotoBLAS2/libgoto2.a
+MYLIBS= libs/libumfpack.a \
+        libs/libamd.a \
+        libs/libcholmod.a \
+        libs/libcolamd.a \
+        libs/libccolamd.a \
+        libs/libcamd.a \
+        libs/libmetis.a \
+        libs/libgoto2.a
+#MYLIBS=./libs/*.a # this does not work in Linux, why?
 AMD_HDR=$(SPARSE)/AMD/Include
 UMFPACK_HDR=$(SPARSE)/UMFPACK/Include
 SPARSE_HDR=$(SPARSE)/UFconfig
