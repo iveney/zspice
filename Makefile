@@ -7,7 +7,9 @@ DBG=debug
 CFLAGS=
 OPT=-Wall -g 
 SPARSE=SuiteSparse
-LIBS=$(SPARSE)/UMFPACK/Lib/libumfpack.a \
+# comment this and uncomment the next line if want to use other lib location 
+LIBS=libs/lib{umfpack,amd,cholmod,colamd,ccolamd,camd,metis,goto2}.a
+#LIBS=$(SPARSE)/UMFPACK/Lib/libumfpack.a \
      $(SPARSE)/AMD/Lib/libamd.a \
      $(SPARSE)/CHOLMOD/Lib/libcholmod.a \
      $(SPARSE)/COLAMD/Lib/libcolamd.a \
