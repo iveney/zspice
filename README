@@ -1,0 +1,36 @@
+ECE552 Circuit Analysis Project Readme
+======================================
+Insturctions:
+
+type:
+
+$ make 
+
+to compile the project. After compilation, the program `zspice' 
+will appeared in the folder, type
+
+$ ./zspice netlist
+
+to run the program on a netlist.
+All the cases are put in directory `case'
+
+For AC analysis, a gain plot and a phase plot of the node
+specified in the netlist will be output.
+
+For and transient analysis, the voltage plot specified in
+the netlist will be output.
+
+A script file is written to view the output.
+Please ensure ghostscript, gnuplot and X11 are installed properly.
+
+Type:
+
+$ ./plot output.dat
+
+to view the file.
+Type:
+
+$ ./plot output.dat pdf
+
+to output data file to a pdf file.
+
