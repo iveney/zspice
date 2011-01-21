@@ -22,7 +22,7 @@ void solve_dc(Triplet & t, double * v, double * J, int n);
 void output_result(Netlist &, Nodelist & , double *v, int n);
 void dc_core(Netlist & netlist, Nodelist & nodelist,
 		double *v, double *J, int size);
-void update_node_voltages(Nodelist & nodelist, double *v);
+void update_node_voltages(Nodelist & nodelist, double *v, bool need_dampen=true);
 bool stamp_linear(Netlist & netlist, Nodelist & nodelist, 
 		Triplet & t, double * J, ANALYSIS_TYPE atype);
 

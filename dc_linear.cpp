@@ -55,7 +55,7 @@ void dc_analysis(Netlist & netlist, Nodelist & nodelist, bool output){
 		// No non-linear device: linear dc analysis
 		dc_core(netlist,nodelist,v,J,size);
 		//output_result(netlist, nodelist, v, size);
-		update_node_voltages(nodelist, v);
+		update_node_voltages(nodelist, v, false);
 		if( output == true){
 			nodelist.output_node_voltages();
 			netlist.output_branch_currents(net2int, v);
@@ -95,12 +95,12 @@ void dc_core(Netlist & netlist, Nodelist & nodelist,
 
 // after dc_analysis, remember to call this function to update node voltages
 // Note: damp here
-void update_node_voltages(Nodelist & nodelist, double *v){
+void update_node_voltages(Nodelist & nodelist, double *v, bool need_dampen){
 	for(int i=1;i<nodelist.size();i++){
 		Node & nd = nodelist.nodelist[i];
 		int id = nodelist.name2idx[nd.name];
 		double diff = v[id]-nd.v;
-		if( abs(diff) > DAMPEN ){
+		if( need_dampen && abs(diff) > DAMPEN ){
 			if( diff > 0 )
 				diff = DAMPEN;
 			else 
@@ -165,7 +165,7 @@ void solve_dc(Triplet & t, double * v, double * J, int n){
 	// DEBUG: output triplet
 	//t.merge();
 	//for(int i=0;i<t.size();i++){
-		//cout<<t.Ti[i]<<" "<<t.Tj[i]<<" : "<<t.Tx[i]<<endl;
+	//	cout<<t.Ti[i]<<" "<<t.Tj[i]<<" : "<<t.Tx[i]<<endl;
 	//}
 
 	int status;
