@@ -13,6 +13,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <cstring>
 #include <cassert>
 #include "net.h"
 #include "util.h"
@@ -40,7 +41,7 @@ void read_initial_values(string line,
 		Netlist & netlist, Nodelist & nodelist){
 	char * l = new char[line.size()+2];
 	l[0]='x'; // trick: magic char
-	strcpy(l+1, line.c_str());
+	strncpy(l+1, line.c_str(),line.size());
 	const char * sep = "=() \r\n";
 	char * chs, t;
 	string name;
@@ -77,7 +78,7 @@ void read_initial_values(string line,
 // read in output node names
 void read_output_node(string line){
 	char * l = new char[line.size()+1];
-	strcpy(l, line.c_str());
+	strncpy(l, line.c_str(), line.size());
 	const char * sep = "() \r\n";
 	char * name;
 	char * saveptr;
@@ -85,11 +86,11 @@ void read_output_node(string line){
 	while( name != NULL ){
 		name = strtok_r(NULL, sep, &saveptr); // reads a `VM' or a `VP'
 		if( name == NULL ) break;
-		if( strcmp(name, "VM") == 0 ){
+		if( strncmp(name, "VM", 2) == 0 ){
 			name = strtok_r(NULL, sep, &saveptr);
 			g_plot_gain_node.push_back(string(name)); 
 		}
-		else if ( strcmp(name, "VP") == 0 ) {
+		else if ( strncmp(name, "VP", 2) == 0 ) {
 			name = strtok_r(NULL, sep, &saveptr);
 			g_plot_phase_node.push_back(string(name)); 
 		}
@@ -100,7 +101,7 @@ void read_output_node(string line){
 
 void read_tran_output_node(string line){
 	char * l = new char[line.size()+1];
-	strcpy(l, line.c_str());
+	strncpy(l, line.c_str(), line.size());
 	const char * sep = "() \r\n";
 	char * name;
 	char * saveptr;
@@ -108,7 +109,7 @@ void read_tran_output_node(string line){
 	while( name != NULL ){
 		name = strtok_r(NULL, sep, &saveptr); // reads a `v'
 		if( name == NULL ) break;
-		if( strcmp(name, "v") == 0 ){
+		if( strncmp(name, "v", 1) == 0 ){
 			name = strtok_r(NULL, sep, &saveptr);
 			g_plot_tran_node.push_back(string(name)); 
 		}
@@ -122,7 +123,7 @@ void read_tran_output_node(string line){
 // NOTE: this part is hard coded now
 void read_plot_params(string line){
 	char * l = new char[line.size()+1];
-	strcpy(l, line.c_str());
+	strncpy(l, line.c_str(), line.size());
 	const char * sep = " ";
 	char * value;
 	char * saveptr;
@@ -143,7 +144,7 @@ void read_plot_params(string line){
 // NOTE: this part is hard coded now
 void read_tran_params(string line){
 	char * l = new char[line.size()+1];
-	strcpy(l, line.c_str());
+	strncpy(l, line.c_str(), line.size());
 	const char * sep = " ";
 	char * value;
 	char * saveptr;
