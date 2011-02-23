@@ -51,7 +51,7 @@ void output_netlist_info(Netlist & netlist, Nodelist & nodelist){
 
 int main(int argc, char *argv[]){
 	if(argc < 2)
-		report_exit("Usage: zspice netlist\n");
+		report_exit("Usage: zspice netlist [mode]\n");
 	g_filename = argv[1];
 	g_basename = get_basename(g_filename);
 
@@ -59,20 +59,20 @@ int main(int argc, char *argv[]){
 	Nodelist nodelist;
 	read_netlist(g_filename, netlist, nodelist);
 
+	if(argc >= 3)
+		output_netlist_info(netlist,nodelist);
+
 	switch(g_atype){
 	case DC: // DC analysis
 		cout<<"** DC analysis **"<<endl<<endl;
-		output_netlist_info(netlist,nodelist);
 		dc_analysis(netlist,nodelist,true);
 		break;
 	case AC: // AC analysis
 		cout<<"** AC analysis **"<<endl<<endl;
-		//output_netlist_info(netlist,nodelist);
 		ac_analysis(netlist,nodelist);
 		break;
 	case TRAN:
 		cout<<"** Transient analysis **"<<endl;
-		output_netlist_info(netlist,nodelist);
 		transient_analysis(netlist,nodelist);
 		break;
 	default:

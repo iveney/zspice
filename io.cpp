@@ -191,7 +191,11 @@ void read_netlist(char * filename, Netlist & netlist, Nodelist & nodelist){
 	while( ifs>>name ){
 		line_counter++;
 		// check declarative command
-		if( name[0] == '.' || name[0] == '+' ){
+		if( name[0] == '*' ){ // ignore comment
+			getline(ifs, name); // read the rest of line
+			continue;
+		}
+		else if( name[0] == '.' || name[0] == '+' ){
 			if( name == ".end" ) break;
 			else if( name == ".op" ) continue;
 			else if( name == ".ac" ){   // set AC plot parameters
@@ -225,7 +229,7 @@ void read_netlist(char * filename, Netlist & netlist, Nodelist & nodelist){
 				report_exit("Unrecognized option!\n");
 			}
 			continue;
-		}
+		} // end of if
 
 		// check device multiple definition
 		if( netlist.netlist.find(name) != netlist.netlist.end() ){
@@ -237,8 +241,6 @@ void read_netlist(char * filename, Netlist & netlist, Nodelist & nodelist){
 			cerr<<name<<dummy<<endl;
 			continue;
 		}
-
-		
 
 		// start to read netlist
 		string node1, node2, ctrl1, ctrl2, vyyy, emit, polarity;
@@ -252,101 +254,101 @@ void read_netlist(char * filename, Netlist & netlist, Nodelist & nodelist){
 		nodelist.insert_node(Node(node1));
 		nodelist.insert_node(Node(node2));
 		switch(c){
-			case 'r': // resistor
-			case 'R':
-				ifs>>v;
-				netlist[name]=Net(RSTR, name, node1, node2, v);
-				netlist.netset[RSTR].insert(name);
-				break;
-			case 'v': // independent voltage source
-			case 'V':
-				vtype = input_voltage(ifs,v,off,amp,freq);
-				netlist[name]=Net(VSRC,name, node1, node2, v); 
-				netlist[name].set_voltage(vtype,v,off,amp,freq);
-				netlist.netset[VSRC].insert(name);
-				// set the initial node voltage
-				nodelist[node1].v = v;
-				if(vtype == AC) g_vin = v; //mark the vin value
-				break;
-			case 'i': // current source
-			case 'I':
-				ifs>>v;
-				netlist[name]=Net(CSRC, name, node1, node2, v);
-				netlist.netset[CSRC].insert(name);
-				break;
-			case 'g': // vccs
-			case 'G':
-				ifs>>ctrl1>>ctrl2>>v;
-				netlist[name]=Net(VCCS, name, node1, node2, 
-						ctrl1, ctrl2, v);
-				netlist.netset[VCCS].insert(name);
-				nodelist.insert_node(Node(ctrl1));
-				nodelist.insert_node(Node(ctrl2));
-				break;
-			case 'e': // vcvs
-			case 'E':
-				ifs>>ctrl1>>ctrl2;
-				vtype = input_voltage(ifs,v,off,amp,freq);
-				netlist[name]=Net(VCVS, name, node1, node2, 
-						ctrl1, ctrl2, v);
-				netlist[name].set_voltage(vtype,v,
-						          off,amp,freq);
-				netlist.netset[VCVS].insert(name);
-				nodelist.insert_node(Node(ctrl1));
-				nodelist.insert_node(Node(ctrl2));
-				break;
-			case 'h': // ccvs
-			case 'H':
-				ifs>>vyyy;
-				vtype = input_voltage(ifs,v,off,amp,freq);
-				netlist[name]=Net(CCVS, name, 
-						  node1, node2, vyyy, v);
-				netlist[name].set_voltage(vtype,v,
-						          off,amp,freq);
-				netlist.netset[CCVS].insert(name);
-				break;
-			case 'f': // cccs
-			case 'F':
-				ifs>>vyyy>>v;
-				netlist[name]=Net(CCCS, name, 
-						node1, node2, vyyy, v);
-				netlist.netset[CCCS].insert(name);
-				break;
-			case 'd': // diode
-			case 'D':
-				netlist[name]=Net(DIODE, name, 
-						node1, node2, v);
-				netlist.netset[DIODE].insert(name);
-				break;
-			case 'q': // bjt
-			case 'Q':
-				ifs>>emit>>polarity ;
-				p = (polarity == "pnp"? PNP: NPN);
-				netlist[name]=Net(BJT, name, 
-						node1, node2, emit, p); 
-				netlist.netset[BJT].insert(name);
-				nodelist.insert_node(Node(emit));
-				nodelist[emit].insert_net(name);
-				break;
-			case 'c': // capacitor
-			case 'C':
-				ifs>>v;
-				netlist[name]=Net(CAPCT, name, node1, node2, v); 
-				netlist.netset[CAPCT].insert(name);
-				break;
-			case 'l': // inductor
-			case 'L':
-				ifs>>v;
-				netlist[name]=Net(INDCT, name, node1, node2, v); 
-				netlist.netset[INDCT].insert(name);
-				break;
-			default: // Uknown type, report error and exit
-				string error_msg(name+": Unknown type\n");
-				report_exit(error_msg.c_str());
-				break;
-		}
+		case 'r': // resistor
+		case 'R':
+			ifs>>v;
+			netlist[name]=Net(RSTR, name, node1, node2, v);
+			netlist.netset[RSTR].insert(name);
+			break;
+		case 'v': // independent voltage source
+		case 'V':
+			vtype = input_voltage(ifs,v,off,amp,freq);
+			netlist[name]=Net(VSRC,name, node1, node2, v); 
+			netlist[name].set_voltage(vtype,v,off,amp,freq);
+			netlist.netset[VSRC].insert(name);
+			// set the initial node voltage
+			nodelist[node1].v = v;
+			if(vtype == AC) g_vin = v; //mark the vin value
+			break;
+		case 'i': // current source
+		case 'I':
+			ifs>>v;
+			netlist[name]=Net(CSRC, name, node1, node2, v);
+			netlist.netset[CSRC].insert(name);
+			break;
+		case 'g': // vccs
+		case 'G':
+			ifs>>ctrl1>>ctrl2>>v;
+			netlist[name]=Net(VCCS, name, node1, node2, 
+					ctrl1, ctrl2, v);
+			netlist.netset[VCCS].insert(name);
+			nodelist.insert_node(Node(ctrl1));
+			nodelist.insert_node(Node(ctrl2));
+			break;
+		case 'e': // vcvs
+		case 'E':
+			ifs>>ctrl1>>ctrl2;
+			vtype = input_voltage(ifs,v,off,amp,freq);
+			netlist[name]=Net(VCVS, name, node1, node2, 
+					ctrl1, ctrl2, v);
+			netlist[name].set_voltage(vtype,v,
+						  off,amp,freq);
+			netlist.netset[VCVS].insert(name);
+			nodelist.insert_node(Node(ctrl1));
+			nodelist.insert_node(Node(ctrl2));
+			break;
+		case 'h': // ccvs
+		case 'H':
+			ifs>>vyyy;
+			vtype = input_voltage(ifs,v,off,amp,freq);
+			netlist[name]=Net(CCVS, name, 
+					  node1, node2, vyyy, v);
+			netlist[name].set_voltage(vtype,v,
+						  off,amp,freq);
+			netlist.netset[CCVS].insert(name);
+			break;
+		case 'f': // cccs
+		case 'F':
+			ifs>>vyyy>>v;
+			netlist[name]=Net(CCCS, name, 
+					node1, node2, vyyy, v);
+			netlist.netset[CCCS].insert(name);
+			break;
+		case 'd': // diode
+		case 'D':
+			netlist[name]=Net(DIODE, name, 
+					node1, node2, v);
+			netlist.netset[DIODE].insert(name);
+			break;
+		case 'q': // bjt
+		case 'Q':
+			ifs>>emit>>polarity ;
+			p = (polarity == "pnp"? PNP: NPN);
+			netlist[name]=Net(BJT, name, 
+					node1, node2, emit, p); 
+			netlist.netset[BJT].insert(name);
+			nodelist.insert_node(Node(emit));
+			nodelist[emit].insert_net(name);
+			break;
+		case 'c': // capacitor
+		case 'C':
+			ifs>>v;
+			netlist[name]=Net(CAPCT, name, node1, node2, v); 
+			netlist.netset[CAPCT].insert(name);
+			break;
+		case 'l': // inductor
+		case 'L':
+			ifs>>v;
+			netlist[name]=Net(INDCT, name, node1, node2, v); 
+			netlist.netset[INDCT].insert(name);
+			break;
+		default: // Uknown type, report error and exit
+			string error_msg(name+": Unknown type\n");
+			report_exit(error_msg.c_str());
+			break;
+		}// end of switch
 		nodelist[node1].insert_net(name);
 		nodelist[node2].insert_net(name);
-	};
+	}; // end of while
 	ifs.close();
 }

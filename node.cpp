@@ -65,8 +65,9 @@ void Nodelist::output_node_voltages(){
 	// node voltages
 	for(i=0;i<this->size();i++){
 		Node & nd = this->nodelist[i];
-		cout<<"voltage at "<<setw(width)
-		    <<nd.name<<" = "<<scientific<<nd.v<<endl;
+		//cout<<"voltage at "<<setw(width)
+		//    <<nd.name<<" = "<<scientific<<nd.v<<endl;
+		printf("%s  %.5e\n",nd.name.c_str(), nd.v);
 	}
 
 }

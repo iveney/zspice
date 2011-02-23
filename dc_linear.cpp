@@ -85,6 +85,8 @@ void dc_core(Netlist & netlist, Nodelist & nodelist,
 	// this is important: cross out the ground (reference) node 
 	J[0]=0.0;
 
+	//tri.merge();
+	//tri.output();
 	// DEBUG: output J;
 	// for(int i=0;i<size;i++) cout<<i<<" "<<J[i]<<endl;
 
