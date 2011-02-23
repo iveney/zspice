@@ -12,15 +12,15 @@
 //   * first create the file
 //
 #include <cmath>
-#include <ext/hash_map>
+#include <tr1/unordered_map>
 #include "global.h"
 #include "dc_nonlinear.h"
 #include "node.h"
 #include "net.h"
 #include "util.h"
-using namespace __gnu_cxx;
+using namespace std::tr1;
 
-extern hash_map<string,int> net2int;
+extern unordered_map<string,int> net2int;
 
 void stamp_capacitor(Netlist & netlist, Nodelist & nodelist,
 		Triplet & t, double f, ANALYSIS_TYPE atype){

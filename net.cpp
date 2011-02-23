@@ -9,14 +9,14 @@
 
 #include <string>
 #include <iostream>
-#include <ext/hash_map>
+#include <tr1/unordered_map>
 #include <set>
 #include <iomanip>
 #include <cassert>
 #include <cmath>
 #include "net.h"
 using namespace std;
-using namespace __gnu_cxx;
+using namespace std::tr1;
 
 extern double g_step_tran;
 
@@ -211,7 +211,7 @@ Net & Netlist::operator [](string name){
 }
 
 // output branch currents
-void Netlist::output_branch_currents(hash_map<string,int> & net2int, 
+void Netlist::output_branch_currents(unordered_map<string,int> & net2int, 
 		double * v){
 	// output branch currents of Voltage source, VCVS and CCVS
 	Net net;

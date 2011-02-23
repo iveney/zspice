@@ -13,12 +13,12 @@
 #define __NODE_H__
 
 #include <vector>
-#include <ext/hash_map>
+#include <tr1/unordered_map>
 #include <iostream>
 #include "net.h"
 #include "global.h"
 using namespace std;
-using namespace __gnu_cxx;
+using namespace std::tr1;
 
 class Node{
 public:
@@ -36,9 +36,9 @@ public:
 	Nodelist();
 	bool insert_node(const Node & node);
 	// given node name, find its index in nodelist
-	hash_map<string, int> name2idx; 
+	unordered_map<string, int> name2idx; 
 	// given an index, find its node name in nodelist
-	hash_map<int, string> idx2name;
+	unordered_map<int, string> idx2name;
 	friend ostream & operator <<(ostream & s, Nodelist & nlist);
 	Node & operator [] (string name);
 	const int size();

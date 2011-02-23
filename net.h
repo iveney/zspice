@@ -13,12 +13,12 @@
 #define __NET_H__
 
 #include <string>
-#include <ext/hash_map>
+#include <tr1/unordered_map>
 #include <set>
 #include <iostream>
 #include "global.h"
 using namespace std;
-using namespace __gnu_cxx;
+using namespace std::tr1;
 
 class Net{
 public:
@@ -82,7 +82,8 @@ public:
 	// double Cc, Cbe, Cbc; // parastic capacitance
 };
 
-// functor of translating string to char *
+// functor of translating string to char*
+/* tr1 now provide this
 namespace __gnu_cxx{ 
 	template<> struct hash< std::string >{
 		size_t operator()( const std::string& x ) const {
@@ -90,17 +91,18 @@ namespace __gnu_cxx{
 		}
 	};
 }
+*/
 
 class Netlist{
 public:
 	Net & operator [] (string name);
 	friend ostream & operator <<(ostream &s, Netlist& );
-	void output_branch_currents(hash_map<string,int> & net2int, 
+	void output_branch_currents(unordered_map<string,int> & net2int, 
 		double * v);
 
 	// component sets, there 11 different types
 	set<string> netset[NUM_NETTYPE];
-	hash_map<string, Net> netlist;
+	unordered_map<string, Net> netlist;
 };
 
 // some macros to iterate the sets

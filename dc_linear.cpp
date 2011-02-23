@@ -16,7 +16,7 @@
 // - Zigang Xiao - Wed Sep 15 16:31:56 CDT 2010
 //   * created file
 
-#include <ext/hash_map>
+#include <tr1/unordered_map>
 #include <cstdlib>
 #include <algorithm>
 #include <iomanip>
@@ -30,10 +30,10 @@
 #include "dc_nonlinear.h"
 #include "umfpack.h"
 using namespace std;
-using namespace __gnu_cxx;
+using namespace std::tr1;
 
 // for vsrc, vcvs, ccvs, map the net name to integer index in the matrix
-hash_map<string, int> net2int;
+unordered_map<string, int> net2int;
 
 // Given netlist and nodelist, perform dc analysis
 void dc_analysis(Netlist & netlist, Nodelist & nodelist, bool output){
