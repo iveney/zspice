@@ -46,14 +46,15 @@ void read_initial_values(string line,
 	string name;
 	double value;
 	int idx;
-	strtok(l, sep); // initialize
+	char * saveptr;
+	strtok_r(l, sep, &saveptr); // initialize
 	do{
-		chs= strtok(NULL, sep); // v or i
+		chs= strtok_r(NULL, sep, &saveptr); // v or i
 		if( chs == NULL ) break;
 		t = chs[0];
-		chs = strtok(NULL, sep); // name
+		chs = strtok_r(NULL, sep, &saveptr); // name
 		name=string(chs);
-		chs = strtok(NULL, sep); // value
+		chs = strtok_r(NULL, sep, &saveptr); // value
 		value = atof(chs);
 		//cout<<"read "<<t<<"="<<name<<"="<<value<<endl;
 		switch(t){
@@ -79,16 +80,17 @@ void read_output_node(string line){
 	strcpy(l, line.c_str());
 	const char * sep = "() \r\n";
 	char * name;
-       	name = strtok(l, sep);    // ac
+	char * saveptr;
+       	name = strtok_r(l, sep, &saveptr);    // ac
 	while( name != NULL ){
-		name = strtok(NULL, sep); // reads a `VM' or a `VP'
+		name = strtok_r(NULL, sep, &saveptr); // reads a `VM' or a `VP'
 		if( name == NULL ) break;
 		if( strcmp(name, "VM") == 0 ){
-			name = strtok(NULL, sep);
+			name = strtok_r(NULL, sep, &saveptr);
 			g_plot_gain_node.push_back(string(name)); 
 		}
 		else if ( strcmp(name, "VP") == 0 ) {
-			name = strtok(NULL, sep);
+			name = strtok_r(NULL, sep, &saveptr);
 			g_plot_phase_node.push_back(string(name)); 
 		}
 		else report_exit("Unknown plot type!\n");
@@ -101,12 +103,13 @@ void read_tran_output_node(string line){
 	strcpy(l, line.c_str());
 	const char * sep = "() \r\n";
 	char * name;
-       	name = strtok(l, sep);    // tran
+	char * saveptr;
+       	name = strtok_r(l, sep, &saveptr);    // tran
 	while( name != NULL ){
-		name = strtok(NULL, sep); // reads a `v'
+		name = strtok_r(NULL, sep, &saveptr); // reads a `v'
 		if( name == NULL ) break;
 		if( strcmp(name, "v") == 0 ){
-			name = strtok(NULL, sep);
+			name = strtok_r(NULL, sep, &saveptr);
 			g_plot_tran_node.push_back(string(name)); 
 		}
 		else 
@@ -122,12 +125,13 @@ void read_plot_params(string line){
 	strcpy(l, line.c_str());
 	const char * sep = " ";
 	char * value;
-	value = strtok(l, sep);   // DEC
-	value = strtok(NULL, sep); // step
+	char * saveptr;
+	value = strtok_r(l, sep, &saveptr);   // DEC
+	value = strtok_r(NULL, sep, &saveptr); // step
 	g_step_f = atoi(value);
-	value = strtok(NULL, sep); // init
+	value = strtok_r(NULL, sep, &saveptr); // init
 	g_init_f = atoi(value);
-	value = strtok(NULL, sep); // end
+	value = strtok_r(NULL, sep, &saveptr); // end
 	g_end_f = atoi(value);
 
 	g_step_f = 100;
@@ -142,9 +146,10 @@ void read_tran_params(string line){
 	strcpy(l, line.c_str());
 	const char * sep = " ";
 	char * value;
-	value = strtok(l, sep);    // step
+	char * saveptr;
+	value = strtok_r(l, sep, &saveptr);    // step
 	g_step_tran = atoi(value);
-	value = strtok(NULL, sep); // end
+	value = strtok_r(NULL, sep, &saveptr); // end
 	g_end_tran = atoi(value);
 
 	//g_step_tran = 0.1E-6; not working!
